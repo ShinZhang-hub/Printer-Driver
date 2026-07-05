@@ -1,0 +1,6 @@
+bin/
+.DS_Store
+config-server.json
+*.exe
+*.pkg
+*.dmg
