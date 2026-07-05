@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,21 +11,51 @@ import (
 )
 
 func Load(configURL string) *Config {
-	cfg := defaultConfig()
+	cfg := Defaults()
 
-	if err := readLocal(cfg); err == nil {
-		log.Println("使用本地缓存配置")
-	}
+	readLocal(cfg)
 
 	if remote, err := fetchRemote(configURL); err == nil {
 		*cfg = *remote
 		saveLocal(cfg)
-		log.Println("已从配置中心更新配置")
-	} else {
-		log.Printf("无法连接配置中心: %v，使用本地配置", err)
 	}
 
 	return cfg
+}
+
+func LoadFile(path string) *Config {
+	cfg := Defaults()
+	f, err := os.Open(path)
+	if err != nil {
+			return cfg
+	}
+	defer f.Close()
+	if err := json.NewDecoder(f).Decode(cfg); err != nil {
+		return Defaults()
+	}
+	return cfg
+}
+
+func Defaults() *Config {
+	return &Config{
+		Version:    1,
+		UpdatedAt:  "2025-01-01T00:00:00Z",
+		Subnet:     "192.168.1.0/24",
+		DriversDir: "drivers",
+		PortNumber: 9100,
+		Protocol:   "raw",
+		Drivers: []DriverConfig{
+			{
+				Brand:     "fujifilm",
+				Model:     "ApeosPort C3070",
+				ID:        "fujifilm-apeosport-c3070",
+				PkgURLWin: "",
+				InstallArgs: []string{"/S"},
+				Version:   "1.0.0",
+				Enabled:   true,
+			},
+		},
+	}
 }
 
 func (c *Config) LookupDriver(model, brand string) *DriverConfig {
@@ -57,26 +86,6 @@ func (c *Config) PlatformURL(d *DriverConfig) string {
 		return d.PkgURLMac
 	}
 	return d.PkgURL
-}
-
-func defaultConfig() *Config {
-	return &Config{
-		Version:   1,
-		UpdatedAt: "2024-01-01T00:00:00Z",
-		Subnet:    "192.168.1.0/24",
-		Drivers: []DriverConfig{
-			{
-				Brand:     "fujifilm",
-				Model:     "ApeosPort C3070",
-				ID:        "fujifilm-apeosport-c3070",
-				PkgURLWin: "http://config.internal.company.com/drivers/fujifilm-apeosport-c3070.exe",
-				PkgURLMac: "http://config.internal.company.com/drivers/fujifilm-apeosport-c3070.pkg",
-				InstallArgs: []string{"/S"},
-				Version:   "1.0.0",
-				Enabled:   true,
-			},
-		},
-	}
 }
 
 func readLocal(cfg *Config) error {

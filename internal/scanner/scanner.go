@@ -18,6 +18,18 @@ type PrinterInfo struct {
 	Location string
 }
 
+// ProbeSingleIP 探测单个 IP 地址的打印机信息
+func ProbeSingleIP(ip string) (*PrinterInfo, error) {
+	if ip == "" {
+		return nil, fmt.Errorf("IP 地址不能为空")
+	}
+	p := snmpProbe(ip)
+	if p == nil {
+		return nil, fmt.Errorf("在 %s 未发现 SNMP 打印机", ip)
+	}
+	return p, nil
+}
+
 // ScanNetwork SNMP 扫描网段内所有打印机
 func ScanNetwork(subnet string) []PrinterInfo {
 	if subnet == "" {
@@ -44,17 +56,17 @@ func ScanNetwork(subnet string) []PrinterInfo {
 }
 
 const (
-	oidSysName    = ".1.3.6.1.2.1.1.5.0"
-	oidModel      = ".1.3.6.1.2.1.25.3.2.1.3.1"
-	oidLocation   = ".1.3.6.1.2.1.1.6.0"
-	oidBrandOID   = ".1.3.6.1.2.1.1.1.0" // sysDescr
+	oidSysName  = ".1.3.6.1.2.1.1.5.0"
+	oidModel    = ".1.3.6.1.2.1.25.3.2.1.3.1"
+	oidLocation = ".1.3.6.1.2.1.1.6.0"
+	oidBrandOID = ".1.3.6.1.2.1.1.1.0" // sysDescr
 )
 
 func snmpProbe(ip string) *PrinterInfo {
 	params := &gosnmp.GoSNMP{
 		Target:    ip,
 		Port:      161,
-		Community: "public",
+		Community: "tencent",
 		Version:   gosnmp.Version2c,
 		Timeout:   time.Second * 2,
 	}

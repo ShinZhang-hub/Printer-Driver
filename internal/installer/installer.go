@@ -1,77 +1,58 @@
 package installer
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
+
+	"printer-installer/internal/log"
 )
 
-func Download(url, checksum string) string {
-	local := filepath.Join(os.TempDir(), filepath.Base(url))
+type Params struct {
+	InfFile     string
+	ModelName   string
+	PrinterIP   string
+	PortName    string
+	PortNum     int
+	Protocol    string
+	PrinterName string
+	SetDefault  bool
+}
 
-	// 检查本地是否已有
-	if _, err := os.Stat(local); err == nil {
-		if verifyChecksum(local, checksum) {
-			log.Println("使用本地缓存:", local)
-			return local
+func (p *Params) fillDefaults() {
+	if p.PortNum == 0 {
+		p.PortNum = 9100
+	}
+	if p.Protocol == "" {
+		p.Protocol = "raw"
+	}
+	if p.PortName == "" {
+		p.PortName = fmt.Sprintf("IP_%s", p.PrinterIP)
+	}
+	if p.PrinterName == "" {
+		p.PrinterName = p.ModelName
+	}
+}
+
+func Install(p Params) error {
+	p.fillDefaults()
+	log.Info("安装打印机: %s (%s @ %s)", p.PrinterName, p.ModelName, p.PrinterIP)
+	log.Info("  INF: %s", p.InfFile)
+	log.Info("  端口: %s [%s:%d/%s]", p.PortName, p.PrinterIP, p.PortNum, p.Protocol)
+
+	if err := installDriver(p); err != nil {
+		return fmt.Errorf("安装驱动失败: %w", err)
+	}
+	if err := addPort(p); err != nil {
+		return fmt.Errorf("添加端口失败: %w", err)
+	}
+	if err := addPrinter(p); err != nil {
+		return fmt.Errorf("添加打印机失败: %w", err)
+	}
+	if p.SetDefault {
+		if err := setDefault(p); err != nil {
+			return fmt.Errorf("设为默认打印机失败: %w", err)
 		}
 	}
-
-	log.Println("下载驱动:", url)
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatalf("下载失败: %v", err)
-	}
-	defer resp.Body.Close()
-
-	f, err := os.Create(local)
-	if err != nil {
-		log.Fatalf("创建文件失败: %v", err)
-	}
-	defer f.Close()
-
-	written, err := io.Copy(f, resp.Body)
-	if err != nil {
-		log.Fatalf("写入失败: %v", err)
-	}
-	log.Printf("下载完成: %d bytes", written)
-
-	if checksum != "" && !verifyChecksum(local, checksum) {
-		log.Fatal("校验和不匹配")
-	}
-
-	return local
-}
-
-func Run(args []string) {
-	if len(args) == 0 {
-		args = []string{"/S"}
-	}
-
-	cmd := exec.Command("msiexec", append([]string{"/i"}, args...)...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	log.Println("执行安装:", cmd.String())
-	if err := cmd.Run(); err != nil {
-		log.Fatalf("安装失败: %v", err)
-	}
-	fmt.Println("安装完成")
-}
-
-func verifyChecksum(path, expected string) bool {
-	f, _ := os.Open(path)
-	if f == nil {
-		return false
-	}
-	defer f.Close()
-	h := sha256.New()
-	io.Copy(h, f)
-	return hex.EncodeToString(h.Sum(nil)) == expected
+	closeProgressWindow()
+	log.Info("安装完成")
+	return nil
 }
