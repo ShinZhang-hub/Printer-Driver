@@ -237,8 +237,9 @@ function startInstall() {
       btn.textContent = '开始安装'
     } else {
       result.className = 'success'
-      result.textContent = '安装成功，2秒后自动关闭'
+      result.textContent = '安装成功，即将关闭'
       btn.textContent = '已完成'
+      document.body.innerHTML = '<div style="text-align:center;margin-top:100px"><h2>安装完成</h2><p>此页面即将关闭</p></div>'
       setTimeout(() => window.close(), 2000)
     }
   }).catch(e => {

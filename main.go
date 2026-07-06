@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"syscall"
 	"time"
+	"unsafe"
 
 	"printer-installer/internal/config"
 	"printer-installer/internal/drvpack"
@@ -32,6 +33,12 @@ func main() {
 	flag.Parse()
 
 	adminMode := *admin || isShiftPressed()
+
+	if adminMode {
+		if !tryLockMutex() {
+			return
+		}
+	}
 
 	log.Init()
 	defer log.Close()
@@ -124,6 +131,18 @@ func isShiftPressed() bool {
 		time.Sleep(50 * time.Millisecond)
 	}
 	return false
+}
+
+func tryLockMutex() bool {
+	kernel32 := syscall.NewLazyDLL("kernel32.dll")
+	proc := kernel32.NewProc("CreateMutexW")
+	name, _ := syscall.UTF16PtrFromString("PrinterInstallerAdminPanel")
+	ret, _, err := proc.Call(0, 0, uintptr(unsafe.Pointer(name)))
+	if err == syscall.Errno(183) { // ERROR_ALREADY_EXISTS
+		return false
+	}
+	_ = ret
+	return true
 }
 
 func resolveDriver(driversDir, brand, extracted string) (*drvpack.DriverPackage, error) {
