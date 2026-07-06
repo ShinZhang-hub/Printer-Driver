@@ -61,6 +61,13 @@ func (p *DriverPackage) FindModel(modelName string) *InfEntry {
 	return best
 }
 
+func (p *DriverPackage) FirstEntry() *InfEntry {
+	if len(p.Entries) == 0 {
+		return nil
+	}
+	return &p.Entries[0]
+}
+
 func (p *DriverPackage) FindModelStrict(modelName string) *InfEntry {
 	clean := normalizeModel(modelName)
 	for _, e := range p.Entries {

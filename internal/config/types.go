@@ -8,6 +8,7 @@ import (
 type Config struct {
 	Version     int              `json:"version"`
 	UpdatedAt   string           `json:"updated_at"`
+	ConfigURL   string           `json:"config_url,omitempty"`
 	Subnet      string           `json:"subnet,omitempty"`
 	PrinterIPs  []string         `json:"printer_ips,omitempty"`
 	DriversDir  string           `json:"drivers_dir,omitempty"`
@@ -23,6 +24,7 @@ type LocationConfig struct {
 	Subnets     []string `json:"subnets"`
 	PrinterIP   string   `json:"printer_ip"`
 	PrinterName string   `json:"printer_name,omitempty"`
+	PrinterModel string  `json:"printer_model,omitempty"`
 	PortNumber  int      `json:"port_number,omitempty"`
 	Protocol    string   `json:"protocol,omitempty"`
 }
@@ -85,6 +87,22 @@ func (c *Config) GetPrinterIP(localIP string) string {
 func (c *Config) GetPrinterName(localIP string) string {
 	if loc := c.MatchLocation(localIP); loc != nil && loc.PrinterName != "" {
 		return loc.PrinterName
+	}
+	return ""
+}
+
+func (c *Config) GetPrinterModel(localIP string) string {
+	if loc := c.MatchLocation(localIP); loc != nil && loc.PrinterModel != "" {
+		return loc.PrinterModel
+	}
+	return ""
+}
+
+func (c *Config) LookupModelByIP(ip string) string {
+	for _, loc := range c.Locations {
+		if loc.PrinterIP == ip && loc.PrinterModel != "" {
+			return loc.PrinterModel
+		}
 	}
 	return ""
 }

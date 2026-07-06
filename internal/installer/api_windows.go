@@ -38,8 +38,7 @@ const (
 	processTerminate   = 0x0001
 	th32csSnapProcess  = 0x00000002
 	wmClose            = 0x0010
-	printerAttributeDirect = 0x0004
-	printerAttributeLocal  = 0x0080
+	printerAttributeLocal = 0x0080
 )
 
 type processEntry32W struct {
@@ -206,36 +205,7 @@ func fallbackDeletePrinterByName(name string) error {
 	return fmt.Errorf("printui 执行后打印机 %s 仍然存在", name)
 }
 
-func addPrinterAPI(driverName, portName, printerName string) error {
-	driverPtr, _ := syscall.UTF16PtrFromString(driverName)
-	portPtr, _ := syscall.UTF16PtrFromString(portName)
-	namePtr, _ := syscall.UTF16PtrFromString(printerName)
-	printProcPtr, _ := syscall.UTF16PtrFromString("WinPrint")
 
-	info := printerInfo2{
-		pPrinterName:    namePtr,
-		pPortName:       portPtr,
-		pDriverName:     driverPtr,
-		pPrintProcessor: printProcPtr,
-		Attributes:      printerAttributeLocal,
-	}
-
-	r, _, err := procAddPrinter.Call(0, 2, uintptr(unsafe.Pointer(&info)))
-	if r == 0 {
-		return fmt.Errorf("AddPrinter 失败: %v", err)
-	}
-	procClosePrinter.Call(r)
-	return nil
-}
-
-func setDefaultPrinter(name string) error {
-	namePtr, _ := syscall.UTF16PtrFromString(name)
-	r, _, err := procSetDefaultPrinter.Call(uintptr(unsafe.Pointer(namePtr)))
-	if r == 0 {
-		return fmt.Errorf("SetDefaultPrinter 失败: %v", err)
-	}
-	return nil
-}
 
 func removePortByName(name string) {
 	script := `C:\WINDOWS\System32\Printing_Admin_Scripts\ja-JP\prnport.vbs`

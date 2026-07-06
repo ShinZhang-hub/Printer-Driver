@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,32 +9,34 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
-func Load(configURL string) *Config {
-	cfg := Defaults()
+func LoadRemote(embedded []byte) *Config {
+	cfg := parseJSON(embedded)
+	if cfg == nil {
+		cfg = Defaults()
+	}
 
-	readLocal(cfg)
-
-	if remote, err := fetchRemote(configURL); err == nil {
-		*cfg = *remote
-		saveLocal(cfg)
+	if cfg.ConfigURL != "" {
+		if remote, err := fetchRemote(cfg.ConfigURL); err == nil {
+			remote.ConfigURL = cfg.ConfigURL
+			return remote
+		}
 	}
 
 	return cfg
 }
 
-func LoadFile(path string) *Config {
-	cfg := Defaults()
-	f, err := os.Open(path)
-	if err != nil {
-			return cfg
+func parseJSON(data []byte) *Config {
+	if len(data) == 0 {
+		return nil
 	}
-	defer f.Close()
-	if err := json.NewDecoder(f).Decode(cfg); err != nil {
-		return Defaults()
+	var cfg Config
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return nil
 	}
-	return cfg
+	return &cfg
 }
 
 func Defaults() *Config {
@@ -46,16 +49,28 @@ func Defaults() *Config {
 		Protocol:   "raw",
 		Drivers: []DriverConfig{
 			{
-				Brand:     "fujifilm",
-				Model:     "ApeosPort C3070",
-				ID:        "fujifilm-apeosport-c3070",
-				PkgURLWin: "",
+				Brand:       "fujifilm",
+				Model:       "ApeosPort C3070",
+				ID:          "fujifilm-apeosport-c3070",
+				PkgURLWin:   "",
 				InstallArgs: []string{"/S"},
-				Version:   "1.0.0",
-				Enabled:   true,
+				Version:     "1.0.0",
+				Enabled:     true,
 			},
 		},
 	}
+}
+
+func (c *Config) Save() error {
+	if err := saveLocal(c); err != nil {
+		return fmt.Errorf("保存本地配置失败: %w", err)
+	}
+	if c.ConfigURL != "" {
+		if err := saveRemote(c); err != nil {
+			return fmt.Errorf("保存远端配置失败: %w", err)
+		}
+	}
+	return nil
 }
 
 func (c *Config) LookupDriver(model, brand string) *DriverConfig {
@@ -88,15 +103,6 @@ func (c *Config) PlatformURL(d *DriverConfig) string {
 	return d.PkgURL
 }
 
-func readLocal(cfg *Config) error {
-	f, err := os.Open(localPath())
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return json.NewDecoder(f).Decode(cfg)
-}
-
 func saveLocal(cfg *Config) error {
 	p := localPath()
 	os.MkdirAll(filepath.Dir(p), 0755)
@@ -105,7 +111,35 @@ func saveLocal(cfg *Config) error {
 		return err
 	}
 	defer f.Close()
-	return json.NewEncoder(f).Encode(cfg)
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	return enc.Encode(cfg)
+}
+
+func saveRemote(cfg *Config) error {
+	body, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	client := &http.Client{Timeout: 5 * time.Second}
+	req, err := http.NewRequest("PUT", cfg.ConfigURL+"/api/v1/config", bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if token := os.Getenv("ADMIN_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("远端写入失败: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 300 {
+		b, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("远端返回 %d: %s", resp.StatusCode, string(b))
+	}
+	return nil
 }
 
 func localPath() string {
@@ -125,7 +159,8 @@ func localPath() string {
 }
 
 func fetchRemote(url string) (*Config, error) {
-	resp, err := http.Get(url + "/api/v1/config")
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get(url + "/api/v1/config")
 	if err != nil {
 		return nil, fmt.Errorf("fetch config: %w", err)
 	}

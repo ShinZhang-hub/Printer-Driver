@@ -1,6 +1,7 @@
 {
   "version": 1,
   "updated_at": "2026-07-06T00:00:00Z",
+  "config_url": "http://30.61.32.138:8080",
   "drivers_dir": "drivers",
   "port_number": 9100,
   "protocol": "raw",
@@ -10,14 +11,16 @@
       "subnets": ["30.61.40.0/24", "30.61.39.0/24"],
       "printer_ip": "30.61.40.40",
       "printer_name": "Printer-Osaka",
+      "printer_model": "FF Apeos C2571",
       "port_number": 9100,
       "protocol": "raw"
     },
     {
       "name": "Business-Tower",
-      "subnets": ["30.61.30.0/24"],
+      "subnets": ["30.61.30.0/24", "30.61.31.0/24", "30.61.32.0/24"],
       "printer_ip": "30.61.30.30",
       "printer_name": "Printer-Tencent",
+      "printer_model": "FF Apeos C3070",
       "port_number": 9100,
       "protocol": "raw"
     }

@@ -58,8 +58,10 @@ func addPort(p Params) error {
 }
 
 func addPrinter(p Params) error {
-	if err := removePrinterByName(p.PrinterName); err != nil {
-		return fmt.Errorf("删除同名打印机失败: %w", err)
+	if printerExists(p.PrinterName) {
+		log.Info("打印机 %s 已存在，先删除", p.PrinterName)
+		runCmd("rundll32", "printui.dll,PrintUIEntry",
+			"/dl", "/n", p.PrinterName)
 	}
 	_, err := runCmd("rundll32", "printui.dll,PrintUIEntry",
 		"/if", "/b", p.PrinterName,

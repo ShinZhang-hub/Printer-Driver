@@ -26,14 +26,8 @@ func shortPath(path string) string {
 	return syscall.UTF16ToString(buf)
 }
 
-func runQuiet(name string, args ...string) *exec.Cmd {
-	cmd := exec.Command(name, args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	return cmd
-}
-
 func runWithTimeout(timeout time.Duration, name string, args ...string) error {
-	cmd := runQuiet(name, args...)
+	cmd := exec.Command(name, args...)
 	if err := cmd.Start(); err != nil {
 		return err
 	}
