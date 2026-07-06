@@ -95,7 +95,7 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) {
 func openBrowser(url string) {
 	switch runtime.GOOS {
 	case "windows":
-		exec.Command("cmd", "/c", "start", url).Start()
+		exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
 	case "darwin":
 		exec.Command("open", url).Start()
 	default:
