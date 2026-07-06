@@ -66,15 +66,9 @@ func (c *Config) Save() error {
 		return fmt.Errorf("保存本地配置失败: %w", err)
 	}
 	if c.ConfigURL != "" {
-		if err := saveRemote(c); err != nil {
-			return fmt.Errorf("保存远端配置失败: %w", err)
-		}
+		saveRemote(c) // 远端失败不影响本地
 	}
 	return nil
-}
-
-func (c *Config) SaveLocal() error {
-	return saveLocal(c)
 }
 
 func (c *Config) LookupDriver(model, brand string) *DriverConfig {
