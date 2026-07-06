@@ -217,7 +217,7 @@ func addPrinterAPI(driverName, portName, printerName string) error {
 		pPortName:       portPtr,
 		pDriverName:     driverPtr,
 		pPrintProcessor: printProcPtr,
-		Attributes:      printerAttributeDirect | printerAttributeLocal,
+		Attributes:      printerAttributeLocal,
 	}
 
 	r, _, err := procAddPrinter.Call(0, 2, uintptr(unsafe.Pointer(&info)))

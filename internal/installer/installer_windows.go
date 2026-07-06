@@ -61,7 +61,10 @@ func addPrinter(p Params) error {
 	if err := removePrinterByName(p.PrinterName); err != nil {
 		return fmt.Errorf("删除同名打印机失败: %w", err)
 	}
-	err := addPrinterAPI(p.ModelName, p.PortName, p.PrinterName)
+	_, err := runCmd("rundll32", "printui.dll,PrintUIEntry",
+		"/if", "/b", p.PrinterName,
+		"/r", p.PortName,
+		"/m", p.ModelName)
 	if err != nil {
 		return err
 	}
@@ -75,7 +78,8 @@ func closeProgressWindow() {
 }
 
 func setDefault(p Params) error {
-	err := setDefaultPrinter(p.PrinterName)
+	_, err := runCmd("rundll32", "printui.dll,PrintUIEntry",
+		"/y", "/n", p.PrinterName)
 	if err != nil {
 		return err
 	}
