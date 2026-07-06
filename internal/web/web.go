@@ -20,6 +20,7 @@ type installHandler func(ip, name string) error
 
 func StartAdminPanel(cfg *config.Config, fn installHandler) (string, <-chan struct{}) {
 	done := make(chan struct{})
+	ctx, cancel := context.WithCancel(context.Background())
 	mux := http.NewServeMux()
 	srv := &http.Server{Handler: mux}
 
@@ -75,9 +76,7 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) (string, <-chan stru
 
 		go func() {
 			time.Sleep(2 * time.Second)
-			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-			defer cancel()
-			srv.Shutdown(ctx)
+			cancel()
 		}()
 	})
 
@@ -95,6 +94,10 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) (string, <-chan stru
 	go func() {
 		srv.Serve(ln)
 		close(done)
+	}()
+	go func() {
+		<-ctx.Done()
+		srv.Shutdown(context.Background())
 	}()
 	return url, done
 }
