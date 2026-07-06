@@ -125,7 +125,7 @@ func saveRemote(cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	client := &http.Client{Timeout: 5 * time.Second}
+	client := &http.Client{Timeout: 2 * time.Second}
 	req, err := http.NewRequest("PUT", cfg.ConfigURL+"/api/v1/config", bytes.NewReader(body))
 	if err != nil {
 		return err
@@ -163,7 +163,7 @@ func localPath() string {
 }
 
 func fetchRemote(url string) (*Config, error) {
-	client := &http.Client{Timeout: 5 * time.Second}
+	client := &http.Client{Timeout: 2 * time.Second}
 	resp, err := client.Get(url + "/api/v1/config")
 	if err != nil {
 		return nil, fmt.Errorf("fetch config: %w", err)

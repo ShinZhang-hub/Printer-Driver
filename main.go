@@ -31,12 +31,14 @@ func main() {
 	admin := flag.Bool("admin", false, "打开管理面板")
 	flag.Parse()
 
+	adminMode := *admin || isShiftPressed()
+
 	log.Init()
 	defer log.Close()
 
 	cfg := config.LoadRemote(embeddedConfig)
 
-	if *admin || isShiftPressed() {
+	if adminMode {
 		web.StartAdminPanel(cfg, func(installIP, installName string) error {
 			return runInstall(cfg, *driversDir, installIP, installName, *setDefault)
 		})
