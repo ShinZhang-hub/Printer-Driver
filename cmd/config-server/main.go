@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"printer-installer/internal/config"
@@ -94,7 +95,14 @@ func handleDriver(w http.ResponseWriter, r *http.Request) {
 
 // --- 存储 ---
 
-const storeFile = "config-server.json"
+var storeFile string
+var adminToken string
+
+func init() {
+	exe, _ := os.Executable()
+	storeFile = filepath.Join(filepath.Dir(exe), "config-server.json")
+	adminToken = os.Getenv("ADMIN_TOKEN")
+}
 
 func loadStore() *config.Config {
 	f, err := os.Open(storeFile)
@@ -137,8 +145,8 @@ func defaultServerConfig() *config.Config {
 				Brand:     "fujifilm",
 				Model:     "ApeosPort C3070",
 				ID:        "fujifilm-apeosport-c3070",
-				PkgURLWin: "http://" + hostname + ":8080/drivers/fujifilm-apeosport-c3070.exe",
-				PkgURLMac: "http://" + hostname + ":8080/drivers/fujifilm-apeosport-c3070.pkg",
+				PkgURLWin: "http://" + hostname + ":9527/drivers/fujifilm-apeosport-c3070.exe",
+				PkgURLMac: "http://" + hostname + ":9527/drivers/fujifilm-apeosport-c3070.pkg",
 				InstallArgs: []string{"/S"},
 				Version:   "1.0.0",
 				Enabled:   true,
@@ -148,12 +156,6 @@ func defaultServerConfig() *config.Config {
 }
 
 // --- auth ---
-
-var adminToken string
-
-func init() {
-	adminToken = os.Getenv("ADMIN_TOKEN")
-}
 
 func requireToken(r *http.Request) error {
 	if adminToken == "" {
