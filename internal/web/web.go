@@ -252,11 +252,18 @@ function saveConfig() {
       if (d.error) {
         result.style.color = 'red'
         result.textContent = '保存失败: ' + d.error
-      } else {
-        result.style.color = 'green'
-        result.textContent = '保存成功（本地 + 远端）'
-        currentConfig = updated
+        return
       }
+      result.style.color = 'green'
+      result.textContent = '保存成功，刷新远端配置...'
+      return fetch('/api/config/reload', {method:'POST'}).then(r => {
+        if (!r.ok) throw new Error(r.statusText)
+        return r.json()
+      }).then(cfg => {
+        currentConfig = cfg
+        display.textContent = JSON.stringify(cfg, null, 2)
+        result.textContent = '保存成功，配置已从远端刷新'
+      })
     }).catch(e => {
       result.style.color = 'red'
       result.textContent = '请求失败: ' + e
