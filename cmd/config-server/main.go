@@ -143,22 +143,38 @@ func saveStore(cfg *config.Config) {
 }
 
 func defaultServerConfig() *config.Config {
-	hostname, _ := os.Hostname()
 	return &config.Config{
 		Version:   1,
 		UpdatedAt: "2024-01-01T00:00:00Z",
-		Subnet:    "192.168.1.0/24",
-		PrinterIPs: []string{},
+		ConfigURL: "http://30.61.40.61:9527",
+		Locations: []config.LocationConfig{
+			{
+				Name:         "JP-Tower",
+				Subnets:      []string{"30.61.40.0/24", "30.61.39.0/24"},
+				PrinterIP:    "30.61.40.40",
+				PrinterName:  "Printer-Osaka",
+				PrinterModel: "FF Apeos C2571",
+				PortNumber:   9100,
+				Protocol:     "raw",
+			},
+			{
+				Name:         "Business-Tower",
+				Subnets:      []string{"30.61.30.0/24", "30.61.31.0/24", "30.61.32.0/24"},
+				PrinterIP:    "30.61.30.30",
+				PrinterName:  "Printer-Tencent",
+				PrinterModel: "FF Apeos C3070",
+				PortNumber:   9100,
+				Protocol:     "raw",
+			},
+		},
 		Drivers: []config.DriverConfig{
 			{
-				Brand:     "fujifilm",
-				Model:     "ApeosPort C3070",
-				ID:        "fujifilm-apeosport-c3070",
-				PkgURLWin: "http://" + hostname + ":9527/drivers/fujifilm-apeosport-c3070.exe",
-				PkgURLMac: "http://" + hostname + ":9527/drivers/fujifilm-apeosport-c3070.pkg",
+				Brand:       "fujifilm",
+				Model:       "FF Apeos C2571",
+				ID:          "fujifilm-ff-apeos-c2571",
 				InstallArgs: []string{"/S"},
-				Version:   "1.0.0",
-				Enabled:   true,
+				Version:     "1.0.0",
+				Enabled:     true,
 			},
 		},
 	}
