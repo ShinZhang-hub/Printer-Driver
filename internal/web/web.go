@@ -16,7 +16,8 @@ import (
 
 type installHandler func(ip, name string) error
 
-func StartAdminPanel(cfg *config.Config, fn installHandler) {
+func StartAdminPanel(cfg *config.Config, fn installHandler) (string, <-chan struct{}) {
+	done := make(chan struct{})
 	mux := http.NewServeMux()
 	srv := &http.Server{Handler: mux}
 
@@ -89,7 +90,11 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) {
 	fmt.Println("关闭此窗口即可退出")
 
 	openBrowser(url)
-	srv.Serve(ln)
+	go func() {
+		srv.Serve(ln)
+		close(done)
+	}()
+	return url, done
 }
 
 func openBrowser(url string) {

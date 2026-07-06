@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 	"unsafe"
@@ -35,7 +38,8 @@ func main() {
 	adminMode := *admin || isShiftPressed()
 
 	if adminMode {
-		if !tryLockMutex() {
+		if url := checkExistingInstance(); url != "" {
+			exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
 			return
 		}
 	}
@@ -46,9 +50,12 @@ func main() {
 	cfg := config.LoadRemote(embeddedConfig)
 
 	if adminMode {
-		web.StartAdminPanel(cfg, func(installIP, installName string) error {
+		url, done := web.StartAdminPanel(cfg, func(installIP, installName string) error {
 			return runInstall(cfg, *driversDir, installIP, installName, *setDefault)
 		})
+		writeLockFile(url)
+		defer removeLockFile()
+		<-done
 		return
 	}
 	localIP := localIPAddr()
@@ -133,16 +140,55 @@ func isShiftPressed() bool {
 	return false
 }
 
-func tryLockMutex() bool {
+const lockFileName = "printer-admin.lock"
+
+func lockFilePath() string {
+	return filepath.Join(os.TempDir(), lockFileName)
+}
+
+func checkExistingInstance() string {
+	data, err := os.ReadFile(lockFilePath())
+	if err != nil {
+		return ""
+	}
+	parts := strings.SplitN(string(data), "\n", 2)
+	if len(parts) < 2 {
+		return ""
+	}
+	pidStr := strings.TrimSpace(parts[0])
+	url := strings.TrimSpace(parts[1])
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil {
+		return ""
+	}
+	if processExists(pid) {
+		return url
+	}
+	return ""
+}
+
+func processExists(pid int) bool {
 	kernel32 := syscall.NewLazyDLL("kernel32.dll")
-	proc := kernel32.NewProc("CreateMutexW")
-	name, _ := syscall.UTF16PtrFromString("PrinterInstallerAdminPanel")
-	ret, _, err := proc.Call(0, 0, uintptr(unsafe.Pointer(name)))
-	if err == syscall.Errno(183) { // ERROR_ALREADY_EXISTS
+	proc := kernel32.NewProc("OpenProcess")
+	handle, _, _ := proc.Call(0x0400, 0, uintptr(pid)) // PROCESS_QUERY_INFORMATION
+	if handle == 0 {
 		return false
 	}
+	defer kernel32.NewProc("CloseHandle").Call(handle)
+	var exitCode uint32
+	proc2 := kernel32.NewProc("GetExitCodeProcess")
+	ret, _, _ := proc2.Call(handle, uintptr(unsafe.Pointer(&exitCode)))
 	_ = ret
-	return true
+	return exitCode == 259 // STILL_ACTIVE
+}
+
+func writeLockFile(url string) {
+	data := fmt.Sprintf("%d\n%s", os.Getpid(), url)
+	os.WriteFile(lockFilePath(), []byte(data), 0644)
+}
+
+func removeLockFile() {
+	os.Remove(lockFilePath())
 }
 
 func resolveDriver(driversDir, brand, extracted string) (*drvpack.DriverPackage, error) {
