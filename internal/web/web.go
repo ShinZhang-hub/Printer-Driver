@@ -27,18 +27,34 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) {
 			return
 		}
 		if r.Method == "POST" {
+			var req struct {
+				Config     json.RawMessage `json:"config"`
+				SyncRemote bool            `json:"sync_remote"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, err.Error(), 400)
+				return
+			}
 			var updated config.Config
-			if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
+			if err := json.Unmarshal(req.Config, &updated); err != nil {
 				http.Error(w, err.Error(), 400)
 				return
 			}
 			*cfg = updated
-			if err := cfg.Save(); err != nil {
-				w.WriteHeader(500)
-				json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-				return
+			if req.SyncRemote {
+				if err := cfg.Save(); err != nil {
+					w.WriteHeader(500)
+					json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+					return
+				}
+			} else {
+				if err := cfg.SaveLocal(); err != nil {
+					w.WriteHeader(500)
+					json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+					return
+				}
 			}
-			json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+			json.NewEncoder(w).Encode(map[string]string{"status": "ok", "sync_remote": fmt.Sprintf("%v", req.SyncRemote)})
 		}
 	})
 
@@ -128,6 +144,7 @@ h2{margin-top:0}
 <div class="card">
 <h3>当前配置</h3>
 		<pre id="configDisplay" style="white-space:pre-wrap;word-break:break-all">加载中...</pre>
+		<label><input type="checkbox" id="syncRemote" checked> 同步到远程</label>
 		<button onclick="saveConfig()" id="saveBtn">保存配置</button>
 		<div id="saveResult"></div>
 	</div>
@@ -144,6 +161,7 @@ function saveConfig() {
   const display = document.getElementById('configDisplay')
   const btn = document.getElementById('saveBtn')
   const result = document.getElementById('saveResult')
+  const syncRemote = document.getElementById('syncRemote').checked
   btn.disabled = true
   btn.textContent = '保存中...'
   result.className = ''
@@ -153,14 +171,14 @@ function saveConfig() {
     fetch('/api/config', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(updated)
+      body: JSON.stringify({config: updated, sync_remote: syncRemote})
     }).then(r => r.json()).then(d => {
       if (d.error) {
         result.style.color = 'red'
         result.textContent = '保存失败: ' + d.error
       } else {
         result.style.color = 'green'
-        result.textContent = '保存成功（本地 + 远端）'
+        result.textContent = syncRemote ? '保存成功（本地 + 远端）' : '保存成功（仅本地）'
         currentConfig = updated
       }
     }).catch(e => {

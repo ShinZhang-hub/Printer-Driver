@@ -73,6 +73,10 @@ func (c *Config) Save() error {
 	return nil
 }
 
+func (c *Config) SaveLocal() error {
+	return saveLocal(c)
+}
+
 func (c *Config) LookupDriver(model, brand string) *DriverConfig {
 	for _, d := range c.Drivers {
 		if !d.Enabled {
