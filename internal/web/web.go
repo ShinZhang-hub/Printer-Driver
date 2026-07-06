@@ -7,7 +7,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -100,7 +102,21 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) (string, <-chan stru
 func openBrowser(url string) {
 	switch runtime.GOOS {
 	case "windows":
-		exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		edgePaths := []string{
+			filepath.Join(os.Getenv("PROGRAMFILES(X86)"), "Microsoft", "Edge", "Application", "msedge.exe"),
+			filepath.Join(os.Getenv("PROGRAMFILES"), "Microsoft", "Edge", "Application", "msedge.exe"),
+		}
+		opened := false
+		for _, p := range edgePaths {
+			if _, err := os.Stat(p); err == nil {
+				exec.Command(p, "--app="+url).Start()
+				opened = true
+				break
+			}
+		}
+		if !opened {
+			exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		}
 	case "darwin":
 		exec.Command("open", url).Start()
 	default:
