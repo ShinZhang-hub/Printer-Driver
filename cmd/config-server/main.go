@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	"printer-installer/internal/config"
@@ -99,9 +100,17 @@ var storeFile string
 var adminToken string
 
 func init() {
-	exe, _ := os.Executable()
-	storeFile = filepath.Join(filepath.Dir(exe), "config-server.json")
+	storeFile = defaultStorePath()
 	adminToken = os.Getenv("ADMIN_TOKEN")
+}
+
+func defaultStorePath() string {
+	dir := filepath.Join("/var", "lib", "printer-installer", "server")
+	if runtime.GOOS == "windows" {
+		dir = filepath.Join("C:\\ProgramData", "PrinterInstaller", "server")
+	}
+	os.MkdirAll(dir, 0755)
+	return filepath.Join(dir, "config-server.json")
 }
 
 func loadStore() *config.Config {
