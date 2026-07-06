@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os/exec"
 	"runtime"
+	"time"
 
 	"printer-installer/internal/config"
 )
@@ -16,6 +18,7 @@ type installHandler func(ip, name string) error
 
 func StartAdminPanel(cfg *config.Config, fn installHandler) {
 	mux := http.NewServeMux()
+	srv := &http.Server{Handler: mux}
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(adminHTML))
@@ -66,6 +69,13 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) {
 			return
 		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "message": "安装成功"})
+
+		go func() {
+			time.Sleep(2 * time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
+			srv.Shutdown(ctx)
+		}()
 	})
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -79,7 +89,7 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) {
 	fmt.Println("关闭此窗口即可退出")
 
 	openBrowser(url)
-	http.Serve(ln, mux)
+	srv.Serve(ln)
 }
 
 func openBrowser(url string) {
@@ -102,6 +112,7 @@ const adminHTML = `<!DOCTYPE html>
 body{font-family:sans-serif;margin:40px;background:#f5f5f5}
 .card{background:#fff;padding:24px;border-radius:8px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
 input{width:100%;padding:8px;margin:6px 0 16px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}
+input:disabled{background:#eee;color:#999}
 button{background:#007aff;color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-size:14px}
 button:hover{background:#0056b3}
 button:disabled{background:#999;cursor:not-allowed}
@@ -118,10 +129,10 @@ h2{margin-top:0}
 <div class="card">
 <h3>手动安装</h3>
 <label>打印机 IP 地址</label>
-<input type="text" id="printerIP" placeholder="例如: 30.61.40.40">
-<label>打印机名称（可选）</label>
-<input type="text" id="printerName" placeholder="例如: Printer-Osaka，留空自动使用型号名">
-<button onclick="startInstall()">开始安装</button>
+<input type="text" id="printerIP" placeholder="例如: 30.61.40.40" oninput="onIPChange()">
+<label>打印机名称</label>
+<input type="text" id="printerName" placeholder="留空自动使用配置名称">
+<button onclick="startInstall()" id="installBtn">开始安装</button>
 <div id="result"></div>
 </div>
 
@@ -138,7 +149,27 @@ fetch('/api/config').then(r=>r.json()).then(cfg => {
   currentConfig = cfg
   document.getElementById('configDisplay').textContent = JSON.stringify(cfg, null, 2)
   document.getElementById('configDisplay').contentEditable = true
+  onIPChange()
 })
+
+function getDefaultName() {
+  if (!currentConfig) return ''
+  if (currentConfig.locations && currentConfig.locations.length > 0) {
+    return currentConfig.locations[0].printer_name || currentConfig.locations[0].printer_model || ''
+  }
+  return ''
+}
+
+function onIPChange() {
+  const ip = document.getElementById('printerIP').value.trim()
+  const nameInput = document.getElementById('printerName')
+  if (!ip) {
+    nameInput.disabled = true
+    nameInput.value = getDefaultName()
+  } else {
+    nameInput.disabled = false
+  }
+}
 
 function saveConfig() {
   const display = document.getElementById('configDisplay')
@@ -181,7 +212,7 @@ function saveConfig() {
 function startInstall() {
   let ip = document.getElementById('printerIP').value.trim()
   const name = document.getElementById('printerName').value.trim()
-  const btn = document.querySelector('button')
+  const btn = document.getElementById('installBtn')
   const result = document.getElementById('result')
   if (!ip && currentConfig) {
     if (currentConfig.printer_ips && currentConfig.printer_ips.length > 0) {
@@ -202,14 +233,17 @@ function startInstall() {
     if (d.error) {
       result.className = 'error'
       result.textContent = '安装失败: ' + d.error
+      btn.disabled = false
+      btn.textContent = '开始安装'
     } else {
       result.className = 'success'
-      result.textContent = d.message || '安装成功'
+      result.textContent = '安装成功，2秒后自动关闭'
+      btn.textContent = '已完成'
+      setTimeout(() => window.close(), 2000)
     }
   }).catch(e => {
     result.className = 'error'
     result.textContent = '请求失败: ' + e
-  }).finally(() => {
     btn.disabled = false
     btn.textContent = '开始安装'
   })
