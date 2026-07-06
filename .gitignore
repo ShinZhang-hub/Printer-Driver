@@ -6,3 +6,6 @@ config-server.json
 *.dmg
 # main.syso is the compiled requireAdministrator manifest — keep in repo so double-click triggers UAC
 .extract-auto/
+
+*~
+PrinterInstaller.zip
