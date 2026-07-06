@@ -19,7 +19,7 @@ import (
 
 type installHandler func(ip, name string) error
 
-func StartAdminPanel(cfg *config.Config, fn installHandler) (string, <-chan struct{}) {
+func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (string, <-chan struct{}) {
 	done := make(chan struct{})
 	ctx, cancel := context.WithCancel(context.Background())
 	mux := http.NewServeMux()
@@ -47,6 +47,19 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) (string, <-chan stru
 				return
 			}
 			json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		}
+	})
+
+	mux.HandleFunc("/api/config/reload", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, "method not allowed", 405)
+			return
+		}
+		if reloaded := config.LoadRemote(embedded); reloaded != nil {
+			*cfg = *reloaded
+			json.NewEncoder(w).Encode(cfg)
+		} else {
+			http.Error(w, `{"error":"重新加载失败"}`, 500)
 		}
 	})
 
@@ -169,6 +182,7 @@ h2{margin-top:0}
 <h3>当前配置</h3>
 		<pre id="configDisplay" style="white-space:pre-wrap;word-break:break-all">加载中...</pre>
 		<button onclick="saveConfig()" id="saveBtn">保存配置</button>
+		<button onclick="reloadConfig()" id="reloadBtn" style="background:#555;margin-left:8px">刷新配置</button>
 		<div id="saveResult"></div>
 	</div>
 
@@ -198,6 +212,26 @@ function onIPChange() {
   } else {
     nameInput.disabled = false
   }
+}
+
+function reloadConfig() {
+  const btn = document.getElementById('reloadBtn')
+  const display = document.getElementById('configDisplay')
+  btn.disabled = true
+  btn.textContent = '刷新中...'
+  fetch('/api/config/reload', {method:'POST'}).then(r=>{
+    if (!r.ok) throw new Error(r.statusText)
+    return r.json()
+  }).then(cfg => {
+    currentConfig = cfg
+    display.textContent = JSON.stringify(cfg, null, 2)
+    document.getElementById('saveResult').textContent = '配置已刷新'
+  }).catch(e => {
+    document.getElementById('saveResult').textContent = '刷新失败: '+e.message
+  }).finally(() => {
+    btn.disabled = false
+    btn.textContent = '刷新配置'
+  })
 }
 
 function saveConfig() {

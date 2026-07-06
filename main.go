@@ -50,7 +50,7 @@ func main() {
 	cfg := config.LoadRemote(embeddedConfig)
 
 	if adminMode {
-		url, done := web.StartAdminPanel(cfg, func(installIP, installName string) error {
+		url, done := web.StartAdminPanel(cfg, embeddedConfig, func(installIP, installName string) error {
 			return runInstall(cfg, *driversDir, installIP, installName, *setDefault)
 		})
 		writeLockFile(url)
