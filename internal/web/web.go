@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	stdlog "log"
 	"net"
 	"net/http"
 	"os"
@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"printer-installer/internal/config"
+	"printer-installer/internal/log"
 )
 
 type installHandler func(ip, name string) error
@@ -82,7 +83,7 @@ func StartAdminPanel(cfg *config.Config, fn installHandler) (string, <-chan stru
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		log.Fatalf("启动管理面板失败: %v", err)
+		stdlog.Fatalf("启动管理面板失败: %v", err)
 	}
 	port := ln.Addr().(*net.TCPAddr).Port
 	url := fmt.Sprintf("http://127.0.0.1:%d", port)
@@ -118,8 +119,10 @@ func openBrowser(url string) {
 			}
 		}
 		if edgePath != "" {
+			log.Info("Edge --app 模式: %s", edgePath)
 			exec.Command(edgePath, "--app="+url).Start()
 		} else {
+			log.Info("Edge 未找到，使用 url.dll 回退")
 			exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
 		}
 	case "darwin":
