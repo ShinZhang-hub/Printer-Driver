@@ -38,10 +38,7 @@ func main() {
 	adminMode := *admin || isShiftPressed()
 
 	if adminMode {
-		if url := checkExistingInstance(); url != "" {
-			exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-			return
-		}
+		killExistingInstance()
 	}
 
 	log.Init()
@@ -146,25 +143,21 @@ func lockFilePath() string {
 	return filepath.Join(os.TempDir(), lockFileName)
 }
 
-func checkExistingInstance() string {
+func killExistingInstance() {
 	data, err := os.ReadFile(lockFilePath())
 	if err != nil {
-		return ""
+		return
 	}
 	parts := strings.SplitN(string(data), "\n", 2)
-	if len(parts) < 2 {
-		return ""
+	if len(parts) < 1 {
+		return
 	}
 	pidStr := strings.TrimSpace(parts[0])
-	url := strings.TrimSpace(parts[1])
-	pid, err := strconv.Atoi(pidStr)
-	if err != nil {
-		return ""
+	if _, err := strconv.Atoi(pidStr); err != nil {
+		return
 	}
-	if processExists(pid) {
-		return url
-	}
-	return ""
+	exec.Command("taskkill", "/F", "/PID", pidStr).Run()
+	os.Remove(lockFilePath())
 }
 
 func processExists(pid int) bool {
