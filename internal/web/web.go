@@ -183,14 +183,13 @@ function startInstall() {
   const name = document.getElementById('printerName').value.trim()
   const btn = document.querySelector('button')
   const result = document.getElementById('result')
-  if (!ip) {
-    if (currentConfig && currentConfig.printer_ips && currentConfig.printer_ips.length > 0) {
+  if (!ip && currentConfig) {
+    if (currentConfig.printer_ips && currentConfig.printer_ips.length > 0) {
       ip = currentConfig.printer_ips[0]
-    } else if (currentConfig && currentConfig.locations && currentConfig.locations.length > 0) {
+    } else if (currentConfig.locations && currentConfig.locations.length > 0) {
       ip = currentConfig.locations[0].printer_ip
     }
   }
-  if (!ip) { alert('请输入打印机 IP 地址'); return }
   btn.disabled = true
   btn.textContent = '安装中...'
   result.className = ''
