@@ -11,6 +11,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"printer-installer/internal/config"
@@ -101,6 +103,29 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 	port := ln.Addr().(*net.TCPAddr).Port
 	url := fmt.Sprintf("http://127.0.0.1:%d", port)
 
+	var connCount int64
+	var shutdownOnce sync.Once
+	shutdown := func() {
+		shutdownOnce.Do(func() {
+			log.Info("无活动连接，关闭服务")
+			cancel()
+		})
+	}
+	srv.ConnState = func(_ net.Conn, state http.ConnState) {
+		switch state {
+		case http.StateNew:
+			atomic.AddInt64(&connCount, 1)
+		case http.StateClosed, http.StateHijacked:
+			if atomic.AddInt64(&connCount, -1) <= 0 {
+				time.AfterFunc(3*time.Second, func() {
+					if atomic.LoadInt64(&connCount) <= 0 {
+						shutdown()
+					}
+				})
+			}
+		}
+	}
+
 	fmt.Println("管理面板已启动:", url)
 	fmt.Println("关闭此窗口即可退出")
 
@@ -113,6 +138,8 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 		<-ctx.Done()
 		srv.Shutdown(context.Background())
 	}()
+
+	// 安装成功后也会调用 cancel，这里加个兜底：srv.Serve 返回后确保 close(done)
 	return url, done
 }
 
