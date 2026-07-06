@@ -18,7 +18,7 @@ var (
 
 func main() {
 	store = loadStore()
-	port := ":8080"
+	port := ":9527"
 	if p := os.Getenv("PORT"); p != "" {
 		port = ":" + p
 	}
