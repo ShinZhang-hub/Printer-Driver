@@ -39,7 +39,9 @@ func installDriver(p Params) error {
 
 func addPort(p Params) error {
 	log.Info("创建端口 %s [%s:%d]", p.PortName, p.PrinterIP, p.PortNum)
-	removePrinterByName(p.PrinterName)
+	if err := removePrinterByName(p.PrinterName); err != nil {
+		return fmt.Errorf("删除同名打印机失败: %w", err)
+	}
 	removePortByName(p.PortName)
 	// use prnport.vbs (standard Windows component, no dialog with //B)
 	script := `C:\WINDOWS\System32\Printing_Admin_Scripts\ja-JP\prnport.vbs`
@@ -56,7 +58,9 @@ func addPort(p Params) error {
 }
 
 func addPrinter(p Params) error {
-	removePrinterByName(p.PrinterName)
+	if err := removePrinterByName(p.PrinterName); err != nil {
+		return fmt.Errorf("删除同名打印机失败: %w", err)
+	}
 	err := addPrinterAPI(p.ModelName, p.PortName, p.PrinterName)
 	if err != nil {
 		return err

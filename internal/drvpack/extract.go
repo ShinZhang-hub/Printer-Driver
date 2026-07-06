@@ -50,28 +50,49 @@ func runWithTimeout(timeout time.Duration, name string, args ...string) error {
 	}
 }
 
+func cleanupExtractProcesses() {
+	exec.Command("taskkill", "/f", "/im", "ffcomist.exe").Run()
+	exec.Command("taskkill", "/f", "/im", "Launcher.exe").Run()
+}
+
 func extract(exePath string) (string, error) {
 	exePath, err := filepath.Abs(exePath)
 	if err != nil {
 		return "", fmt.Errorf("无法解析驱动路径: %w", err)
 	}
 
-	workDir := filepath.Join(filepath.Dir(exePath), ".extract-auto")
-	os.RemoveAll(workDir)
-	os.MkdirAll(workDir, 0755)
+	workDir, err := os.MkdirTemp("", "printer-installer-extract-")
+	if err != nil {
+		return "", fmt.Errorf("创建临时解压目录失败: %w", err)
+	}
 
-	// NSIS 静默解压: /S (silent) + /D=<dir> (输出目录，必须用短路径避免空格)
-	runWithTimeout(60*time.Second, exePath, "/S", fmt.Sprintf("/D=%s", shortPath(workDir)))
+	shortWorkDir := shortPath(workDir)
+	attempts := [][]string{
+		{"/S", "/D" + shortWorkDir},
+		{"/s", "/d" + shortWorkDir},
+	}
 
-	// 清残留子进程
-	exec.Command("taskkill", "/f", "/im", "ffcomist.exe").Run()
-	exec.Command("taskkill", "/f", "/im", "Launcher.exe").Run()
+	var attemptErrs []string
+	for _, args := range attempts {
+		os.RemoveAll(workDir)
+		if err := os.MkdirAll(workDir, 0755); err != nil {
+			return "", fmt.Errorf("创建临时解压目录失败: %w", err)
+		}
 
-	if root := findDriverRoot(workDir); root != "" {
-		return root, nil
+		err := runWithTimeout(60*time.Second, exePath, args...)
+		cleanupExtractProcesses()
+		if err != nil {
+			attemptErrs = append(attemptErrs, fmt.Sprintf("%s: %v", strings.Join(args, " "), err))
+		}
+		if root := findDriverRoot(workDir); root != "" {
+			return root, nil
+		}
 	}
 
 	os.RemoveAll(workDir)
+	if len(attemptErrs) > 0 {
+		return "", fmt.Errorf("无法解压 %s（已尝试静默参数：%s）\n可尝试手动解压后用 --extracted 指定目录", exePath, strings.Join(attemptErrs, "; "))
+	}
 	return "", fmt.Errorf("无法解压 %s\n可尝试手动解压后用 --extracted 指定目录", exePath)
 }
 
@@ -89,5 +110,3 @@ func findDriverRoot(dir string) string {
 	})
 	return root
 }
-
-

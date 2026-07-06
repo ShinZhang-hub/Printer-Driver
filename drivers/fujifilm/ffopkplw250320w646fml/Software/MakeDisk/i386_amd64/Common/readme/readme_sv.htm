@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- saved from url=(0014)about:internet -->
+<html lang="sv-se">
+<head>
+<title>Anteckningar och begränsningar </title>
+<meta charset="utf-8">
+</head>
+<html><body>
+<center> 
+----------------------------<br>
+Anteckningar och begränsningar<br> 
+---------------------------- <br>
+</center>
+
+<ul>
+<li>När du använder Terminal Service i serverns OS, kör Setup Utility Tools i installationsläge. <br> 
+Metoden för att köra installationsläget är följande. <br> 
+- Öppna [Lägg till eller ta bort program] i [Kontrollpanelen] och kör sedan Setup Utility Tools. 
+</li>
+<br>
+<li>Under uppstart visas skärmen [User Account Control] beroende på behörigheten för användaren som körde verktygen. Klicka i så fall på [Tillåt] eller ange administratörslösenordet och klicka på [OK]. Dessutom visas skärmen [Assistenten för programkompatibilitet] när du avslutar verktygen. När [Det här programmet är korrekt installerat.] är valt visas inte den här skärmen nästa gång. 
+</li>
+<br>
+<li>Välja NDS-kö<br>
+Det går inte att skriva ut om en port/kö i NDS-trädet som inte finns i målporten har valts i Setup Disk Creation Tool. </li>
+<br>
+<li>När "Ett fel har inträffat under uppgraderingen" visas under en uppgradering, tar du bort skrivardrivrutinen och lägger till en ny skrivare efter omstart. 
+</li>
+<br>
+<li>Omstart av systemet under Installation/Uppgradering<br>
+När du installerar skrivardrivrutinen eller uppgraderar drivrutinsversionen ska du alltid starta om systemet enligt instruktionerna i meddelandet som visas innan du använder skrivardrivrutinen. Oväntade fel kan uppstå om systemet inte startas om. 
+</li>
+<br>
+<li>Återspegla dokumentstorlek med hjälp av Setup Tool<br>
+När ett papper som är unikt för drivrutinen väljs för dokumentstorlek kommer dokumentstorleken inte att återspeglas korrekt. 
+</li>
+<br>
+<li>Om "Aktuella skrivarinställningar kan ändras om du installerar den nya drivrutinen. Vill du fortsätta?" visas när du installerar drivrutinen med Setup Tool, markerar du kryssrutan "Uppgradera drivrutinen med installationsdisk" i Setup Disk Creation Tool och skapar en installationsdisk. 
+</li>
+<br>
+<li>Om Setup Tool skapas från en diskett med hjälp av Setup Disk Creation Tool med "Uppgradera drivrutin med installationsdisk" markerat kan du inte köra verup.exe på disketten. Vänligen kör setup.exe. Genom att köra setup.exe uppgraderas även drivrutinen för skrivaren. 
+</li>
+<br>
+<li>Tillvägagångssätt för att ange port för nätverksskrivare<br>
+Porten för nätverksskrivare kan inte anges från skärmen [Bläddra efter skrivare] i Setup Disk Creation Tool. Ange portnamnet direkt i [Skrivarens nätverkssökväg] på skärmen [Lägg till port]. 
+</li>
+<br>
+<li>Återspegla utskriftsinställningar för Setup Tool<br>
+När du kör Setup Tool med [Tillåt standardanvändare att köra installationsprogrammet] angivet återspeglas utskriftsinställningarna som sparats på installationsdisken i utskriftsinställningarna för administratörskontot. Utöver det, även när du kör Setup Tool utan [Tillåt standardanvändare att köra installationsprogrammet] angivet men med ett administratörskonto angivet vid skärmen för [User Account Control] återspeglas utskriftsinställningarna som sparats på installationsdisken i utskriftsinställningarna för administratörskontot. För att återspegla inställningarna under utskriftsinställningar för alla användare, inklusive användaren som körde Setup Tool, konfigurerar du [Standardvärden] för skrivaren när du skapar installationsdisken. Du kan ställa in [Standardvärden] på fliken [Avancerat] i dialogrutan Egenskaper för skrivare.
+</li>
+<br><br>
+
+Microsoft, Windows och Windows Server varumärken eller registrerade varumärken som ägs av Microsoft Corporation i USA och andra länder. 
+</body></html>

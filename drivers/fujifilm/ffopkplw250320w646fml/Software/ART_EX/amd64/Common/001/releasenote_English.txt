@@ -1,0 +1,466 @@
+
+================================================================================
+ART EX Print Driver Improvements in v7.0.x
+================================================================================
+
+The improvements made so far for each model related to this driver are described.
+
+
+- Apeos C8180/C7580/C6580
+
+[Improvements from Ver 7.0.0]
+* Corrected wrong UI terms.
+* Removed unnecessary buttons and options.
+* Fixed the issue that Hole Punch cannot be selected for a certain paper size when using
+the printer installed with Finisher Type C4.
+
+[Improvements from Ver 7.0.1]
+* Finisher Type C5 is now supported. If you want to
+use Staple-Free Staple function, Finisher Type C5 is required separately.
+* Added the ability to control [Skip Blank Pages] function for 2 Sided Printing.
+* Added the function to print images on the overlap margin area
+when printing Poster.
+
+[Improvements from Ver 7.0.4]
+* Fixed the printing problem occurred when the Plain Side 2 was selected as
+  [Paper Type for Auto Tray].
+* Corrected the direction of Z Fold Half Sheet icon in the case of Print Mixed
+  Size Originals setting.
+
+[Improvements from Ver 7.0.6]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+
+[Improvements from Ver 7.0.7]
+* Added Trustmark Feature.
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.8]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.9]
+* Improved behavior of Saved Settings function.
+
+[Improvements from Ver 7.0.10]
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos C7070/C6570/C5570/C4570/C3570/C3070/C2570
+
+[Improvements from Ver 7.0.0]
+* Corrected wrong UI terms.
+* Removed unnecessary buttons and options.
+* Fixed the issue that Right Top Tray in Finisher Type C4 cannot be selected for printing
+Postcard (148 x 200mm).
+
+[Improvements from Ver 7.0.1]
+* Fixed the issue where it creates extra margins on both edges when printing
+on Long Paper/ Long Paper A/ Long Paper B.
+* Fixed the issue where Plain Side 2 is not present as the paper type setting
+per tray in the printer driver.
+* Finisher Type B5/C5 is now supported. If you want to
+use Staple-Free Staple function, Finisher Type B5/C5 is required separately.
+* Added the ability to control [Skip Blank Pages] function for 2 Sided Printing.
+* Added the function to print images on the overlap margin area
+when printing Poster.
+
+[Improvements from Ver 7.0.4]
+* Corrected the direction of Z Fold Half Sheet icon in the case of Print Mixed Size 
+  Originals setting.
+
+[Improvements from Ver 7.0.6]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+
+[Improvements from Ver 7.0.7]
+* Added Trustmark Feature.
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.10]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.11]
+* Improved behavior of Saved Settings function.
+
+[Improvements from Ver 7.0.12]
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos C5240
+
+[Improvements from Ver 7.0.0]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+
+[Improvements from Ver 7.0.2]
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.3]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 version 22H2 or later.
+
+[Improvements from Ver 7.0.4]
+* Added Trustmark Feature.
+* Improved behavior of Saved Settings function.
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos C4030/C3530
+
+[Improvements from Ver 7.0.0]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.1]
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Improved behavior of Saved Settings function.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos C2360/C2060
+
+[Improvements from Ver 7.0.1]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+* Added a function to specify Image Position when the Bi-Fold Single Sheets/Booklet
+  Fold and Staple feature is selected. 
+
+[Improvements from Ver 7.0.3]
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.4]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.5]
+* Added Trustmark Feature.
+* Improved behavior of Saved Settings function.
+
+[Improvements from Ver 7.0.6]
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos 7580/6580/5580
+
+[Improvements from Ver 7.0.0]
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.2]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.3]
+* Improved behavior of Saved Settings function.
+
+[Improvements from Ver 7.0.4]
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos 6340
+
+[Improvements from Ver 7.0.0]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+
+[Improvements from Ver 7.0.2]
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.3]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 version 22H2 or later.
+
+[Improvements from Ver 7.0.4]
+* Added Trustmark Feature.
+* Improved behavior of Saved Settings function.
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos 5330
+
+[Improvements from Ver 7.0.0]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.1]
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Improved behavior of Saved Settings function.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos 4570/3570
+
+[Improvements from Ver 7.0.0]
+* Corrected the direction of Z Fold Half Sheet icon in the case of Print Mixed Size Originals setting.
+
+[Improvements from Ver 7.0.3]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+
+[Improvements from Ver 7.0.4]
+* Added Trustmark Feature.
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.5]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.6]
+* Improved behavior of Saved Settings function.
+
+[Improvements from Ver 7.0.7]
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- Apeos 3060/2560/1860
+
+[Improvements from Ver 7.0.1]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+* Added a function to specify Image Position when the Bi-Fold Single Sheets/Booklet
+  Fold and Staple feature is selected.
+
+[Improvements from Ver 7.0.3]
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.4]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.5]
+* Added Trustmark Feature.
+* Improved behavior of Saved Settings function.
+
+[Improvements from Ver 7.0.6]
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- ApeosPrint C5570/C4570
+
+[Improvements from Ver 7.0.0]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+* Added Trustmark Feature.
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.2]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 version 22H2 or later.
+
+[Improvements from Ver 7.0.3]
+* Improved behavior of Saved Settings function.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- ApeosPrint C5240
+
+[Improvements from Ver 7.0.0]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+
+[Improvements from Ver 7.0.2]
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.3]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 version 22H2 or later.
+
+[Improvements from Ver 7.0.4]
+* Added Trustmark Feature.
+* Improved behavior of Saved Settings function.
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- ApeosPrint C4030/C3530
+
+[Improvements from Ver 7.0.0]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.1]
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Improved behavior of Saved Settings function.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- ApeosPrint 6340
+
+[Improvements from Ver 7.0.0]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+
+[Improvements from Ver 7.0.2]
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.3]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 version 22H2 or later.
+
+[Improvements from Ver 7.0.4]
+* Added Trustmark Feature.
+* Improved behavior of Saved Settings function.
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- ApeosPrint 4830
+
+[Improvements from Ver 7.0.0]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.1]
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Improved behavior of Saved Settings function.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- ApeosPrint 4830 JM
+
+[Improvements from Ver 7.0.0]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.1]
+* Improved behavior when printing A5 size paper from the bypass tray.
+* Improved behavior of Saved Settings function.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- ApeosPrint 4560 S/3960 S/3360 S
+
+[Improvements from Ver 7.0.0]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.1]
+* Improved behavior of Saved Settings function.
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+* ApeosPrint 4560 S supported High Capacity Stacker.
+  The firmware version must be used at least the following version.
+
+  Controller ROM and IOT ROM version
+  - Controller ROM Ver.1.26.23
+  - IOT ROM Ver.3.23.0 / 2.23.0 / 1.23.0
+  - IOT2 ROM Ver.30.67.0 / 20.67.0 / 10.67.0
+
+
+
+- ApeosPrint C3560 S/C3060 S
+
+[Improvements from Ver 7.0.1]
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+- ApeosPro C810/C750/C650
+
+[Improvements from Ver 7.0.1]
+* Fixed the issue that Hole Punch cannot be selected for a certain paper size
+  when using the printer installed with Finisher Type C4.
+
+[Improvements from Ver 7.0.2]
+* Finisher Type C5 is now supported. If you want to 
+  use Staple-Free Staple function, Finisher Type C5 is required separately.
+* Added the ability to control [Skip Blank Pages] function for 2 Sided Printing.
+* Added the function to print images on the overlap margin area 
+  when printing Poster.
+
+[Improvements from Ver 7.0.4]
+* Corrected the direction of Z Fold Half Sheet icon in the case of Print Mixed
+  Size Originals setting.
+
+[Improvements from Ver 7.0.6]
+* Fixed the problem that [Use Account Management Tool] of the [Accounting System]
+  function cannot be selected when using the Job Owner Setup tool.
+
+[Improvements from Ver 7.0.7]
+* Added Trustmark Feature.
+* Fixed a symptom that the software terminates abnormally when ""Get Information 
+  from Printer"" is issued under a certain condition.
+
+[Improvements from Ver 7.0.8]
+* Fixed an issue that an application may freeze when printing from the application
+  after opening properties of this driver on Windows 11 Version 22H2 or later.
+
+[Improvements from Ver 7.0.9]
+* Changed default value of [Height] when [Three Edge Trim] is specified. 
+* Improved behavior of Saved Settings function.
+
+[Improvements from Ver 7.0.10]
+* Fixed an issue that occasionally caused the settings of our already
+  installed printer drivers and direct fax drivers to be reset to their
+  default values when installing a new printer driver.
+
+
+
+
+
+(C) FUJIFILM Business Innovation Corp. 2021-2024

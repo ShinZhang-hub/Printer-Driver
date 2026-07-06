@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2025-06-01T00:00:00Z",
+  "updated_at": "2026-07-06T00:00:00Z",
   "drivers_dir": "drivers",
   "port_number": 9100,
   "protocol": "raw",
@@ -10,6 +10,14 @@
       "subnets": ["30.61.40.0/24", "30.61.39.0/24"],
       "printer_ip": "30.61.40.40",
       "printer_name": "Printer-Osaka",
+      "port_number": 9100,
+      "protocol": "raw"
+    },
+    {
+      "name": "Business-Tower",
+      "subnets": ["30.61.30.0/24"],
+      "printer_ip": "30.61.30.30",
+      "printer_name": "Printer-Tencent",
       "port_number": 9100,
       "protocol": "raw"
     }

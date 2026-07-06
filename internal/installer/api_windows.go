@@ -4,8 +4,12 @@ package installer
 
 import (
 	"fmt"
+	"strings"
 	"syscall"
+	"time"
 	"unsafe"
+
+	"printer-installer/internal/log"
 )
 
 var (
@@ -89,13 +93,117 @@ func closePrinter(h syscall.Handle) {
 	procClosePrinter.Call(uintptr(h))
 }
 
-func removePrinterByName(name string) {
+func printerExists(name string) bool {
 	h, err := openPrinter(name)
 	if err != nil {
-		return
+		return false
 	}
-	defer closePrinter(h)
-	procDeletePrinter.Call(uintptr(h))
+	closePrinter(h)
+	return true
+}
+
+func removePrinterByName(name string) error {
+	h, err := openPrinter(name)
+	if err != nil {
+		return nil
+	}
+
+	r, _, err := procDeletePrinter.Call(uintptr(h))
+	closePrinter(h)
+	if r == 0 {
+		if isAccessDenied(err) {
+			log.Warn("DeletePrinter(%s) 返回 Access is denied，尝试释放占用后重试", name)
+			if recoverErr := recoverPrinterDeleteLock(); recoverErr != nil {
+				return fmt.Errorf("DeletePrinter(%s) 失败: %v；占用恢复失败: %w", name, err, recoverErr)
+			}
+
+			h, retryOpenErr := openPrinter(name)
+			if retryOpenErr != nil {
+				return nil
+			}
+			r, _, err = procDeletePrinter.Call(uintptr(h))
+			closePrinter(h)
+			if r == 0 {
+				log.Warn("DeletePrinter(%s) 重试仍失败，尝试 printui 兜底", name)
+				if fallbackErr := fallbackDeletePrinterByName(name); fallbackErr != nil {
+					return fmt.Errorf("DeletePrinter(%s) 重试失败: %v；兜底删除失败: %w", name, err, fallbackErr)
+				}
+			}
+		} else {
+			return fmt.Errorf("DeletePrinter(%s) 失败: %v", name, err)
+		}
+	}
+
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if !printerExists(name) {
+			return nil
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+	return fmt.Errorf("删除打印机 %s 超时: 对象仍然存在", name)
+}
+
+func isAccessDenied(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errno, ok := err.(syscall.Errno); ok {
+		return errno == 5
+	}
+	return strings.Contains(strings.ToLower(err.Error()), "access is denied")
+}
+
+func recoverPrinterDeleteLock() error {
+	killProcessByName("splwow64.exe")
+	killProcessByName("PrintIsolationHost.exe")
+
+	if err := restartService("spooler", 15*time.Second); err != nil {
+		return err
+	}
+	time.Sleep(500 * time.Millisecond)
+	return nil
+}
+
+func restartService(name string, timeout time.Duration) error {
+	_, stopErr := runCmd("sc", "stop", name)
+	if stopErr != nil {
+		if err := waitServiceState(name, "STOPPED", timeout/2); err != nil {
+			return fmt.Errorf("停止服务 %s 失败: %w", name, stopErr)
+		}
+	} else {
+		if err := waitServiceState(name, "STOPPED", timeout/2); err != nil {
+			return err
+		}
+	}
+
+	if _, err := runCmd("sc", "start", name); err != nil {
+		return fmt.Errorf("启动服务 %s 失败: %w", name, err)
+	}
+	return waitServiceState(name, "RUNNING", timeout/2)
+}
+
+func waitServiceState(name, want string, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	want = strings.ToUpper(want)
+	for time.Now().Before(deadline) {
+		out, err := runCmd("sc", "query", name)
+		if err == nil && strings.Contains(strings.ToUpper(out), "STATE") && strings.Contains(strings.ToUpper(out), want) {
+			return nil
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	return fmt.Errorf("等待服务 %s 进入 %s 超时", name, want)
+}
+
+func fallbackDeletePrinterByName(name string) error {
+	if _, err := runCmd("rundll32", "printui.dll,PrintUIEntry", "/dl", "/n", name); err != nil {
+		return fmt.Errorf("printui: %v", err)
+	}
+	if !printerExists(name) {
+		return nil
+	}
+	return fmt.Errorf("printui 执行后打印机 %s 仍然存在", name)
 }
 
 func addPrinterAPI(driverName, portName, printerName string) error {
