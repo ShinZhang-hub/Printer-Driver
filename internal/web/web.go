@@ -144,7 +144,7 @@ h2{margin-top:0}
 <div class="card">
 <h3>当前配置</h3>
 		<pre id="configDisplay" style="white-space:pre-wrap;word-break:break-all">加载中...</pre>
-		<label><input type="checkbox" id="syncRemote" checked> 同步到远程</label>
+		<label><input type="checkbox" id="syncRemote"> 同步到远程</label>
 		<button onclick="saveConfig()" id="saveBtn">保存配置</button>
 		<div id="saveResult"></div>
 	</div>
