@@ -3,12 +3,10 @@
 package installer
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
@@ -41,28 +39,11 @@ func installDriver(p Params) error {
 	if err != nil {
 		return fmt.Errorf("failed to read PPD file: %w", err)
 	}
-
-	if runtime.GOARCH == "arm64" {
-		data = stripCupsFilter(data)
-	}
-
 	if err := os.WriteFile(dst, data, 0644); err != nil {
 		return fmt.Errorf("failed to copy PPD to %s: %w", dst, err)
 	}
 	log.Info("PPD installed: %s", dst)
 	return nil
-}
-
-func stripCupsFilter(data []byte) []byte {
-	var out []byte
-	lines := bytes.Split(data, []byte("\n"))
-	for _, line := range lines {
-		if !bytes.Contains(line, []byte("*cupsFilter:")) {
-			out = append(out, line...)
-			out = append(out, '\n')
-		}
-	}
-	return out
 }
 
 func addPrinter(p Params) error {

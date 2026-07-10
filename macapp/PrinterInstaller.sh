@@ -102,6 +102,17 @@ if [ "$SHIFT" = "1" ]; then
 	exit 0
 fi
 
+# --- Rosetta detection for Apple Silicon ---
+if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/arch -x86_64 /bin/true 2>/dev/null; then
+	write_msg "$ROSETTA_PROMPT"
+	RESULT=$(osascript_dialog "\"$INSTALL_LABEL\", \"$CANCEL_LABEL\"" "$INSTALL_LABEL")
+	if [ "$RESULT" = "$INSTALL_LABEL" ]; then
+		osascript -e "do shell script \"softwareupdate --install-rosetta --agree-to-license\" with administrator privileges" 2>/dev/null
+	else
+		exit 0
+	fi
+fi
+
 # --- Step 1: Discover printer (no admin) ---
 DISCOVERED=$("$BINARY" $DRVARG --discover 2>/dev/null)
 DETECTED_IP=$(echo "$DISCOVERED" | grep "^IP=" | head -1 | cut -d= -f2)

@@ -169,6 +169,24 @@ var stringsMap = map[string]map[string]string{
 		"ko": "확인",
 		"zh": "好",
 	},
+	"ROSETTA_PROMPT": {
+		"en": "Rosetta 2 is required to install the printer driver.\\nInstall now?",
+		"ja": "プリンタードライバーのインストールにRosetta 2が必要です。\\n今すぐインストールしますか？",
+		"ko": "프린터 드라이버 설치에 Rosetta 2가 필요합니다.\\n지금 설치하시겠습니까?",
+		"zh": "打印机驱动安装需要 Rosetta 2。\\n立即安装？",
+	},
+	"INSTALL_LABEL": {
+		"en": "Install",
+		"ja": "インストール",
+		"ko": "설치",
+		"zh": "安装",
+	},
+	"CANCEL_LABEL": {
+		"en": "Cancel",
+		"ja": "キャンセル",
+		"ko": "취소",
+		"zh": "取消",
+	},
 }
 
 func Get(key, lang string) string {
