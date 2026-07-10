@@ -6,17 +6,18 @@ import (
 )
 
 type Config struct {
-	Version     int              `json:"version"`
-	UpdatedAt   string           `json:"updated_at"`
-	ConfigURL   string           `json:"config_url,omitempty"`
-	Subnet      string           `json:"subnet,omitempty"`
-	PrinterIPs  []string         `json:"printer_ips,omitempty"`
-	DriversDir  string           `json:"drivers_dir,omitempty"`
-	PortNumber  int              `json:"port_number,omitempty"`
-	Protocol    string           `json:"protocol,omitempty"`
-	SetDefault  *bool            `json:"set_default,omitempty"`
-	Locations   []LocationConfig `json:"locations,omitempty"`
-	Drivers     []DriverConfig   `json:"drivers"`
+	Version            int              `json:"version"`
+	UpdatedAt          string           `json:"updated_at"`
+	AdminPasswordHash  string           `json:"admin_password_hash,omitempty"`
+	ConfigURL          string           `json:"config_url,omitempty"`
+	Subnet             string           `json:"subnet,omitempty"`
+	PrinterIPs         []string         `json:"printer_ips,omitempty"`
+	DriversDir         string           `json:"drivers_dir,omitempty"`
+	PortNumber         int              `json:"port_number,omitempty"`
+	Protocol           string           `json:"protocol,omitempty"`
+	SetDefault         *bool            `json:"set_default,omitempty"`
+	Locations          []LocationConfig `json:"locations,omitempty"`
+	Drivers            []DriverConfig   `json:"drivers"`
 }
 
 type LocationConfig struct {
@@ -105,4 +106,13 @@ func (c *Config) LookupModelByIP(ip string) string {
 		}
 	}
 	return ""
+}
+
+func (c *Config) LookupLocationByPrinterName(name string) *LocationConfig {
+	for i := range c.Locations {
+		if c.Locations[i].PrinterName == name {
+			return &c.Locations[i]
+		}
+	}
+	return nil
 }

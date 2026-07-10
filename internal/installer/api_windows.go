@@ -83,7 +83,7 @@ func openPrinter(name string) (syscall.Handle, error) {
 	namePtr, _ := syscall.UTF16PtrFromString(name)
 	r, _, err := procOpenPrinter.Call(uintptr(unsafe.Pointer(namePtr)), uintptr(unsafe.Pointer(&h)), 0)
 	if r == 0 {
-		return 0, fmt.Errorf("OpenPrinter(%s) 失败: %v", name, err)
+		return 0, fmt.Errorf("OpenPrinter(%s) failed: %v", name, err)
 	}
 	return h, nil
 }
@@ -111,9 +111,9 @@ func removePrinterByName(name string) error {
 	closePrinter(h)
 	if r == 0 {
 		if isAccessDenied(err) {
-			log.Warn("DeletePrinter(%s) 返回 Access is denied，尝试释放占用后重试", name)
+			log.Warn("DeletePrinter(%s) returned Access is denied, releasing locks and retrying", name)
 			if recoverErr := recoverPrinterDeleteLock(); recoverErr != nil {
-				return fmt.Errorf("DeletePrinter(%s) 失败: %v；占用恢复失败: %w", name, err, recoverErr)
+				return fmt.Errorf("DeletePrinter(%s) failed: %v; lock recovery failed: %w", name, err, recoverErr)
 			}
 
 			h, retryOpenErr := openPrinter(name)
@@ -123,13 +123,13 @@ func removePrinterByName(name string) error {
 			r, _, err = procDeletePrinter.Call(uintptr(h))
 			closePrinter(h)
 			if r == 0 {
-				log.Warn("DeletePrinter(%s) 重试仍失败，尝试 printui 兜底", name)
+				log.Warn("DeletePrinter(%s) retry failed, falling back to printui", name)
 				if fallbackErr := fallbackDeletePrinterByName(name); fallbackErr != nil {
-					return fmt.Errorf("DeletePrinter(%s) 重试失败: %v；兜底删除失败: %w", name, err, fallbackErr)
+					return fmt.Errorf("DeletePrinter(%s) retry failed: %v; fallback also failed: %w", name, err, fallbackErr)
 				}
 			}
 		} else {
-			return fmt.Errorf("DeletePrinter(%s) 失败: %v", name, err)
+			return fmt.Errorf("DeletePrinter(%s) failed: %v", name, err)
 		}
 	}
 
@@ -140,7 +140,7 @@ func removePrinterByName(name string) error {
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
-	return fmt.Errorf("删除打印机 %s 超时: 对象仍然存在", name)
+	return fmt.Errorf("deleting printer %s timed out: object still exists", name)
 }
 
 func isAccessDenied(err error) bool {
@@ -168,7 +168,7 @@ func restartService(name string, timeout time.Duration) error {
 	_, stopErr := runCmd("sc", "stop", name)
 	if stopErr != nil {
 		if err := waitServiceState(name, "STOPPED", timeout/2); err != nil {
-			return fmt.Errorf("停止服务 %s 失败: %w", name, stopErr)
+			return fmt.Errorf("stopping service %s failed: %w", name, stopErr)
 		}
 	} else {
 		if err := waitServiceState(name, "STOPPED", timeout/2); err != nil {
@@ -177,7 +177,7 @@ func restartService(name string, timeout time.Duration) error {
 	}
 
 	if _, err := runCmd("sc", "start", name); err != nil {
-		return fmt.Errorf("启动服务 %s 失败: %w", name, err)
+		return fmt.Errorf("starting service %s failed: %w", name, err)
 	}
 	return waitServiceState(name, "RUNNING", timeout/2)
 }
@@ -192,7 +192,7 @@ func waitServiceState(name, want string, timeout time.Duration) error {
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
-	return fmt.Errorf("等待服务 %s 进入 %s 超时", name, want)
+	return fmt.Errorf("waiting for service %s to reach %s timed out", name, want)
 }
 
 func fallbackDeletePrinterByName(name string) error {
@@ -202,7 +202,7 @@ func fallbackDeletePrinterByName(name string) error {
 	if !printerExists(name) {
 		return nil
 	}
-	return fmt.Errorf("printui 执行后打印机 %s 仍然存在", name)
+	return fmt.Errorf("printer %s still exists after printui fallback", name)
 }
 
 

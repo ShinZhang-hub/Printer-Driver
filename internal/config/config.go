@@ -13,7 +13,7 @@ import (
 )
 
 func LoadRemote(embedded []byte) *Config {
-	cfg := parseJSON(embedded)
+	cfg := ParseEmbedded(embedded)
 	if cfg == nil {
 		cfg = Defaults()
 	}
@@ -28,7 +28,7 @@ func LoadRemote(embedded []byte) *Config {
 	return cfg
 }
 
-func parseJSON(data []byte) *Config {
+func ParseEmbedded(data []byte) *Config {
 	if len(data) == 0 {
 		return nil
 	}
@@ -43,10 +43,20 @@ func Defaults() *Config {
 	return &Config{
 		Version:    1,
 		UpdatedAt:  "2025-01-01T00:00:00Z",
-		Subnet:     "192.168.1.0/24",
+		Subnet:     "30.61.40.0/24",
 		DriversDir: "drivers",
 		PortNumber: 9100,
 		Protocol:   "raw",
+		Locations: []LocationConfig{
+			{
+				Name:        "Default",
+				Subnets:     []string{"30.61.40.0/24"},
+				PrinterIP:   "30.61.40.40",
+				PrinterName: "Printer-Osaka",
+				PortNumber:  9100,
+				Protocol:    "raw",
+			},
+		},
 		Drivers: []DriverConfig{
 			{
 				Brand:       "fujifilm",
@@ -63,10 +73,10 @@ func Defaults() *Config {
 
 func (c *Config) Save() error {
 	if err := saveLocal(c); err != nil {
-		return fmt.Errorf("保存本地配置失败: %w", err)
+		return fmt.Errorf("failed to save local config: %w", err)
 	}
 	if c.ConfigURL != "" {
-		saveRemote(c) // 远端失败不影响本地
+		saveRemote(c) // remote failure does not block local save
 	}
 	return nil
 }
@@ -130,12 +140,12 @@ func saveRemote(cfg *Config) error {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("远端写入失败: %w", err)
+		return fmt.Errorf("remote write failed: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= 300 {
 		b, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("远端返回 %d: %s", resp.StatusCode, string(b))
+		return fmt.Errorf("remote returned %d: %s", resp.StatusCode, string(b))
 	}
 	return nil
 }

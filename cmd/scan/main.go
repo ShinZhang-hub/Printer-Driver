@@ -12,19 +12,19 @@ func main() {
 		subnet = os.Args[1]
 	}
 
-	fmt.Println("扫描子网:", subnet)
+	fmt.Println("Scanning subnet:", subnet)
 	printers := scanner.ScanNetwork(subnet)
 
 	if len(printers) == 0 {
-		fmt.Println("未发现 SNMP 打印机")
+		fmt.Println("No SNMP printers found")
 		return
 	}
 
 	for _, p := range printers {
 		fmt.Printf("IP: %s\n", p.IP)
-		fmt.Printf("  型号: %s\n", p.Model)
-		fmt.Printf("  名称: %s\n", p.Name)
-		fmt.Printf("  品牌: %s\n", p.Brand)
-		fmt.Printf("  位置: %s\n", p.Location)
+		fmt.Printf("  Model: %s\n", p.Model)
+		fmt.Printf("  Name: %s\n", p.Name)
+		fmt.Printf("  Brand: %s\n", p.Brand)
+		fmt.Printf("  Location: %s\n", p.Location)
 	}
 }

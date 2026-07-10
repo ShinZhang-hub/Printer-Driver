@@ -40,7 +40,7 @@ func ParseInfDirectory(dir string) ([]InfEntry, error) {
 		}
 		entries, err := parseInf(path)
 		if err != nil {
-			return fmt.Errorf("解析 %s: %w", path, err)
+			return fmt.Errorf("parse %s: %w", path, err)
 		}
 		all = append(all, entries...)
 		return nil

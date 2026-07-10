@@ -2,6 +2,8 @@ package installer
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"printer-installer/internal/log"
 )
@@ -34,25 +36,31 @@ func (p *Params) fillDefaults() {
 
 func Install(p Params) error {
 	p.fillDefaults()
-	log.Info("安装打印机: %s (%s @ %s)", p.PrinterName, p.ModelName, p.PrinterIP)
-	log.Info("  INF: %s", p.InfFile)
-	log.Info("  端口: %s [%s:%d/%s]", p.PortName, p.PrinterIP, p.PortNum, p.Protocol)
+	log.Info("Installing printer: %s (%s @ %s)", p.PrinterName, p.ModelName, p.PrinterIP)
+	log.Info("  Driver: %s", p.InfFile)
+	log.Info("  Port: %s [%s:%d/%s]", p.PortName, p.PrinterIP, p.PortNum, p.Protocol)
 
 	if err := installDriver(p); err != nil {
-		return fmt.Errorf("安装驱动失败: %w", err)
-	}
-	if err := addPort(p); err != nil {
-		return fmt.Errorf("添加端口失败: %w", err)
+		return fmt.Errorf("install driver failed: %w", err)
 	}
 	if err := addPrinter(p); err != nil {
-		return fmt.Errorf("添加打印机失败: %w", err)
+		return fmt.Errorf("add printer failed: %w", err)
 	}
 	if p.SetDefault {
+		time.Sleep(500 * time.Millisecond)
 		if err := setDefault(p); err != nil {
-			return fmt.Errorf("设为默认打印机失败: %w", err)
+			return fmt.Errorf("set default failed: %w", err)
 		}
 	}
 	closeProgressWindow()
-	log.Info("安装完成")
+	log.Info("Installation complete")
+
+	names := getOtherPrinterNames(p.PrinterName)
+	log.Info("Other printers after install (excluding %s): %d found: %v", p.PrinterName, len(names), names)
+	if len(names) > 0 {
+		ResultMessage += "\nOther printers: " + strings.Join(names, ", ")
+	}
 	return nil
 }
+
+var ResultMessage string

@@ -21,17 +21,17 @@ func Init() error {
 	path := filepath.Join(dir, time.Now().Format("2006-01-02")+".log")
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		return fmt.Errorf("创建日志文件失败: %w", err)
+		return fmt.Errorf("failed to create log file: %w", err)
 	}
 
-	// 空文件写入 UTF-8 BOM，让 Windows 记事本能正确识别中文
+	// write UTF-8 BOM for Windows Notepad compatibility
 	info, _ := f.Stat()
 	if info.Size() == 0 {
 		f.Write([]byte{0xEF, 0xBB, 0xBF})
 	}
 
 	file = f
-	Info("=== 启动 ===")
+	Info("=== Start ===")
 	return nil
 }
 
@@ -64,9 +64,6 @@ func write(level, format string, args ...interface{}) {
 	}
 	mu.Unlock()
 
-	w := io.Writer(os.Stdout)
-	if level == "ERROR" || level == "WARN" {
-		w = os.Stderr
-	}
+	w := io.Writer(os.Stderr)
 	fmt.Fprintln(w, line)
 }

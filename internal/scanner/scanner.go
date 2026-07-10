@@ -18,19 +18,19 @@ type PrinterInfo struct {
 	Location string
 }
 
-// ProbeSingleIP 探测单个 IP 地址的打印机信息
+// ProbeSingleIP probes a single IP for printer info via SNMP
 func ProbeSingleIP(ip string) (*PrinterInfo, error) {
 	if ip == "" {
-		return nil, fmt.Errorf("IP 地址不能为空")
+		return nil, fmt.Errorf("IP address cannot be empty")
 	}
 	p := snmpProbe(ip)
 	if p == nil {
-		return nil, fmt.Errorf("在 %s 未发现 SNMP 打印机", ip)
+		return nil, fmt.Errorf("no SNMP printer found at %s", ip)
 	}
 	return p, nil
 }
 
-// ScanNetwork SNMP 扫描网段内所有打印机
+// ScanNetwork scans a subnet for printers via SNMP
 func ScanNetwork(subnet string) []PrinterInfo {
 	if subnet == "" {
 		subnet = "192.168.1.0/24"
@@ -38,13 +38,13 @@ func ScanNetwork(subnet string) []PrinterInfo {
 
 	ip, ipnet, err := net.ParseCIDR(subnet)
 	if err != nil {
-		log.Printf("无效子网: %v", err)
+		log.Printf("invalid subnet: %v", err)
 		return nil
 	}
 
 	var printers []PrinterInfo
 	for ip = ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
-		// 快速 ping 检测存活
+		// quick ping to check liveness
 		if !ping(ip.String()) {
 			continue
 		}
@@ -87,7 +87,7 @@ func snmpProbe(ip string) *PrinterInfo {
 
 	model := pduString(result.Variables[1])
 	if model == "" {
-		return nil // 没有型号信息，跳过
+		return nil // no model info found, skip
 	}
 
 	return &PrinterInfo{
@@ -100,7 +100,7 @@ func snmpProbe(ip string) *PrinterInfo {
 }
 
 func detectBrand(sysDescr, model string) string {
-	// 品牌识别规则（配置中心会覆盖此内置映射）
+	// brand detection rules (config center overrides this built-in mapping)
 	brands := map[string]string{
 		"fujifilm":  "fujifilm",
 		"apeosport": "fujifilm",

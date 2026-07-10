@@ -1,0 +1,614 @@
+*PPD-Adobe: "4.3"
+*%
+*%   FF Print Driver for Mac OS X
+*%
+*%
+*FileVersion: "2.6"
+*FormatVersion: "4.3"
+*LanguageEncoding: ISOLatin1
+*LanguageVersion: English
+*Manufacturer: "FF"
+*PCFileName: "FFPDMX01.PPD"
+*Product: "(Print Driver for Mac OS X)"
+*PSVersion: "(3015.104) 1"
+*ShortNickName: "FF Print Driver for Mac OS X"
+*ModelName: "FF Print Driver for Mac OS X"
+*NickName: "FF Print Driver for Mac OS X v2.6"
+*cupsFilter: "application/pdf 0 /Library/Printers/FUJIFILM/Filter/FFACMMCFilter"
+*FFXPrintTypeSettings: "Default03-Type16"
+*FFXAccountingSettings: "Default04-Type08"
+*FFXFeaturesSettings: "Default01"
+*FFXLayoutSettings: "Default00-Type02"
+*APDialogExtension: "/Library/Printers/FUJIFILM/PDEs/FFACMMAccount.plugin"
+*APDialogExtension: "/Library/Printers/FUJIFILM/PDEs/FFACMMFeatures.plugin"
+*cupsSNMPSuppliles: False
+*cupsSingleFile:True
+*JobPatchFile 0: ""
+
+*% === Options and Constraints =========
+*OpenGroup: InstallableOptions/Options Installed
+*OpenUI *FFMinDigitPasscode/Minimum Passcode Length: PickOne
+*DefaultFFMinDigitPasscode: 0
+*FFMinDigitPasscode 0/0: ""
+*FFMinDigitPasscode 1/1: ""
+*FFMinDigitPasscode 2/2: ""
+*FFMinDigitPasscode 3/3: ""
+*FFMinDigitPasscode 4/4: ""
+*FFMinDigitPasscode 5/5: ""
+*FFMinDigitPasscode 6/6: ""
+*FFMinDigitPasscode 7/7: ""
+*FFMinDigitPasscode 8/8: ""
+*FFMinDigitPasscode 9/9: ""
+*FFMinDigitPasscode 10/10: ""
+*FFMinDigitPasscode 11/11: ""
+*FFMinDigitPasscode 12/12: ""
+*CloseUI: *FFMinDigitPasscode
+
+*OpenUI *FFSelectID/Customize User Prompts: PickOne
+*DefaultFFSelectID: UserID_AccountID
+*FFSelectID UserID_AccountID/Display User ID and Account ID Prompts: ""
+*FFSelectID UserID/Display User ID Prompt Only: ""
+*FFSelectID AccountID/Display Account ID Prompt Only: ""
+*CloseUI: *FFSelectID
+
+*OpenUI *FFEmitPageSizeCommand/Specify Paper size with Print Job Ticket: Boolean
+*DefaultFFEmitPageSizeCommand: False
+*FFEmitPageSizeCommand False/Not Installed: “”
+*FFEmitPageSizeCommand True/Installed: “”
+*CloseUI: *FFEmitPageSizeCommand
+
+*%OpenUI *FFEncryptionSetting/Encryption Level: PickOne
+*%DefaultFFEncryptionSetting: Current
+*%FFEncryptionSetting Current/Current: “”
+*%FFEncryptionSetting New/New: “”
+*%CloseUI: *FFEncryptionSetting
+
+*CloseGroup: InstallableOptions
+
+*% ==== UI Constraints ===============
+*UIConstraints: *PageSize FFPostcard *InputSlot 1stTray
+*UIConstraints: *PageSize FFPostcard *InputSlot 2ndTray
+*UIConstraints: *PageSize FFPostcard *InputSlot 3rdTray
+*UIConstraints: *PageSize FFPostcard *InputSlot 4thTray
+*UIConstraints: *InputSlot 1stTray *PageSize FFPostcard
+*UIConstraints: *InputSlot 2ndTray *PageSize FFPostcard
+*UIConstraints: *InputSlot 3rdTray *PageSize FFPostcard
+*UIConstraints: *InputSlot 4thTray *PageSize FFPostcard
+*UIConstraints: *PageSize FFPostcard *Duplex
+*UIConstraints: *Duplex *PageSize FFPostcard
+*UIConstraints: *PageSize A5 *FFStaple
+*UIConstraints: *PageSize FFPostcard *FFStaple
+*UIConstraints: *FFStaple *PageSize A5
+*UIConstraints: *FFStaple *PageSize FFPostcard
+*UIConstraints: *PageSize A5 *FFPunch
+*UIConstraints: *PageSize FFPostcard *FFPunch
+*UIConstraints: *FFPunch *PageSize A5
+*UIConstraints: *FFPunch *PageSize FFPostcard
+*NonUIConstraints: *CustomPageSize True *FFPunch
+*NonUIConstraints: *FFPunch *CustomPageSize True
+*UIConstraints: *PageSize FFPostcard *FFSignature
+*UIConstraints: *FFSignature *PageSize FFPostcard
+*NonUIConstraints: *CustomPageSize True *FFSignature
+*NonUIConstraints: *FFSignature *CustomPageSize True
+*UIConstraints: *FFPunch *FFSignature
+*UIConstraints: *FFSignature *FFPunch
+*UIConstraints: *FFSignature *FFIntBackCoverSheet
+*UIConstraints: *FFIntBackCoverSheet *FFSignature
+*UIConstraints: *FFSignature None *FFSigVol
+*UIConstraints: *FFSigVol *FFSignature None
+*UIConstraints: *FFSignature *FFIntCoverSheet
+*UIConstraints: *FFIntCoverSheet *FFSignature
+*UIConstraints: *FFSignature *Duplex
+*UIConstraints: *Duplex *FFSignature
+
+*% ==== Device Capabilities ===============
+*LanguageLevel: "3"
+*Protocols: TBCP
+*1284Modes Parallel: Compat Nibble ECP
+*%1284DeviceID: "MFG:FUJIFILM;CMD:;MDL:Print Driver for Mac OS X;DES:FF Print Driver for Mac OS X;CLS:PRINTER;"
+
+*ColorDevice: True
+*DefaultColorSpace: CMYK
+*VariablePaperSize: True
+*LandscapeOrientation: Plus90
+*TTRasterizer: Type42
+*FileSystem: True
+*Throughput: "35"
+*DefaultResolution: 600dpi
+
+*OpenUI *Duplex/2 Sided Print:  PickOne
+*OrderDependency: 110.0 AnySetup *Duplex
+*DefaultDuplex: None
+*Duplex None/1 Sided Print: "<</TYPE(SET) /KEY(DUPLEX) /VALUE(OFF)>> pop"
+*Duplex DuplexNoTumble/Flip on long edge: " <</TYPE(SET) /KEY(DUPLEX) /VALUE(LONGEDGE)>> pop pop"
+*Duplex DuplexTumble/Flip on short edge: "<</TYPE(SET) /KEY(DUPLEX) /VALUE(SHORTEDGE)>> pop pop"
+*CloseUI: *Duplex
+
+*% Collate ===============
+*OpenUI *Collate/Collated: PickOne
+*OrderDependency: 15.0 AnySetup *Collate
+*DefaultCollate: False
+*Collate False/Off: "<</TYPE(SET) /KEY(COLLATE) /VALUE(OFF)>> pop"
+*Collate True/On: "<</TYPE(SET) /KEY(COLLATE) /VALUE(ON)>> pop"
+*CloseUI: *Collate
+
+*% Paper Handling ===================
+*RequiresPageRegion 1stTray: False
+*RequiresPageRegion 2ndTray: False
+*RequiresPageRegion 3rdTray: False
+*RequiresPageRegion 4thTray: False
+*RequiresPageRegion MediaTypeAPS: True
+
+*OpenUI *PageSize: PickOne
+*OrderDependency: 60.0 AnySetup *PageSize
+*DefaultPageSize: A4
+*PageSize A3/A3 (297 x 420mm): "<</PageSize[842 1191]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(A3)>> pop"
+*PageSize B4/B4 (257 x 364mm): "<</PageSize[729 1032]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(JISB4)>> pop"
+*PageSize A4/A4 (210 x 297mm): "<</PageSize[595 842]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(A4)>> pop"
+*PageSize B5/B5 (182 x 257mm): "<</PageSize[516 729]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(JISB5)>> pop"
+*PageSize A5/A5 (148 x 210mm): "<</PageSize[420 595]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(A5)>> pop"
+*PageSize Letter/Letter (8.5 x 11"): "<</PageSize[612 792]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(LETTER)>> pop"
+*PageSize Legal/Legal (8.5 x 14"): "<</PageSize[612 1008]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(LEGAL)>> pop"
+*PageSize Tabloid/Tabloid (11 x 17"): "<</PageSize[792 1224]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(LEDGER)>> pop"
+*PageSize FFPostcard/Postcard (100 x 148mm): "<</PageSize[283 420]/ImagingBBox null>>setpagedevice
+								<</TYPE(SET) /KEY(PAPER) /VALUE(FFPostcard)>> pop"
+*CloseUI: *PageSize
+
+*OpenUI *PageRegion:  PickOne
+*OrderDependency: 80.0 AnySetup *PageRegion
+*DefaultPageRegion: A4
+*PageRegion A3/A3 (297 x 420mm): "<</PageSize[842 1191]/ImagingBBox null>>setpagedevice"
+*PageRegion B4/B4 (257 x 364mm): "<</PageSize[729 1032]/ImagingBBox null>>setpagedevice"
+*PageRegion A4/A4 (210 x 297mm): "<</PageSize[595 842]/ImagingBBox null>>setpagedevice"
+*PageRegion B5/B5 (182 x 257mm): "<</PageSize[516 729]/ImagingBBox null>>setpagedevice"
+*PageRegion A5/A5 (148 x 210mm): "<</PageSize[420 595]/ImagingBBox null>>setpagedevice"
+*PageRegion Letter/Letter (8.5 x 11"): "<</PageSize[612 792]/ImagingBBox null>>setpagedevice"
+*PageRegion Legal/Legal (8.5 x 14"): "<</PageSize[612 1008]/ImagingBBox null>>setpagedevice"
+*PageRegion Tabloid/Tabloid (11 x 17"): "<</PageSize[792 1224]/ImagingBBox null>>setpagedevice"
+*PageRegion FFPostcard/Postcard (100 x 148mm): "<</PageSize[283 420]/ImagingBBox null>>setpagedevice"
+*CloseUI: *PageRegion
+
+*% The following entries provide information about specific paper keywords.
+*DefaultImageableArea: A4
+*ImageableArea A3/A3 (297 x 420mm): "11.62 11.62 830.38 1179.38 "
+*ImageableArea B4/B4 (257 x 364mm): "11.62 11.62 717.38 1020.38 "
+*ImageableArea A4/A4 (210 x 297mm): "11.62 11.62 583.38 830.38 "
+*ImageableArea B5/B5 (182 x 257mm): "11.62 11.62 504.38 717.38 "
+*ImageableArea A5/A5 (148 x 210mm): "11.62 11.62 408.38 583.38 "
+*ImageableArea Letter/Letter (8.5 x 11"): "11.62 11.62 600.38 780.38 "
+*ImageableArea Legal/Legal (8.5 x 14"): "11.62 11.62 600.38 996.38 "
+*ImageableArea Tabloid/Tabloid (11 x 17"): "11.62 11.62 780.38 1212.38 "
+*ImageableArea FFPostcard/Postcard (100 x 148mm): "11.62 11.62 271.84 407.91 "
+
+*% These provide the physical dimensions of the paper (by keyword)
+*DefaultPaperDimension: A4
+*PaperDimension A3/A3 (297 x 420mm): "842 1191"
+*PaperDimension B4/B4 (257 x 364mm): "729 1032"
+*PaperDimension A4/A4 (210 x 297mm): "595 842"
+*PaperDimension B5/B5 (182 x 257mm): "516 729"
+*PaperDimension A5/A5 (148 x 210mm): "420 595"
+*PaperDimension Letter/Letter (8.5 x 11"): "612 792"
+*PaperDimension Legal/Legal (8.5 x 14"): "612 1008"
+*PaperDimension Tabloid/Tabloid (11 x 17"): "792 1224"
+*PaperDimension FFPostcard/Postcard (100 x 148mm): "283 420"
+
+*% InputSlot Information ================
+*OpenUI *InputSlot/Paper Source: PickOne
+*OrderDependency: 50.0 AnySetup *InputSlot
+*DefaultInputSlot: 1stTray
+*InputSlot 1stTray/Tray 1: "<</TYPE(SET) /KEY(MEDIASOURCE) /VALUE(TRAY1)>> pop"
+*InputSlot 2ndTray/Tray 2: "<</TYPE(SET) /KEY(MEDIASOURCE) /VALUE(TRAY2)>> pop"
+*InputSlot 3rdTray/Tray 3: "<</TYPE(SET) /KEY(MEDIASOURCE) /VALUE(TRAY3)>> pop"
+*InputSlot 4thTray/Tray 4: "<</TYPE(SET) /KEY(MEDIASOURCE) /VALUE(TRAY4)>> pop"
+*InputSlot BypassTray/Bypass Tray: "<</TYPE(SET) /KEY(MEDIASOURCE) /VALUE(TRAY5)>> pop"
+*CloseUI: *InputSlot
+
+*% MediaType Information ===================
+*OpenUI *MediaType/Paper Type: PickOne
+*OrderDependency: 50.0 AnySetup *MediaType
+*DefaultMediaType: Default
+*MediaType Default/Printer Default Type: ""
+*MediaType Stationary/Plain: "<</TYPE(SET) /KEY(MEDIATYPE) /VALUE(STATIONARY)>> pop"
+*MediaType StationaryBack/Plain Side 2: "<</TYPE(MEDIAKEY) /KEY(AUTOSELECT) /VALUE(STATIONARYBACK)>> pop"
+*MediaType RecyclePaper/Recycled: "<</TYPE(SET) /KEY(MEDIAKEY) /VALUE(RECYCLEPAPER)>> pop"
+*MediaType ThickPaper/Heavyweight: "<</TYPE(SET) /KEY(MEDIAKEY) /VALUE(THICKPAPER)>> pop"
+*CloseUI: *MediaType
+
+*% ColorMode Information ===================
+*OpenUI *FFColorMode/Output Color:PickOne
+*OrderDependency: 20.0 AnySetup *FFColorMode
+*DefaultFFColorMode: Color
+*FFColorMode Color/Color: "<</TYPE(SET) /KEY(RENDERMODE) /VALUE(AUTOCOLOR)>> pop"
+*FFColorMode Black/Black and White: "<</TYPE(SET) /KEY(RENDERMODE) /VALUE(GRAYSCALE)>> pop"
+*CloseUI: *FFColorMode
+
+*% OutputMode Information ===================
+*OpenUI *FFOutputMode/Image Quality:PickOne
+*OrderDependency: 10.0 AnySetup *FFOutputMode
+*DefaultFFOutputMode: Standard
+*FFOutputMode Standard/Standard: "<</TYPE(ATTR) /KEY(DIPQ) /VALUE(STANDARD)>> pop"
+*FFOutputMode HighSpeed/High Speed: "<</TYPE(ATTR) /KEY(DIPQ) /VALUE(HIGHSPEED)>> pop"
+*FFOutputMode HighQuality/High Quality: "<</TYPE(ATTR) /KEY(DIPQ) /VALUE(HIGHQUALITY)>> pop"
+*CloseUI: *FFOutputMode
+
+*% Staple ===============
+*OpenUI *FFStaple/Staple:  PickOne
+*OrderDependency: 160.0 AnySetup *FFStaple
+*DefaultFFStaple: None
+*FFStaple None/None: ""
+*FFStaple UpperLeftSinglePort/1 Staple, Top Left: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(STAPLE) /VALUE(TOPLEFT)>> pop pop"
+*FFStaple UpperRightSinglePort/1 Staple, Top Right: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(STAPLE) /VALUE(TOPRIGHT)>> pop pop"
+*FFStaple BottomRightSinglePort/1 Staple, Bottom Right: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(STAPLE) /VALUE(BOTTOMRIGHT)>> pop pop"
+*FFStaple BottomLeftSinglePort/1 Staple, Bottom Left: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(STAPLE) /VALUE(BOTTOMLEFT)>> pop pop"
+*FFStaple LeftDoublePort/2 Staples, Left: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(STAPLE) /VALUE(LEFTDUAL)>> pop pop"
+*FFStaple TopDoublePort/2 Staples, Top: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(STAPLE) /VALUE(TOPDUAL)>> pop pop"
+*FFStaple RightDoublePort/2 Staples, Right: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(STAPLE) /VALUE(RIGHTDUAL)>> pop pop"
+*FFStaple BottomDoublePort/2 Staples, Bottom:"<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(STAPLE) /VALUE(BOTTOMDUAL)>> pop pop"
+*CloseUI: *FFStaple
+
+*% Punch ===============
+*OpenUI *FFPunch/Hole Punch: PickOne
+*OrderDependency: 160.0 AnySetup *FFPunch
+*DefaultFFPunch: None
+*FFPunch None/None: ""
+*FFPunch Left/Left: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(PUNCH) /VALUE(LEFT)>> pop pop"
+*FFPunch Top/Top: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(PUNCH) /VALUE(TOP)>> pop pop"
+*FFPunch Right/Right: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(PUNCH) /VALUE(RIGHT)>> pop pop"
+*FFPunch Bottom/Bottom: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(PUNCH) /VALUE(BOTTOM)>> pop pop"
+*CloseUI: *FFPunch
+
+*% Hole Punch Settings ===============
+*OpenUI *FFNumPunchHoles/Hole Punch Settings: PickOne
+*OrderDependency: 176.0 AnySetup *FFNumPunchHoles
+*DefaultFFNumPunchHoles: 2Holes
+*FFNumPunchHoles 2Holes/2 Hole Punch: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(PUNCHHOLES) /VALUE(2HOLES)>> pop pop"
+*FFNumPunchHoles 3Holes/3 Hole Punch: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(PUNCHHOLES) /VALUE(3HOLES)>> pop pop"
+*FFNumPunchHoles 4Holes/4 Hole Punch: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(PUNCHHOLES) /VALUE(4HOLES)>> pop pop"
+*CloseUI: *FFNumPunchHoles
+
+
+*% RasterMode ===================
+*OpenUI *FFPDFRasterizedMode/Image Conversion:  PickOne
+*OrderDependency: 120.0 AnySetup *FFPDFRasterizedMode
+*DefaultFFPDFRasterizedMode: False
+*FFPDFRasterizedMode True/On:  ""
+*FFPDFRasterizedMode False/Off: ""
+*CloseUI: *FFPDFRasterizedMode
+
+*% Offset ===============
+*OpenUI *Jog/Offset Stacking: PickOne
+*OrderDependency: 175.0 AnySetup *Jog
+*DefaultJog: None
+*Jog None/No Offset: ""
+*Jog EndOfSet/Offset per Set: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(JOG) /VALUE(ENDOFSET)>> pop pop"
+*Jog DeviceDeactivation/Offset per Job: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(JOG) /VALUE(DEVICEDEACTIVATION)>> pop pop"
+*CloseUI: *Jog
+
+*% Add Front Cover ===================
+*OpenUI *FFIntCoverSheet/Add Front Cover: PickOne
+*OrderDependency: 140.0 AnySetup *FFIntCoverSheet
+*DefaultFFIntCoverSheet: None
+*FFIntCoverSheet None/No Front Cover: ""
+*FFIntCoverSheet 1stTray/Tray 1: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(INTCOVERSHEET) /VALUE(1STTRAY)>> pop pop"
+*FFIntCoverSheet 2ndTray/Tray 2: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(INTCOVERSHEET) /VALUE(2NDTRAY)>> pop pop"
+*FFIntCoverSheet 3rdTray/Tray 3: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(INTCOVERSHEET) /VALUE(3RDTRAY)>> pop pop"
+*FFIntCoverSheet 4thTray/Tray 4: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(INTCOVERSHEET) /VALUE(4THTRAY)>> pop pop"
+*FFIntCoverSheet MSI/Tray 5 (Bypass): "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(INTCOVERSHEET) /VALUE(MSI)>> pop pop"
+*CloseUI: *FFIntCoverSheet
+
+*% Add Back Cover ===================
+*OpenUI *FFIntBackCoverSheet/Add Back Cover: PickOne
+*OrderDependency: 140.0 AnySetup *FFIntBackCoverSheet
+*DefaultFFIntBackCoverSheet: None
+*FFIntBackCoverSheet None/No Back Cover: ""
+*FFIntBackCoverSheet 1stTray/Tray 1: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(INTBACKCOVERSHEET) /VALUE(1STTRAY)>> pop pop"
+*FFIntBackCoverSheet 2ndTray/Tray 2: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(INTBACKCOVERSHEET) /VALUE(2NDTRAY)>> pop pop"
+*FFIntBackCoverSheet 3rdTray/Tray 3: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(INTBACKCOVERSHEET) /VALUE(3RDTRAY)>> pop pop"
+*FFIntBackCoverSheet 4thTray/Tray 4: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(INTBACKCOVERSHEET) /VALUE(4THTRAY)>> pop pop"
+*FFIntBackCoverSheet MSI/Tray 5 (Bypass): "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(INTBACKCOVERSHEET) /VALUE(MSI)>> pop pop"
+*CloseUI: *FFIntBackCoverSheet
+
+*% Booklet Creation ===================
+*OpenUI *FFSignature/Booklet Creation: PickOne
+*OrderDependency: 10.0 AnySetup *FFSignature
+*DefaultFFSignature: None
+*FFSignature None/No Booklets: ""
+*FFSignature LeftSig/Left Bind / Top Bind: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(FIGNATURE) /VALUE(LEFTSIG)>> pop pop"
+*FFSignature RightSig/Right Bind / Bottom Bind: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(FIGNATURE) /VALUE(RIGHTSIG)>> pop pop"
+*FFSignature LeftSigCenterStaple/Booklet Staple (Left / Top Bind): "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(FIGNATURE) /VALUE(LEFTSIGCENTERSTAPLE)>> pop pop"
+*FFSignature RightSigCenterStaple/Booklet Staple (Right / Bottom Bind): "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(FIGNATURE) /VALUE(RIGHTSIGCENTERSTAPLE)>> pop pop"
+*FFSignature LeftSigFold/Bi-Fold (Left / Top Bind): "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(FIGNATURE) /VALUE(LEFTSIGFOLD)>> pop pop"
+*FFSignature RightSigFold/Bi-Fold (Right / Bottom Bind): "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(FIGNATURE) /VALUE(RIGHTSIGFOLD)>> pop pop"
+*CloseUI: *FFSignature
+
+*% Booklet Divide Output ===================
+*OpenUI *FFSigVol/Booklet Divide Output: PickOne
+*OrderDependency: 245.0 AnySetup *FFSigVol
+*DefaultFFSigVol: None
+*FFSigVol None/Off: ""
+*FFSigVol 1Sheet/Each Sheet: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(SIGVOL) /VALUE(1)>> pop pop"
+*FFSigVol 2Sheets/2 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(2)>> pop pop"
+*FFSigVol 3Sheets/3 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(SIGVOL) /VALUE(3)>> pop pop"
+*FFSigVol 4Sheets/4 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(4)>> pop pop"
+*FFSigVol 5Sheets/5 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(5)>> pop pop"
+*FFSigVol 6Sheets/6 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(SIGVOL) /VALUE(6)>> pop pop"
+*FFSigVol 7Sheets/7 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(7)>> pop pop"
+*FFSigVol 8Sheets/8 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(8)>> pop pop"
+*FFSigVol 9Sheets/9 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(SIGVOL) /VALUE(9)>> pop pop"
+*FFSigVol 10Sheets/10 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(10)>> pop pop"
+*FFSigVol 11Sheets/11 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(11)>> pop pop"
+*FFSigVol 12Sheets/12 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(SIGVOL) /VALUE(12)>> pop pop"
+*FFSigVol 13Sheets/13 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(13)>> pop pop"
+*FFSigVol 14Sheets/14 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(14)>> pop pop"
+*FFSigVol 15Sheets/15 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(15)>> pop pop"
+*FFSigVol 16Sheets/16 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(SIGVOL) /VALUE(16)>> pop pop"
+*FFSigVol 17Sheets/17 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(17)>> pop pop"
+*FFSigVol 18Sheets/18 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(18)>> pop pop"
+*FFSigVol 19Sheets/19 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(19)>> pop pop"
+*FFSigVol 20Sheets/20 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(SIGVOL) /VALUE(20)>> pop pop"
+*FFSigVol 21Sheets/21 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(21)>> pop pop"
+*FFSigVol 22Sheets/22 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(22)>> pop pop"
+*FFSigVol 23Sheets/23 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(23)>> pop pop"
+*FFSigVol 24Sheets/24 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+										<</TYPE(SET) /KEY(SIGVOL) /VALUE(24)>> pop pop"
+*FFSigVol 25Sheets/25 Sheets: "<</TYPE(SET) /KEY(FINISH) /VALUE(ON)>> 
+											<</TYPE(SET) /KEY(SIGVOL) /VALUE(25)>> pop pop"
+*CloseUI: *FFSigVol
+
+*% Custom Paper ===================
+*HWMargins: 11.62 11.62 11.62 11.62
+*LeadingEdge Short: ""
+*DefaultLeadingEdge: Short
+*MaxMediaWidth: "907"
+*MaxMediaHeight: "1369"
+*NonUIOrderDependency: 40.0 AnySetup *CustomPageSize
+*CustomPageSize True: "
+userdict /4.3PPDCompliant known
+    {userdict /4.3PPDCompliant get } {false} ifelse
+{
+  pop pop pop
+  3 dict begin
+    /PageSize [
+      4 -2 roll
+    ] def
+  /ImagingBBox null def
+  currentdict end setpagedevice
+}{
+  pop pop pop
+  3 dict begin
+    /PageSize [
+      4 -2 roll exch
+    ] def
+  /ImagingBBox null def
+  currentdict end setpagedevice
+} ifelse
+"
+*End
+
+*ParamCustomPageSize Height:       1 points 278 1369
+*ParamCustomPageSize Width:        2 points 253 907
+*ParamCustomPageSize WidthOffset:  3 points 0 0 
+*ParamCustomPageSize HeightOffset: 4 points 0 0 
+*ParamCustomPageSize Orientation:  5 int 1 1
+
+*% end of PPD file
+
+*% Japanese localization
+*ja.Translation ModelName/FF Print Driver for Mac OS X: ""
+*ja.Translation FFMinDigitPasscode/暗証番号の最小桁数: ""
+*ja.FFMinDigitPasscode 0/0: ""
+*ja.FFMinDigitPasscode 1/1: ""
+*ja.FFMinDigitPasscode 2/2: ""
+*ja.FFMinDigitPasscode 3/3: ""
+*ja.FFMinDigitPasscode 4/4: ""
+*ja.FFMinDigitPasscode 5/5: ""
+*ja.FFMinDigitPasscode 6/6: ""
+*ja.FFMinDigitPasscode 7/7: ""
+*ja.FFMinDigitPasscode 8/8: ""
+*ja.FFMinDigitPasscode 9/9: ""
+*ja.FFMinDigitPasscode 10/10: ""
+*ja.FFMinDigitPasscode 11/11: ""
+*ja.FFMinDigitPasscode 12/12: ""
+*ja.Translation FFSelectID/認証/集計時の入力項目: ""
+*ja.FFSelectID UserID_AccountID/User IDとAccount ID: ""
+*ja.FFSelectID UserID/User IDのみ: ""
+*ja.FFSelectID AccountID/Account IDのみ: ""
+*ja.Translation General/General: ""
+*ja.Translation Duplex/両面印刷: ""
+*ja.Duplex None/なし: ""
+*ja.Duplex DuplexNoTumble/長辺をとじる: ""
+*ja.Duplex DuplexTumble/短辺をとじる: ""
+*ja.Translation Collate/部単位で印刷: ""
+*ja.Collate False/しない: ""
+*ja.Collate True/する: ""
+*ja.Translation PageSize/用紙サイズ: ""
+*ja.PageSize A3/A3: ""
+*ja.PageSize B4/B4: ""
+*ja.PageSize A4/A4: ""
+*ja.PageSize B5/B5: ""
+*ja.PageSize A5/A5: ""
+*ja.PageSize Letter/8.5x11": ""
+*ja.PageSize Legal/8.5x14": ""
+*ja.PageSize Tabloid/11x17": ""
+*ja.PageSize FFPostcard/はがき: ""
+*ja.PageSize Custom/Custom: ""
+*ja.Translation PageRegion/PageRegion: ""
+*ja.PageRegion A3/A3: ""
+*ja.PageRegion B4/B4: ""
+*ja.PageRegion A4/A4: ""
+*ja.PageRegion B5/B5: ""
+*ja.PageRegion A5/A5: ""
+*ja.PageRegion Letter/8.5x11": ""
+*ja.PageRegion Legal/8.5x14": ""
+*ja.PageRegion Tabloid/11x17": ""
+*ja.PageRegion FFPostcard/はがき: ""
+*ja.PageRegion Custom/Custom: ""
+*ja.Translation FFColorMode/カラーモード: ""
+*ja.FFColorMode Color/カラー: ""
+*ja.FFColorMode Black/白黒: ""
+*ja.Translation FFOutputMode/印刷モード: ""
+*ja.FFOutputMode HighSpeed/高速: ""
+*ja.FFOutputMode Standard/標準: ""
+*ja.FFOutputMode HighQuality/高画質: ""
+*ja.Translation InputSlot/給紙方法: ""
+*ja.InputSlot 1stTray/トレイ1: ""
+*ja.InputSlot 2ndTray/トレイ2: ""
+*ja.InputSlot 3rdTray/トレイ3: ""
+*ja.InputSlot 4thTray/トレイ4: ""
+*ja.InputSlot BypassTray/手差し: ""
+*ja.Translation MediaType/用紙種類: ""
+*ja.MediaType Default/指定しない: ""
+*ja.MediaType Stationary/普通紙: ""
+*ja.MediaType StationaryBack/普通紙うら面: ""
+*ja.MediaType RecyclePaper/再生紙: ""
+*ja.MediaType ThickPaper/厚紙: ""
+*ja.Translation FFStaple/ホチキス: ""
+*ja.FFStaple None/しない: ""
+*ja.FFStaple UpperLeftSinglePort/左上1ヵ所: ""
+*ja.FFStaple UpperRightSinglePort/右上1ヵ所: ""
+*ja.FFStaple BottomRightSinglePort/右下1ヵ所: ""
+*ja.FFStaple BottomLeftSinglePort/左下1ヵ所: ""
+*ja.FFStaple LeftDoublePort/左2ヵ所: ""
+*ja.FFStaple TopDoublePort/上2ヵ所: ""
+*ja.FFStaple RightDoublePort/右2ヵ所: ""
+*ja.FFStaple BottomDoublePort/下2ヵ所: ""
+*ja.Translation FFPunch/パンチ: ""
+*ja.FFPunch None/しない: ""
+*ja.FFPunch Left/左: ""
+*ja.FFPunch Top/上: ""
+*ja.FFPunch Right/右: ""
+*ja.FFPunch Bottom/下: ""
+*ja.Translation FFNumPunchHoles/パンチ穴: ""
+*ja.FFNumPunchHoles Auto/プリンタの設定を用いる: ""
+*ja.FFNumPunchHoles 2Holes/2穴: ""
+*ja.FFNumPunchHoles 3Holes/3穴: ""
+*ja.FFNumPunchHoles 4Holes/4穴: ""
+*ja.Translation Jog/オフセット排出: ""
+*ja.Jog None/しない: ""
+*ja.Jog EndOfSet/セットごとにずらす: ""
+*ja.Jog DeviceDeactivation/ジョブごとにずらす: ""
+*ja.Translation FFIntCoverSheet/おもて表紙: ""
+*ja.FFIntCoverSheet None/付けない: ""
+*ja.FFIntCoverSheet 1stTray/トレイ1: ""
+*ja.FFIntCoverSheet 2ndTray/トレイ2: ""
+*ja.FFIntCoverSheet 3rdTray/トレイ3: ""
+*ja.FFIntCoverSheet 4thTray/トレイ4: ""
+*ja.FFIntCoverSheet MSI/トレイ5(手差し): ""
+*ja.Translation FFIntBackCoverSheet/うら表紙: ""
+*ja.FFIntBackCoverSheet None/付けない: ""
+*ja.FFIntBackCoverSheet 1stTray/トレイ1: ""
+*ja.FFIntBackCoverSheet 2ndTray/トレイ2: ""
+*ja.FFIntBackCoverSheet 3rdTray/トレイ3: ""
+*ja.FFIntBackCoverSheet 4thTray/トレイ4: ""
+*ja.FFIntBackCoverSheet MSI/トレイ5(手差し): ""
+*ja.Translation FFPDFRasterizedMode/イメージ変換出力: ""
+*ja.FFPDFRasterizedMode True/する: ""
+*ja.FFPDFRasterizedMode False/しない: ""
+*ja.Translation FFSignature/製本: ""
+*ja.FFSignature None/しない: ""
+*ja.FFSignature LeftSig/左とじ/上とじ: ""
+*ja.FFSignature RightSig/右とじ/下とじ: ""
+*ja.FFSignature LeftSigCenterStaple/中とじホチキス(左とじ/上とじ): ""
+*ja.FFSignature RightSigCenterStaple/中とじホチキス(右とじ/下とじ): ""
+*ja.FFSignature LeftSigFold/二つ折り (左とじ/上とじ): ""
+*ja.FFSignature RightSigFold/二つ折り (右とじ/下とじ): ""
+*ja.Translation FFSigVol/製本の分冊: ""
+*ja.FFSigVol None/しない: ""
+*ja.FFSigVol 1Sheet/1枚ごと: “”
+*ja.FFSigVol 2Sheets/2枚ごと: ""
+*ja.FFSigVol 3Sheets/3枚ごと: ""
+*ja.FFSigVol 4Sheets/4枚ごと: ""
+*ja.FFSigVol 5Sheets/5枚ごと: ""
+*ja.FFSigVol 6Sheets/6枚ごと: ""
+*ja.FFSigVol 7Sheets/7枚ごと: ""
+*ja.FFSigVol 8Sheets/8枚ごと: ""
+*ja.FFSigVol 9Sheets/9枚ごと: ""
+*ja.FFSigVol 10Sheets/10枚ごと: ""
+*ja.FFSigVol 11Sheets/11枚ごと: ""
+*ja.FFSigVol 12Sheets/12枚ごと: ""
+*ja.FFSigVol 13Sheets/13枚ごと: ""
+*ja.FFSigVol 14Sheets/14枚ごと: ""
+*ja.FFSigVol 15Sheets/15枚ごと: ""
+*ja.FFSigVol 16Sheets/16枚ごと: ""
+*ja.FFSigVol 17Sheets/17枚ごと: ""
+*ja.FFSigVol 18Sheets/18枚ごと: ""
+*ja.FFSigVol 19Sheets/19枚ごと: ""
+*ja.FFSigVol 20Sheets/20枚ごと: ""
+*ja.FFSigVol 21Sheets/21枚ごと: ""
+*ja.FFSigVol 22Sheets/22枚ごと: ""
+*ja.FFSigVol 23Sheets/23枚ごと: ""
+*ja.FFSigVol 24Sheets/24枚ごと: ""
+*ja.FFSigVol 25Sheets/25枚ごと: ""
+*ja.Translation FFEmitPageSizeCommand/用紙サイズをジョブチケットで指定する: ""
+*ja.FFEmitPageSizeCommand False/しない: ""
+*ja.FFEmitPageSizeCommand True/する: ""
+*%ja.Translation FFEncryptionSetting/暗号化方式: ""
+*%ja.FFEncryptionSetting Current/従来方式: ""
+*%ja.FFEncryptionSetting New/新方式: ""
+*cupsLanguages: "ja"
+
+

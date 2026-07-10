@@ -1,3 +1,5 @@
+//go:build windows
+
 package drvpack
 
 import (
@@ -38,7 +40,7 @@ func runWithTimeout(timeout time.Duration, name string, args ...string) error {
 		// 杀整个进程树（InnoSetup 可能衍生子进程）
 		exec.Command("taskkill", "/f", "/t", "/pid", fmt.Sprintf("%d", cmd.Process.Pid)).Run()
 		cmd.Process.Kill()
-		return fmt.Errorf("超时 (%v)", timeout)
+		return fmt.Errorf("timeout (%v)", timeout)
 	case err := <-done:
 		return err
 	}
@@ -52,12 +54,12 @@ func cleanupExtractProcesses() {
 func extract(exePath string) (string, error) {
 	exePath, err := filepath.Abs(exePath)
 	if err != nil {
-		return "", fmt.Errorf("无法解析驱动路径: %w", err)
+		return "", fmt.Errorf("failed to resolve driver path: %w", err)
 	}
 
 	workDir, err := os.MkdirTemp("", "printer-installer-extract-")
 	if err != nil {
-		return "", fmt.Errorf("创建临时解压目录失败: %w", err)
+		return "", fmt.Errorf("failed to create temp extraction directory: %w", err)
 	}
 
 	shortWorkDir := shortPath(workDir)
@@ -70,7 +72,7 @@ func extract(exePath string) (string, error) {
 	for _, args := range attempts {
 		os.RemoveAll(workDir)
 		if err := os.MkdirAll(workDir, 0755); err != nil {
-			return "", fmt.Errorf("创建临时解压目录失败: %w", err)
+			return "", fmt.Errorf("failed to create temp extraction directory: %w", err)
 		}
 
 		err := runWithTimeout(60*time.Second, exePath, args...)
@@ -85,9 +87,9 @@ func extract(exePath string) (string, error) {
 
 	os.RemoveAll(workDir)
 	if len(attemptErrs) > 0 {
-		return "", fmt.Errorf("无法解压 %s（已尝试静默参数：%s）\n可尝试手动解压后用 --extracted 指定目录", exePath, strings.Join(attemptErrs, "; "))
+		return "", fmt.Errorf("failed to extract %s (tried silent flags: %s)\ntry manual extraction and use --extracted", exePath, strings.Join(attemptErrs, "; "))
 	}
-	return "", fmt.Errorf("无法解压 %s\n可尝试手动解压后用 --extracted 指定目录", exePath)
+	return "", fmt.Errorf("failed to extract %s\ntry manual extraction and use --extracted", exePath)
 }
 
 func findDriverRoot(dir string) string {

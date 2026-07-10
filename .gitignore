@@ -4,6 +4,9 @@ config-server.json
 *.exe
 *.pkg
 *.dmg
+printer-installer
+printer-installer-darwin
+FUJIFILM/
 # main.syso is the compiled requireAdministrator manifest — keep in repo so double-click triggers UAC
 .extract-auto/
 

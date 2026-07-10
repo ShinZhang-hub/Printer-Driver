@@ -15,7 +15,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"printer-installer/internal/config"
+	"printer-installer/internal/installer"
 	"printer-installer/internal/log"
 )
 
@@ -27,11 +30,55 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 	mux := http.NewServeMux()
 	srv := &http.Server{Handler: mux}
 
+	var authed atomic.Bool
+	if cfg.AdminPasswordHash == "" {
+		authed.Store(true)
+	}
+
+	authGate := func(next http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			if !authed.Load() {
+				http.Error(w, `{"error":"unauthorized"}`, 401)
+				return
+			}
+			next(w, r)
+		}
+	}
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		if !authed.Load() {
+			w.Write([]byte(loginPageHTML))
+			return
+		}
 		w.Write([]byte(adminHTML))
 	})
 
-	mux.HandleFunc("/api/config", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/auth", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, "method not allowed", 405)
+			return
+		}
+		var req struct {
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request"}`, 400)
+			return
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(cfg.AdminPasswordHash), []byte(req.Password)); err != nil {
+			w.WriteHeader(401)
+			json.NewEncoder(w).Encode(map[string]string{"error": "invalid password"})
+			return
+		}
+		authed.Store(true)
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	})
+
+	mux.HandleFunc("/api/config", authGate(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			json.NewEncoder(w).Encode(cfg)
 			return
@@ -50,9 +97,9 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 			}
 			json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 		}
-	})
+	}))
 
-	mux.HandleFunc("/api/config/reload", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/config/reload", authGate(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, "method not allowed", 405)
 			return
@@ -61,11 +108,11 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 			*cfg = *reloaded
 			json.NewEncoder(w).Encode(cfg)
 		} else {
-			http.Error(w, `{"error":"重新加载失败"}`, 500)
+			http.Error(w, `{"error":"reload failed"}`, 500)
 		}
-	})
+	}))
 
-	mux.HandleFunc("/api/install", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/install", authGate(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, "method not allowed", 405)
 			return
@@ -79,7 +126,7 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 			return
 		}
 		if req.IP == "" {
-			http.Error(w, `{"error":"IP 地址不能为空"}`, 400)
+			http.Error(w, `{"error":"IP cannot be empty"}`, 400)
 			return
 		}
 		err := fn(req.IP, req.Name)
@@ -88,17 +135,17 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 			return
 		}
-		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "message": "安装成功"})
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "message": installer.ResultMessage})
 
 		go func() {
 			time.Sleep(2 * time.Second)
 			cancel()
 		}()
-	})
+	}))
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		stdlog.Fatalf("启动管理面板失败: %v", err)
+		stdlog.Fatalf("failed to start admin panel: %v", err)
 	}
 	port := ln.Addr().(*net.TCPAddr).Port
 	url := fmt.Sprintf("http://127.0.0.1:%d", port)
@@ -107,7 +154,7 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 	var shutdownOnce sync.Once
 	shutdown := func() {
 		shutdownOnce.Do(func() {
-			log.Info("无活动连接，关闭服务")
+			log.Info("no active connections, shutting down")
 			cancel()
 		})
 	}
@@ -126,8 +173,8 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 		}
 	}
 
-	fmt.Println("管理面板已启动:", url)
-	fmt.Println("关闭此窗口即可退出")
+	fmt.Println("Admin panel started:", url)
+	fmt.Println("Close this window to exit")
 
 	openBrowser(url)
 	go func() {
@@ -139,7 +186,6 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 		srv.Shutdown(context.Background())
 	}()
 
-	// 安装成功后也会调用 cancel，这里加个兜底：srv.Serve 返回后确保 close(done)
 	return url, done
 }
 
@@ -159,10 +205,10 @@ func openBrowser(url string) {
 			}
 		}
 		if edgePath != "" {
-			log.Info("Edge --app 模式: %s", edgePath)
+			log.Info("Edge --app mode: %s", edgePath)
 			exec.Command(edgePath, "--app="+url).Start()
 		} else {
-			log.Info("Edge 未找到，使用 url.dll 回退")
+			log.Info("Edge not found, falling back to url.dll")
 			exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
 		}
 	case "darwin":
@@ -172,11 +218,64 @@ func openBrowser(url string) {
 	}
 }
 
-const adminHTML = `<!DOCTYPE html>
-<html lang="zh-CN">
+const loginPageHTML = `<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>打印机驱动 - 管理面板</title>
+<title>Printer Driver - Admin Login</title>
+<style>
+body{font-family:sans-serif;margin:0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.card{background:#fff;padding:32px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.1);width:360px;max-width:90vw}
+h2{margin-top:0;text-align:center}
+input{width:100%;padding:8px;margin:6px 0 16px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}
+button{background:#007aff;color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-size:14px;width:100%}
+button:hover{background:#0056b3}
+button:disabled{background:#999;cursor:not-allowed}
+#error{color:#dc3545;text-align:center;margin-top:12px;display:none}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>Admin Panel</h2>
+<p style="text-align:center;color:#666;margin-bottom:20px">Enter password to continue</p>
+<input type="password" id="password" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+<button onclick="login()" id="loginBtn">Login</button>
+<div id="error"></div>
+</div>
+<script>
+function login() {
+  const pw = document.getElementById('password').value
+  const btn = document.getElementById('loginBtn')
+  const err = document.getElementById('error')
+  btn.disabled = true
+  btn.textContent = 'Verifying...'
+  err.style.display = 'none'
+  fetch('/api/auth', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({password: pw})
+  }).then(r => {
+    if (r.ok) {
+      window.location.href = '/'
+    } else {
+      return r.json().then(d => { throw new Error(d.error || 'Invalid password') })
+    }
+  }).catch(e => {
+    err.textContent = e.message
+    err.style.display = 'block'
+    btn.disabled = false
+    btn.textContent = 'Login'
+  })
+}
+</script>
+</body>
+</html>`
+
+const adminHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Printer Driver - Admin Panel</title>
 <style>
 body{font-family:sans-serif;margin:40px;background:#f5f5f5}
 .card{background:#fff;padding:24px;border-radius:8px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
@@ -193,28 +292,38 @@ h2{margin-top:0}
 </style>
 </head>
 <body>
-<h2>打印机驱动安装器</h2>
+<h2>Printer Driver Installer</h2>
 
 <div class="card">
-<h3>手动安装</h3>
-<label>打印机 IP 地址</label>
-<input type="text" id="printerIP" placeholder="例如: 30.61.40.40" oninput="onIPChange()">
-<label>打印机名称</label>
-<input type="text" id="printerName" placeholder="留空自动使用配置名称">
-<button onclick="startInstall()" id="installBtn">开始安装</button>
+<h3 id="manualTitle" onclick="onManualClick()">Manual Install</h3>
+<label>Printer IP Address</label>
+<input type="text" id="printerIP" placeholder="e.g. 30.61.40.40" oninput="onIPChange()">
+<label>Printer Name</label>
+<input type="text" id="printerName" placeholder="leave empty to use config name">
+<button onclick="startInstall()" id="installBtn">Start Install</button>
 <div id="result"></div>
 </div>
 
-<div class="card">
-<h3>当前配置</h3>
-		<pre id="configDisplay" style="white-space:pre-wrap;word-break:break-all">加载中...</pre>
-		<button onclick="saveConfig()" id="saveBtn">保存配置</button>
-		<button onclick="reloadConfig()" id="reloadBtn" style="background:#555;margin-left:8px">刷新配置</button>
+<div class="card" id="configCard" style="display:none">
+<h3>Current Config</h3>
+		<pre id="configDisplay" style="white-space:pre-wrap;word-break:break-all">Loading...</pre>
+		<button onclick="saveConfig()" id="saveBtn">Save Config</button>
+		<button onclick="reloadConfig()" id="reloadBtn" style="background:#555;margin-left:8px">Refresh Config</button>
 		<div id="saveResult"></div>
 	</div>
 
 <script>
 let currentConfig = null
+let manualClicks = 0
+
+function onManualClick() {
+  manualClicks++
+  if (manualClicks >= 6) {
+    document.getElementById('configCard').style.display = 'block'
+    document.getElementById('manualTitle').onclick = null
+    document.getElementById('manualTitle').style.cursor = 'default'
+  }
+}
 fetch('/api/config').then(r=>r.json()).then(cfg => {
   currentConfig = cfg
   document.getElementById('configDisplay').textContent = JSON.stringify(cfg, null, 2)
@@ -245,19 +354,19 @@ function reloadConfig() {
   const btn = document.getElementById('reloadBtn')
   const display = document.getElementById('configDisplay')
   btn.disabled = true
-  btn.textContent = '刷新中...'
+  btn.textContent = 'Refreshing...'
   fetch('/api/config/reload', {method:'POST'}).then(r=>{
     if (!r.ok) throw new Error(r.statusText)
     return r.json()
   }).then(cfg => {
     currentConfig = cfg
     display.textContent = JSON.stringify(cfg, null, 2)
-    document.getElementById('saveResult').textContent = '配置已刷新'
+    document.getElementById('saveResult').textContent = 'Config refreshed'
   }).catch(e => {
-    document.getElementById('saveResult').textContent = '刷新失败: '+e.message
+    document.getElementById('saveResult').textContent = 'Refresh failed: '+e.message
   }).finally(() => {
     btn.disabled = false
-    btn.textContent = '刷新配置'
+    btn.textContent = 'Refresh Config'
   })
 }
 
@@ -266,7 +375,7 @@ function saveConfig() {
   const btn = document.getElementById('saveBtn')
   const result = document.getElementById('saveResult')
   btn.disabled = true
-  btn.textContent = '保存中...'
+  btn.textContent = 'Saving...'
   result.className = ''
   result.textContent = ''
   try {
@@ -278,29 +387,29 @@ function saveConfig() {
     }).then(r => r.json()).then(d => {
       if (d.error) {
         result.style.color = 'red'
-        result.textContent = '保存失败: ' + d.error
+        result.textContent = 'Save failed: ' + d.error
         return
       }
       result.style.color = 'green'
-      result.textContent = '保存成功，刷新远端配置...'
+      result.textContent = 'Saved, refreshing remote config...'
       return fetch('/api/config/reload', {method:'POST'}).then(r => {
         if (!r.ok) throw new Error(r.statusText)
         return r.json()
       }).then(cfg => {
         currentConfig = cfg
         display.textContent = JSON.stringify(cfg, null, 2)
-        result.textContent = '保存成功，配置已从远端刷新'
+        result.textContent = 'Saved, config refreshed from remote'
       })
     }).catch(e => {
       result.style.color = 'red'
-      result.textContent = '请求失败: ' + e
+      result.textContent = 'Request failed: ' + e
     }).finally(() => {
       btn.disabled = false
-      btn.textContent = '保存配置'
+      btn.textContent = 'Save Config'
     })
   } catch (e) {
     result.style.color = 'red'
-    result.textContent = 'JSON 格式错误: ' + e.message
+    result.textContent = 'Invalid JSON: ' + e.message
     btn.disabled = false
     btn.textContent = '保存配置'
   }
@@ -319,7 +428,7 @@ function startInstall() {
     }
   }
   btn.disabled = true
-  btn.textContent = '安装中...'
+  btn.textContent = 'Installing...'
   result.className = ''
   result.style.display = 'none'
   fetch('/api/install', {
@@ -329,14 +438,14 @@ function startInstall() {
   }).then(r => r.json()).then(d => {
     if (d.error) {
       result.className = 'error'
-      result.textContent = '安装失败: ' + d.error
+      result.textContent = 'Install failed: ' + d.error
       btn.disabled = false
-      btn.textContent = '开始安装'
+      btn.textContent = 'Start Install'
     } else {
       result.className = 'success'
-      result.textContent = '安装成功，即将关闭'
-      btn.textContent = '已完成'
-      document.body.innerHTML = '<div style="text-align:center;margin-top:100px"><h2>安装完成</h2><p>此页面即将关闭</p></div>'
+      result.textContent = (d.message || 'Installation successful').replace(/\n/g, '\n') + '\n\nPage will close shortly'
+      btn.textContent = 'Done'
+      document.body.innerHTML = '<div style="text-align:center;margin-top:80px"><h2>Installation Complete</h2><pre style="max-width:600px;margin:0 auto;text-align:left;background:#f8f8f8;padding:16px;border-radius:4px;font-size:13px">' + (d.message || 'Installation successful') + '</pre><p style="margin-top:20px;color:#666">This page will close shortly</p></div>'
       setTimeout(() => window.close(), 2000)
     }
   }).catch(e => {

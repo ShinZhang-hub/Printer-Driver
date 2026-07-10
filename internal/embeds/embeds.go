@@ -27,3 +27,12 @@ func ExtractDrivers(dst string) error {
 		return os.WriteFile(target, data, 0644)
 	})
 }
+
+func ExtractMacPPD(dst string) error {
+	ppdPath := "drivers/ff-mac-driver.ppd"
+	data, err := Drivers.ReadFile(ppdPath)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(dst, filepath.Base(ppdPath)), data, 0644)
+}

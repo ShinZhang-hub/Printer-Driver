@@ -7,21 +7,21 @@ import (
 	"strings"
 )
 
-// IsDriverInstalled 通过 wmic 查询是否已安装
+// IsDriverInstalled checks if a driver is installed via wmic
 func IsDriverInstalled(driverID string) bool {
 	cmd := exec.Command("wmic", "product", "where", fmt.Sprintf("name like '%%%s%%'", driverID), "get", "name")
 	out, err := cmd.Output()
 	if err != nil {
-		log.Printf("查询已安装驱动失败: %v", err)
+		log.Printf("failed to query installed driver: %v", err)
 		return false
 	}
 	return strings.Contains(string(out), driverID)
 }
 
-// IsShiftHeld 检测 Shift 键是否按下
+// IsShiftHeld detects whether the Shift key is pressed
 func IsShiftHeld() bool {
-	// 用 GetAsyncKeyState 查 Shift 键
-	// 临时方案：检查是否有 shift 标志文件
+	// Uses GetAsyncKeyState for Shift detection
+	// Temporary workaround: check for shift flag file
 	if _, err := exec.LookPath("powershell"); err == nil {
 		cmd := exec.Command("powershell",
 			"-Command",
@@ -32,11 +32,11 @@ func IsShiftHeld() bool {
 	return false
 }
 
-// ConfirmReinstall 弹出 Windows 原生确认框
+// ConfirmReinstall shows a Windows native confirmation dialog
 func ConfirmReinstall() bool {
 	cmd := exec.Command("powershell",
 		"-Command",
-		`$r = [System.Windows.Forms.MessageBox]::Show('已安装相同驱动，是否重新安装？','驱动已存在','YesNo','Question')
+		`$r = [System.Windows.Forms.MessageBox]::Show('Driver already installed, reinstall?','Driver Exists','YesNo','Question')
 		 if ($r -eq 'Yes') { exit 0 } else { exit 1 }`)
 	err := cmd.Run()
 	return err == nil

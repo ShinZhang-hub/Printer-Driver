@@ -7,7 +7,7 @@
   "protocol": "raw",
   "locations": [
     {
-      "name": "JP-Tower",
+      "name": "Osaka - JP Tower",
       "subnets": ["30.61.40.0/24", "30.61.39.0/24"],
       "printer_ip": "30.61.40.40",
       "printer_name": "Printer-Osaka",
@@ -16,8 +16,8 @@
       "protocol": "raw"
     },
     {
-      "name": "Business-Tower",
-      "subnets": ["30.61.30.0/24", "30.61.31.0/24", "30.61.32.0/24"],
+      "name": "Tokyo - Business Tower",
+      "subnets": ["30.61.30.0/24", "30.61.31.0/24", "30.61.32.0/24", "30.61.33.0/24"],
       "printer_ip": "30.61.30.30",
       "printer_name": "Printer-Tencent",
       "printer_model": "FF Apeos C3070",

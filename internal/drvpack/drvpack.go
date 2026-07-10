@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type DriverPackage struct {
@@ -23,15 +24,15 @@ type InfEntry struct {
 func Open(exePath string) (*DriverPackage, error) {
 	workDir, err := extract(exePath)
 	if err != nil {
-		return nil, fmt.Errorf("解压驱动包失败: %w", err)
+		return nil, fmt.Errorf("failed to extract driver package: %w", err)
 	}
 
 	entries, err := ParseInfDirectory(workDir)
 	if err != nil {
-		return nil, fmt.Errorf("解析 INF 失败: %w", err)
+		return nil, fmt.Errorf("failed to parse INF: %w", err)
 	}
 	if len(entries) == 0 {
-		return nil, fmt.Errorf("未在 %s 中找到任何打印机驱动", workDir)
+		return nil, fmt.Errorf("no printer drivers found in %s", workDir)
 	}
 
 	return &DriverPackage{
@@ -97,5 +98,42 @@ func FindExe(dir string) (string, error) {
 			return filepath.Join(dir, e.Name()), nil
 		}
 	}
-	return "", fmt.Errorf("在 %s 中未找到 .exe 文件", dir)
+	return "", fmt.Errorf("no .exe file found in %s", dir)
+}
+
+func FindDmg(dir string) (string, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		if strings.EqualFold(filepath.Ext(e.Name()), ".dmg") {
+			return filepath.Join(dir, e.Name()), nil
+		}
+	}
+	return "", fmt.Errorf("no .dmg file found in %s", dir)
+}
+
+func OpenDMG(dmgPath string) (*DriverPackage, error) {
+	workDir, err := extract(dmgPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract DMG driver package: %w", err)
+	}
+
+	entries, err := ParsePPDDirectory(workDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse PPD: %w", err)
+	}
+	if len(entries) == 0 {
+		return nil, fmt.Errorf("no printer drivers found in %s", workDir)
+	}
+
+	return &DriverPackage{
+		ExePath: dmgPath,
+		WorkDir: workDir,
+		Entries: entries,
+	}, nil
 }
