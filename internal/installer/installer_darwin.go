@@ -43,10 +43,7 @@ func installDriver(p Params) error {
 	}
 
 	if runtime.GOARCH == "arm64" {
-		data = patchPPDForRosetta(data)
-		if err := installRosettaWrapper(); err != nil {
-			log.Warn("Failed to install Rosetta wrapper: %v", err)
-		}
+		data = stripCupsFilter(data)
 	}
 
 	if err := os.WriteFile(dst, data, 0644); err != nil {
@@ -56,19 +53,16 @@ func installDriver(p Params) error {
 	return nil
 }
 
-func patchPPDForRosetta(data []byte) []byte {
-	wrapperPath := []byte("/Library/Printers/FUJIFILM/bin/FFACMMCFilter.sh")
-	oldFilter := []byte("/Library/Printers/FUJIFILM/Filter/FFACMMCFilter")
-	return bytes.ReplaceAll(data, oldFilter, wrapperPath)
-}
-
-func installRosettaWrapper() error {
-	binDir := "/Library/Printers/FUJIFILM/bin"
-	if err := os.MkdirAll(binDir, 0755); err != nil {
-		return err
+func stripCupsFilter(data []byte) []byte {
+	var out []byte
+	lines := bytes.Split(data, []byte("\n"))
+	for _, line := range lines {
+		if !bytes.Contains(line, []byte("*cupsFilter:")) {
+			out = append(out, line...)
+			out = append(out, '\n')
+		}
 	}
-	wrapper := []byte("#!/bin/bash\nexec /usr/bin/arch -x86_64 /Library/Printers/FUJIFILM/Filter/FFACMMCFilter \"$@\"\n")
-	return os.WriteFile(filepath.Join(binDir, "FFACMMCFilter.sh"), wrapper, 0755)
+	return out
 }
 
 func addPrinter(p Params) error {
