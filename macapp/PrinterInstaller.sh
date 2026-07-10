@@ -103,7 +103,7 @@ if [ "$SHIFT" = "1" ]; then
 fi
 
 # --- Rosetta installation for Apple Silicon (silent, forced) ---
-if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/arch -x86_64 /bin/true 2>/dev/null; then
+if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/arch -x86_64 /bin/ls >/dev/null 2>&1; then
 	osascript -e "do shell script \"softwareupdate --install-rosetta --agree-to-license\" with administrator privileges" 2>/dev/null
 fi
 
