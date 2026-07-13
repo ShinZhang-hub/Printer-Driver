@@ -2,7 +2,6 @@ package installer
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"printer-installer/internal/log"
