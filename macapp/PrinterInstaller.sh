@@ -406,7 +406,7 @@ if [ -n "$TO_DELETE" ]; then
 		if [ -z "$SUCCESS_MSG" ]; then
 			SUCCESS_MSG="🗑️ $REMOVE_LINE"
 		else
-			SUCCESS_MSG="$SUCCESS_MSG"$'\n'"🗑️ $REMOVE_LINE"
+			SUCCESS_MSG="$SUCCESS_MSG"$'\n\n'"🗑️ $REMOVE_LINE"
 		fi
 	fi
 fi
