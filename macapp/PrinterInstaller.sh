@@ -222,7 +222,7 @@ for (var i = 0; i < views.length; i++) {
 	acc.addSubview(v)
 }
 
-var line1 = detectedLoc + "  |  " + detectedName + "  |  IP: " + detectedIP
+var line1 = detectedLoc + "  |  " + detectedNames + "  |  IP: " + detectedIP
 var line2 = model
 var alert = $.NSAlert.alloc.init
 alert.messageText = title
