@@ -46,29 +46,9 @@ ALL_PRINTERS=$("$BINARY" $DRVARG --debug-printers 2>/dev/null)
 # --- Build confirm text ---
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
 
-# --- Build prompt ---
-PROMPT="========================================================================\n"
-PROMPT="${PROMPT}Location: ${DETECTED_LOCATION:-Unknown}\n"
-PROMPT="${PROMPT}Printer:  ${TARGET_NAME}\n"
-PROMPT="${PROMPT}IP:       ${TARGET_IP:-Unknown}\n"
-PROMPT="${PROMPT}Model:    ${DETECTED_MODEL}\n"
-[ -n "$EXISTING_NAME" ] && PROMPT="${PROMPT}Conflict: ${EXISTING_NAME} (same IP)\n"
-PROMPT="${PROMPT}========================================================================\n"
-PROMPT="${PROMPT}Select items below (checkboxes):"
-
-# --- Build checkboxes ---
-ITEMS=""
-add() {
-	if [ -z "$ITEMS" ]; then ITEMS="\"$1\""; else ITEMS="$ITEMS, \"$1\""; fi
-}
-
-# 1. Location confirm
-[ -n "$DETECTED_LOCATION" ] && add "$CONFIRM_TEXT"
-
-# 2. Overwrite
-[ -n "$EXISTING_NAME" ] && add "$OVERWRITE_LABEL: $EXISTING_NAME"
-
-# 4. Delete printers
+# --- Build other printer list ---
+OTHER_NAMES=""
+OPRINTERS=""
 if [ -n "$ALL_PRINTERS" ]; then
 	IFS=',' read -ra PNAMES <<< "$ALL_PRINTERS"
 	for pn in "${PNAMES[@]}"; do
@@ -76,35 +56,17 @@ if [ -n "$ALL_PRINTERS" ]; then
 		[ -z "$pn" ] && continue
 		[ "$pn" = "$EXISTING_NAME" ] && continue
 		[ "$pn" = "$TARGET_NAME" ] && continue
-		add "   $DEL_BTN: $pn"
+		if [ -z "$OTHER_NAMES" ]; then
+			OTHER_NAMES="\"$pn\""
+		else
+			OTHER_NAMES="$OTHER_NAMES, \"$pn\""
+		fi
 	done
 fi
 
-# --- Show dialog ---
-if [ -z "$ITEMS" ]; then
-	echo "No options to show."
-	exit 0
-fi
-
-RESULT=$(osascript 2>/dev/null -e "
-set thePrompt to \"$(echo -e "$PROMPT" | sed 's/"/\\"/g')\"
-set theItems to {$ITEMS}
-
-set selected to choose from list theItems with prompt thePrompt with title \"Printer Installer\" with multiple selections allowed with empty selection allowed
-if selected is false then return \"\"
-set AppleScript's text item delimiters to \", \"
-return selected as string
-")
-
-[ -z "$RESULT" ] && exit 0
-
-# --- Location picker: show if confirm NOT checked ---
-LOCATION_CONFIRMED=false
-if echo "$RESULT" | grep -q "$CONFIRM_TEXT"; then
-	LOCATION_CONFIRMED=true
-	TARGET_LOCATION="$DETECTED_LOCATION"
-else
-	LOC_ITEMS=""
+# --- Build location list ---
+LOC_ITEMS=""
+if [ -n "$ALL_LOCATIONS" ]; then
 	FIRST=true
 	while IFS=',' read -ra NAMES; do
 		for name in "${NAMES[@]}"; do
@@ -114,29 +76,195 @@ else
 			FIRST=false
 		done
 	done <<< "$ALL_LOCATIONS"
-
-	[ -n "$LOC_ITEMS" ] && PICKED=$(osascript -e "set selected to choose from list {$LOC_ITEMS} with prompt \"$PICKER_PROMPT\"" -e "if selected is false then return \"\"" -e "return selected as string" 2>/dev/null)
-
-	if [ -n "$PICKED" ]; then
-		TARGET_LOCATION="$PICKED"
-	else
-		exit 0
-	fi
 fi
 
-# Resolve final location
-RESOLVED=$("$BINARY" $DRVARG --resolve-location "$TARGET_LOCATION" 2>/dev/null)
-TARGET_NAME=$(echo "$RESOLVED" | grep "^Name=" | head -1 | cut -d= -f2)
-TARGET_IP=$(echo "$RESOLVED" | grep "^IP=" | head -1 | cut -d= -f2)
+# --- Escape for JSON ---
+escape_json() { echo "$1" | python3 -c "import json,sys; print(json.dumps(sys.stdin.read().strip()))" 2>/dev/null; }
 
-# --- Result ---
+# --- Call JXA dialog ---
+RESULT=$(osascript -l JavaScript 2>/dev/null <<ENDJXA
+ObjC.import('Cocoa')
+
+// --- Receive data from shell ---
+var locItems = [$LOC_ITEMS]
+var otherNames = [$OTHER_NAMES]
+var conflictName = $(escape_json "$EXISTING_NAME")
+var detectedLoc = $(escape_json "$DETECTED_LOCATION")
+var targetName = $(escape_json "$TARGET_NAME")
+var targetIP = $(escape_json "$TARGET_IP")
+var model = $(escape_json "$DETECTED_MODEL")
+
+// --- i18n ---
+var confirmText = $(escape_json "$CONFIRM_TEXT")
+var overwriteLabel = $(escape_json "$OVERWRITE_LABEL")
+var delLabel = $(escape_json "$DEL_BTN")
+var pickerPrompt = $(escape_json "$PICKER_PROMPT")
+var okLabel = "$OK_LABEL"
+var cancelLabel = "$CANCEL_LABEL"
+
+// --- Layout ---
+var M = 20  // margin
+var LH = 24 // line height
+var CW = 460 // content width
+var X1 = M
+var X2 = X1 + 20 // indented
+
+var views = []
+var Y = 0
+
+function label(text, x, bold) {
+    var h = LH
+    var f = $.NSTextField.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x, h))
+    f.stringValue = text
+    f.editable = false
+    f.bordered = false
+    f.drawsBackground = false
+    f.font = bold ? $.NSFont.boldSystemFontOfSize(12) : $.NSFont.systemFontOfSize(11)
+    f.sizeToFit()
+    h = f.frame.size.height + 2
+    f.frame = $.NSMakeRect(x, Y, CW - x, h)
+    views.push(f)
+    Y += h + 2
+    return f
+}
+
+function checkbox(text, x, tag, checked) {
+    var h = LH
+    var btn = $.NSButton.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x, h))
+    btn.title = text
+    btn.setButtonType($.NSSwitchButton)
+    btn.tag = tag
+    btn.font = $.NSFont.systemFontOfSize(12)
+    if (checked) btn.state = $.NSOnState
+    views.push(btn)
+    Y += h + 2
+    return btn
+}
+
+function popup(items, x, tag, selIdx) {
+    var h = 24
+    var pop = $.NSPopUpButton.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x - 20, h))
+    pop.removeAllItems()
+    for (var i = 0; i < items.length; i++) {
+        pop.addItemWithTitle(items[i])
+    }
+    if (selIdx !== undefined && selIdx < items.length) pop.selectItemAtIndex(selIdx)
+    pop.tag = tag
+    pop.font = $.NSFont.systemFontOfSize(12)
+    views.push(pop)
+    Y += h + 4
+    return pop
+}
+
+function separator() {
+    var h = 1
+    var box = $.NSBox.alloc.initWithFrame($.NSMakeRect(X1, Y, CW - X1, h))
+    box.boxType = $.NSSeparator
+    views.push(box)
+    Y += 8
+}
+
+// --- Build UI from bottom up ---
+Y = 6
+
+// Ok/Cancel buttons handled by NSAlert
+
+// Section 4: Delete other printers
+if (otherNames.length > 0 && otherNames[0] != "") {
+    label(delLabel, X1, true)
+    var delBoxes = []
+    for (var i = 0; i < otherNames.length; i++) {
+        delBoxes.push(checkbox(otherNames[i], X2, 200 + i, false))
+    }
+    separator()
+}
+
+// Section 3: Overwrite
+if (conflictName != "") {
+    var txt = overwriteLabel + ": " + conflictName
+    var chkOverwrite = checkbox(txt, X1, 30, true)
+    separator()
+}
+
+// Section 2: Location picker (initially hidden)
+label(pickerPrompt, X1, true)
+var popupLoc = popup(locItems, X2, 20, 0)
+popupLoc.hidden = true
+
+// Section 1: Location confirm
+var chkConfirm = checkbox(confirmText, X1, 10, true)
+
+// Toggle picker visibility
+chkConfirm.action = 'toggleConfirm:'
+chkConfirm.target = function() {
+    popupLoc.hidden = (chkConfirm.state == $.NSOnState)
+}
+
+// --- Build accessory view ---
+Y += 10
+var totalH = Y
+var accessory = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW, totalH))
+for (var i = 0; i < views.length; i++) {
+    // Flip Y for Cocoa coordinates
+    var v = views[i]
+    var r = v.frame
+    v.frame = $.NSMakeRect(r.origin.x, totalH - r.origin.y - r.size.height, r.size.width, r.size.height)
+    accessory.addSubview(v)
+}
+
+// --- Show alert ---
+var alert = $.NSAlert.alloc.init
+alert.messageText = "Printer Installer"
+var info = "Location: " + detectedLoc + " | Printer: " + targetName + " | IP: " + targetIP + " | Model: " + model
+alert.informativeText = info
+alert.accessoryView = accessory
+alert.addButtonWithTitle(okLabel)
+alert.addButtonWithTitle(cancelLabel)
+alert.window.initialFirstResponder = alert.buttons.objectAtIndex(0)
+
+var response = alert.runModal
+
+// --- Collect results ---
+if (response == $.NSAlertFirstButtonReturn) {
+    var result = {
+        confirm: chkConfirm.state == $.NSOnState,
+        location: popupLoc.titleOfSelectedItem.js,
+        overwrite: typeof chkOverwrite != 'undefined' ? (chkOverwrite.state == $.NSOnState) : true,
+        deletePrinters: []
+    }
+    if (typeof delBoxes != 'undefined') {
+        for (var i = 0; i < delBoxes.length; i++) {
+            if (delBoxes[i].state == $.NSOnState) {
+                result.deletePrinters.push(delBoxes[i].title.js)
+            }
+        }
+    }
+    JSON.stringify(result)
+} else {
+    ""
+}
+ENDJXA
+)
+
+# --- Parse result ---
+if [ -z "$RESULT" ]; then
+	exit 0
+fi
+
+CONFIRMED=$(echo "$RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); print('yes' if d['confirm'] else 'no')" 2>/dev/null)
+PICKED_LOC=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin)['location'])" 2>/dev/null)
+OVERWRITE=$(echo "$RESULT" | python3 -c "import json,sys; print('yes' if json.load(sys.stdin)['overwrite'] else 'no')" 2>/dev/null)
+DELETES=$(echo "$RESULT" | python3 -c "import json,sys; print(','.join(json.load(sys.stdin)['deletePrinters']))" 2>/dev/null)
+
+if [ "$CONFIRMED" = "yes" ]; then
+	FINAL_LOC="$DETECTED_LOCATION"
+else
+	FINAL_LOC="$PICKED_LOC"
+fi
+
 echo ""
 echo "========== Analysis =========="
-echo "Location: $TARGET_LOCATION"
-echo "Printer:  $TARGET_NAME"
-echo "IP:       $TARGET_IP"
-echo "Model:    $DETECTED_MODEL"
-echo ""
-echo "Selected:"
-echo "$RESULT" | tr ',' '\n' | sed 's/^/  - /'
+echo "Location:   $FINAL_LOC"
+echo "Overwrite:  $OVERWRITE"
+echo "To delete:  ${DELETES:-none}"
 echo "=============================="
