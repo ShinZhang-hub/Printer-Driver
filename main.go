@@ -16,8 +16,8 @@ import (
 	"printer-installer/internal/config"
 	"printer-installer/internal/drvpack"
 	"printer-installer/internal/embeds"
+	"printer-installer/internal/fyneui"
 	"printer-installer/internal/i18n"
-	"printer-installer/internal/winui"
 	"printer-installer/internal/installer"
 	"printer-installer/internal/log"
 	"printer-installer/internal/scanner"
@@ -512,7 +512,7 @@ func showNativeUI(cfg *config.Config) {
 		}
 	}
 
-	result := winui.Run(detectedLoc, allLocNames, deleteItems)
+	result := fyneui.Run(detectedLoc, allLocNames, deleteItems)
 	if result == nil || result.Cancelled {
 		return
 	}
