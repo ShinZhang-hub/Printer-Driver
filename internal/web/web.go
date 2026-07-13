@@ -307,8 +307,9 @@ h2{margin-top:0}
 <div class="card" id="configCard" style="display:none">
 <h3>Current Config</h3>
 		<pre id="configDisplay" style="white-space:pre-wrap;word-break:break-all">Loading...</pre>
-		<button onclick="saveConfig()" id="saveBtn">Save Config</button>
-		<button onclick="reloadConfig()" id="reloadBtn" style="background:#555;margin-left:8px">Refresh Config</button>
+		<button onclick="saveConfig()" id="saveBtn">保存配置</button>
+		<button onclick="formatConfig()" id="formatBtn" style="background:#555;margin-left:8px">格式化</button>
+		<button onclick="reloadConfig()" id="reloadBtn" style="background:#555;margin-left:8px">刷新配置</button>
 		<div id="saveResult"></div>
 	</div>
 
@@ -350,6 +351,26 @@ function onIPChange() {
   }
 }
 
+function formatConfig() {
+  const display = document.getElementById('configDisplay')
+  const result = document.getElementById('saveResult')
+  let fixed = tryFixJSON(display.textContent)
+  if (fixed) {
+    try {
+      const obj = JSON.parse(fixed)
+      display.textContent = JSON.stringify(obj, null, 2)
+      result.style.color = 'green'
+      result.textContent = '格式化和修复完成'
+    } catch(e) {
+      result.style.color = 'red'
+      result.textContent = 'JSON 错误: ' + e.message
+    }
+  } else {
+    result.style.color = 'red'
+    result.textContent = '无法修复某些 JSON 错误'
+  }
+}
+
 function reloadConfig() {
   const btn = document.getElementById('reloadBtn')
   const display = document.getElementById('configDisplay')
@@ -376,43 +397,93 @@ function saveConfig() {
   const result = document.getElementById('saveResult')
   btn.disabled = true
   btn.textContent = 'Saving...'
-  result.className = ''
+  result.style.color = ''
   result.textContent = ''
+  let raw = display.textContent
+  let updated
   try {
-    const updated = JSON.parse(display.textContent)
-    fetch('/api/config', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(updated)
-    }).then(r => r.json()).then(d => {
-      if (d.error) {
+    updated = JSON.parse(raw)
+  } catch (e) {
+    // 自动修复常见 JSON 错误
+    result.textContent = 'Fixing JSON...'
+    let fixed = tryFixJSON(raw)
+    if (fixed) {
+      try {
+        updated = JSON.parse(fixed)
+        display.textContent = JSON.stringify(updated, null, 2)
+        result.textContent = 'JSON auto-fixed and formatted'
+      } catch (e2) {
         result.style.color = 'red'
-        result.textContent = 'Save failed: ' + d.error
+        result.textContent = 'Invalid JSON (auto-fix failed): ' + e2.message
+        btn.disabled = false; btn.textContent = '保存配置'
         return
       }
-      result.style.color = 'green'
-      result.textContent = 'Saved, refreshing remote config...'
-      return fetch('/api/config/reload', {method:'POST'}).then(r => {
-        if (!r.ok) throw new Error(r.statusText)
-        return r.json()
-      }).then(cfg => {
-        currentConfig = cfg
-        display.textContent = JSON.stringify(cfg, null, 2)
-        result.textContent = 'Saved, config refreshed from remote'
-      })
-    }).catch(e => {
+    } else {
       result.style.color = 'red'
-      result.textContent = 'Request failed: ' + e
-    }).finally(() => {
-      btn.disabled = false
-      btn.textContent = 'Save Config'
-    })
-  } catch (e) {
-    result.style.color = 'red'
-    result.textContent = 'Invalid JSON: ' + e.message
-    btn.disabled = false
-    btn.textContent = '保存配置'
+      result.textContent = 'Invalid JSON: ' + e.message + ' (line ' + (extractLine(raw, e.message)) + ')'
+      btn.disabled = false; btn.textContent = '保存配置'
+      return
+    }
   }
+  // 格式化后保存
+  display.textContent = JSON.stringify(updated, null, 2)
+  fetch('/api/config', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(updated)
+  }).then(r => r.json()).then(d => {
+    if (d.error) { result.style.color = 'red'; result.textContent = 'Save failed: ' + d.error; return }
+    result.style.color = 'green'
+    result.textContent = 'Saved, refreshing...'
+    return fetch('/api/config/reload', {method:'POST'}).then(r => {
+      if (!r.ok) throw new Error(r.statusText)
+      return r.json()
+    }).then(cfg => {
+      currentConfig = cfg
+      display.textContent = JSON.stringify(cfg, null, 2)
+      result.textContent = '保存成功'
+    })
+  }).catch(e => {
+    result.style.color = 'red'; result.textContent = 'Request failed: ' + e
+  }).finally(() => { btn.disabled = false; btn.textContent = '保存配置' })
+}
+
+function extractLine(text, msg) {
+  var m = msg.match(/position (\d+)/)
+  if (m) {
+    var pos = parseInt(m[1])
+    var before = text.substring(0, pos)
+    return (before.match(/\n/g) || []).length + 1
+  }
+  return '?'
+}
+
+function tryFixJSON(raw) {
+  raw = raw.trim()
+  if (!raw) return null
+  // Remove BOM
+  raw = raw.replace(/^\uFEFF/, '')
+  // Remove trailing commas before } or ]
+  var prev = ''
+  while (prev != raw) { prev = raw; raw = raw.replace(/,(\s*[}\]])/g, '$1') }
+  // Ensure quoted keys: convert {key: to {"key":
+  raw = raw.replace(/([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g, '$1"$2"$3')
+  // Single quotes to double quotes for keys and values
+  // (careful: only simple cases)
+  var inString = false, escaped = false, result = ''
+  for (var i = 0; i < raw.length; i++) {
+    var ch = raw[i]
+    if (inString) {
+      if (escaped) { escaped = false; result += ch; continue }
+      if (ch == '\\') { escaped = true; result += ch; continue }
+      if (ch == '"') { inString = false; result += ch; continue }
+      result += ch
+    } else {
+      if (ch == '"') { inString = true; result += ch; continue }
+      result += ch
+    }
+  }
+  return result
 }
 
 function startInstall() {
