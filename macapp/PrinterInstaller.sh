@@ -317,16 +317,13 @@ COMBINED_SCRIPT=""
 
 if [ -n "$CHOSEN_LOC" ]; then
 	if [ "$DO_OVERWRITE" = "false" ]; then
-		# Check if printer already exists at target IPs
 		SKIP_ALL=true
-		while IFS=',' read -ra IPS <<< "$ALL_PRINTER_IPS"; do :; done
 		for ip in $(echo "$ALL_PRINTER_IPS" | tr ',' ' '); do
 			[ -z "$ip" ] && continue
 			EXIST=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$ip" 2>/dev/null)
 			if [ -z "$EXIST" ]; then SKIP_ALL=false; break; fi
 		done
 		if [ "$SKIP_ALL" = true ]; then
-			SKIP_MSG="$DETECTED_NAME $SKIP_INSTALL_MSG"
 			SKIP_MSG=$(echo "$SKIP_INSTALL_MSG" | sed "s/%s/$DETECTED_NAME/")
 		else
 			COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
