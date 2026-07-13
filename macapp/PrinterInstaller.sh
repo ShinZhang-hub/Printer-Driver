@@ -202,9 +202,9 @@ function hr() {
 // 1. Location confirm
 chkConfirm = ck(confirmText, X1, true, false, true)
 
-// 2. Location picker — disabled when confirmed, enabled when unchecked
+// 2. Location picker — hidden when confirmed, shown when unchecked
 var pickerPopup = pp(locItemsNoDetect, X2)
-pickerPopup.enabled = false
+pickerPopup.hidden = true
 
 hr()
 
@@ -234,7 +234,7 @@ ObjC.registerSubclass({
 	name: "TH",
 	methods: {"t:": {types:["void",["id"]], implementation:function(s) {
 		var on = (chkConfirm.state == $.NSOnState)
-		pickerPopup.enabled = !on
+		pickerPopup.hidden = on
 		var curLoc = on ? detectedLoc : pickerPopup.titleOfSelectedItem.js
 		conflictPopup.enabled = (conflictMap[curLoc] === true)
 		var curIPs = (locIPMap[curLoc] || "").split(",")
