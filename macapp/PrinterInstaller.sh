@@ -53,13 +53,11 @@ ALL_PRINTERS=$("$BINARY" --drivers "$DRIVERS_DIR" --debug-printers 2>/dev/null)
 LOC_ITEMS_ALL=""
 LOC_ITEMS_NODETECT=""
 if [ -n "$ALL_LOCATIONS" ]; then
-	F1=true; F2=true
+	F2=true
 	while IFS=',' read -ra NAMES; do
 		for name in "${NAMES[@]}"; do
 			name=$(echo "$name" | sed 's/^ *//;s/ *$//')
 			[ -z "$name" ] && continue
-			[ "$F1" = true ] && LOC_ITEMS_ALL="\"$name\"" || LOC_ITEMS_ALL="$LOC_ITEMS_ALL, \"$name\""
-			F1=false
 			if [ "$name" != "$DETECTED_LOCATION" ]; then
 				[ "$F2" = true ] && LOC_ITEMS_NODETECT="\"$name\"" || LOC_ITEMS_NODETECT="$LOC_ITEMS_NODETECT, \"$name\""
 				F2=false
@@ -68,13 +66,8 @@ if [ -n "$ALL_LOCATIONS" ]; then
 	done <<< "$ALL_LOCATIONS"
 fi
 
-# --- Build printer info: name, IP, location ---
-PRINTER_INFO_JS=""        # for JXA: {name, ip, loc}
-INSTALL_IPS=""             # comma-sep IPs at detected location
-if [ -n "$ALL_PRINTER_IPS" ]; then
-	INSTALL_IPS="$ALL_PRINTER_IPS"
-fi
-
+# --- Build printer info: name, IP ---
+PRINTER_INFO_JS=""
 DELETE_ITEMS=""
 PRINTER_MAP=""
 PRINTER_IPS=""  # parallel to DELETE_ITEMS: IP for each printer
@@ -89,14 +82,9 @@ if [ -n "$ALL_PRINTERS" ]; then
 		[ -z "$PN_IP" ] && PN_IP=$(lpstat -v 2>/dev/null | grep "$pn" | head -1 | sed -n 's/.*:\/\/\([0-9.]*\).*/\1/p')
 		[ -z "$PN_IP" ] && PN_IP="?"
 		
-		PLOC=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-location "$pn" 2>/dev/null || echo "")
-		
-		# Display format: Printer-BG (30.61.34.29)
 		DISPLAY="$pn ($PN_IP)"
 		if [ -z "$DELETE_ITEMS" ]; then DELETE_ITEMS="\"$DISPLAY\""
 		else DELETE_ITEMS="$DELETE_ITEMS, \"$DISPLAY\""; fi
-		if [ -z "$PRINTER_MAP" ]; then PRINTER_MAP="$pn=$PLOC"
-		else PRINTER_MAP="$PRINTER_MAP|$pn=$PLOC"; fi
 		if [ -z "$PRINTER_IPS" ]; then PRINTER_IPS="$pn=$PN_IP"
 		else PRINTER_IPS="$PRINTER_IPS|$pn=$PN_IP"; fi
 	done
@@ -141,16 +129,8 @@ CONFIRM_L2=$(echo -e "$CONFIRM_TEXT" | tail -1)
 PRINTER_SUMMARY="$DETECTED_NAME"
 [ $(echo "$ALL_PRINTER_NAMES" | tr ',' '\n' | wc -l | tr -d ' ') -gt 1 ] && PRINTER_SUMMARY="$ALL_PRINTER_NAMES"
 
-# Build printer-to-location and printer-to-IP JS maps
-PRINTER_MAP_JS=""
+# Build printer-to-IP JS map
 PRINTER_IP_MAP_JS=""
-if [ -n "$PRINTER_MAP" ]; then
-	IFS='|' read -ra PMAP <<< "$PRINTER_MAP"
-	for m in "${PMAP[@]}"; do
-		pn=$(echo "$m" | cut -d= -f1); pl=$(echo "$m" | cut -d= -f2-)
-		[ -z "$PRINTER_MAP_JS" ] && PRINTER_MAP_JS="\"$pn\":\"$pl\"" || PRINTER_MAP_JS="$PRINTER_MAP_JS, \"$pn\":\"$pl\""
-	done
-fi
 if [ -n "$PRINTER_IPS" ]; then
 	IFS='|' read -ra IPMAP <<< "$PRINTER_IPS"
 	for m in "${IPMAP[@]}"; do
@@ -165,10 +145,8 @@ ObjC.import('Cocoa')
 // Force dialog to front
 $.NSRunningApplication.currentApplication.activateWithOptions($.NSApplicationActivateIgnoringOtherApps)
 
-var locItemsAll = [$LOC_ITEMS_ALL]
 var locItemsNoDetect = [$LOC_ITEMS_NODETECT]
 var deleteItems = [$DELETE_ITEMS]
-var printerMap = {$PRINTER_MAP_JS}
 var printerIPMap = {$PRINTER_IP_MAP_JS}
 var installIPs = $(js_escape "$ALL_PRINTER_IPS")
 var installIPList = installIPs ? installIPs.split(",") : []
@@ -329,8 +307,6 @@ if [ -n "$CHOSEN_LOC" ]; then
 	CHOSEN_RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$CHOSEN_LOC" 2>/dev/null)
 	CHOSEN_IPS=""
 	CHOSEN_NAMES=""
-	echo "DEBUG CHOSEN_LOC=$CHOSEN_LOC" >> /tmp/printer-installer-debug.txt
-	echo "DEBUG RESOLVED=$CHOSEN_RESOLVED" >> /tmp/printer-installer-debug.txt
 	while IFS= read -r line; do
 		case "$line" in
 			IP=*) CHOSEN_IPS="${CHOSEN_IPS}${CHOSEN_IPS:+,}$(echo "$line" | cut -d= -f2-)" ;;
@@ -347,7 +323,6 @@ if [ -n "$CHOSEN_LOC" ]; then
 		done
 		if [ "$SKIP_ALL" = true ]; then
 			SKIP_MSG=$(echo "$SKIP_INSTALL_MSG" | sed "s/%s/$CHOSEN_NAMES/")
-			echo "DEBUG SKIP_MSG=$SKIP_MSG" >> /tmp/printer-installer-debug.txt
 		else
 			COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
 		fi
