@@ -376,9 +376,16 @@ func runInstall(cfg *config.Config, driversDir, printerIP, printerName string, s
 	p, probeErr := scanner.ProbeSingleIP(printerIP)
 	brand := ""
 	model := cfg.LookupModelByIP(printerIP)
+	if model == "" {
+		if embCfg := config.ParseEmbedded(embeddedConfig); embCfg != nil {
+			model = embCfg.LookupModelByIP(printerIP)
+		}
+	}
 	if probeErr == nil {
 		brand = p.Brand
-		model = p.Model
+		if p.Model != "" {
+			model = p.Model
+		}
 	}
 	if model == "" {
 		return fmt.Errorf("cannot determine printer model (SNMP failed and no printer_model in config for %s)", printerIP)
