@@ -164,7 +164,7 @@ func StartAdminPanel(cfg *config.Config, embedded []byte, fn installHandler) (st
 			atomic.AddInt64(&connCount, 1)
 		case http.StateClosed, http.StateHijacked:
 			if atomic.AddInt64(&connCount, -1) <= 0 {
-				time.AfterFunc(3*time.Second, func() {
+				time.AfterFunc(30*time.Second, func() {
 					if atomic.LoadInt64(&connCount) <= 0 {
 						shutdown()
 					}
