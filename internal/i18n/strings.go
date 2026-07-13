@@ -92,10 +92,10 @@ var stringsMap = map[string]map[string]string{
 		"zh": "已删除：",
 	},
 	"CONFIRM_FMT": {
-		"en": "Detected you are at %s.\\nUncheck to select a different location",
-		"ja": "%s にいることを検出しました。\\n別の場所を選ぶにはチェックを外してください",
-		"ko": "%s에 있는 것으로 감지되었습니다.\\n다른 위치를 선택하려면 체크를 해제하세요",
-		"zh": "检测到您在 %s，\\n若不是，请取消勾选选择正确位置",
+		"en": "Detected at %s, uncheck to pick another location",
+		"ja": "%s を検出、チェックを外すと別の場所を選択できます",
+		"ko": "%s 감지됨, 체크 해제 시 다른 위치 선택 가능",
+		"zh": "检测到您在%s，取消勾选也可选择其他位置",
 	},
 	"YES_LABEL": {
 		"en": "Yes",
@@ -122,10 +122,10 @@ var stringsMap = map[string]map[string]string{
 		"zh": "请输入打印机名称：",
 	},
 	"CONFLICT_LABEL": {
-		"en": "If a printer already exists at this IP, please choose:",
-		"ja": "同じIPにプリンターが既に存在する場合、選択してください：",
-		"ko": "같은 IP에 프린터가 이미 있는 경우 선택하세요：",
-		"zh": "如果同IP打印机已存在，请选择：",
+		"en": "A printer exists at this IP, choose:",
+		"ja": "このIPにプリンターが既存、選択：",
+		"ko": "이 IP에 프린터 존재, 선택：",
+		"zh": "同IP打印机已存在，请选择：",
 	},
 	"OVERWRITE_LABEL": {
 		"en": "Overwrite",
