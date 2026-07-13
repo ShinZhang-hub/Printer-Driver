@@ -167,11 +167,15 @@ function sp() {
 // 1. Location confirm
 chkConfirm = ck(confirmText, X1, true, false, true)
 
-// 2. Location picker — two popups toggled by #1
+// 2. Location picker — two popups at same position, toggled vis
 var itemsDetect = [$(js_escape "$DETECTED_LOCATION")]
-var ppKeep = pp(itemsDetect, X2)      // shown when checked: detected location
-var ppPick = pp(locItemsNoDetect, X2) // shown when unchecked: other locations
-var pickerPopup = ppPick  // alias for result reading
+var ppKeep = pp(itemsDetect, X2)       // when checked: detected location
+var saveY = Y
+var ppPick = pp(locItemsNoDetect, X2)  // when unchecked: other locations
+// Overlap: set ppPick frame to same position as ppKeep
+ppPick.frame = ppKeep.frame
+Y = saveY + 28  // only count one popup height
+var pickerPopup = ppKeep
 ppPick.hidden = true
 
 sp()
