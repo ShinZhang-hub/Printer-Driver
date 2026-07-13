@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -18,6 +17,7 @@ import (
 	"printer-installer/internal/drvpack"
 	"printer-installer/internal/embeds"
 	"printer-installer/internal/i18n"
+	"printer-installer/internal/winui"
 	"printer-installer/internal/installer"
 	"printer-installer/internal/log"
 	"printer-installer/internal/scanner"
@@ -226,17 +226,9 @@ func main() {
 		return
 	}
 
-	if runtime.GOOS == "windows" && *ip == "" && *name == "" && *location == "" {
-		exePath, _ := os.Executable()
-		exeDir := filepath.Dir(exePath)
-		psPath := filepath.Join(exeDir, "PrinterInstaller.ps1")
-		if _, err := os.Stat(psPath); err != nil {
-			psPath = filepath.Join(exeDir, "..", "winapp", "PrinterInstaller.ps1")
-		}
-		if _, err := os.Stat(psPath); err == nil {
-			exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", psPath).Start()
-			return
-		}
+	if *ip == "" && *name == "" && *location == "" && !*noSnmp {
+		showNativeUI(cfg)
+		return
 	}
 
 	localIP := localIPAddr()
@@ -496,4 +488,50 @@ func localIPAddr() string {
 		}
 	}
 	return ""
+}
+
+func showNativeUI(cfg *config.Config) {
+	localIP := localIPAddr()
+	detectedLoc := ""
+	if loc := cfg.MatchLocation(localIP); loc != nil {
+		detectedLoc = loc.Name
+	}
+
+	allLocNames := make([]string, len(cfg.Locations))
+	for i, loc := range cfg.Locations {
+		allLocNames[i] = loc.Name
+	}
+
+	printerList := installer.ListPrinters("")
+	printerNames := strings.FieldsFunc(printerList, func(r rune) bool { return r == ',' || r == '\n' })
+	deleteItems := make([]string, 0)
+	for _, pn := range printerNames {
+		pn = strings.TrimSpace(pn)
+		if pn != "" && pn != "none" {
+			deleteItems = append(deleteItems, pn)
+		}
+	}
+
+	result := winui.Run(detectedLoc, allLocNames, deleteItems)
+	if result == nil || result.Cancelled {
+		return
+	}
+
+	log.Info("WinUI: location=%s overwrite=%t", result.Location, result.Overwrite)
+
+	var printers []config.PrinterInfo
+	for _, loc := range cfg.Locations {
+		if loc.Name == result.Location {
+			printers = loc.AllPrinters()
+			break
+		}
+	}
+	if len(printers) == 0 {
+		log.Error("No printers for location %q", result.Location)
+		return
+	}
+
+	if err := installAllPrinters(cfg, "", printers, true); err != nil {
+		log.Error("Installation failed: %v", err)
+	}
 }
