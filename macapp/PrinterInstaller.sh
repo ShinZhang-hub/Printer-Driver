@@ -83,8 +83,9 @@ fi
 # --- Escape ---
 js_escape() { local s="$1"; s="${s//\\/\\\\}"; s="${s//\"/\\\"}"; echo "\"$s\""; }
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
-# Replace literal \n with actual newline for JXA
-CONFIRM_TEXT=$(echo -e "$CONFIRM_TEXT")
+# Split at \n, pass as two parts for JXA to join
+CONFIRM_L1=$(echo -e "$CONFIRM_TEXT" | head -1)
+CONFIRM_L2=$(echo -e "$CONFIRM_TEXT" | tail -1)
 
 # Build printer-to-location mapping for JXA
 PRINTER_MAP_JS=""
@@ -111,7 +112,7 @@ var model = $(js_escape "$DETECTED_MODEL")
 var conflictName = $(js_escape "$EXISTING_NAME")
 
 var title = $(js_escape "$TITLE")
-var confirmText = $(js_escape "$CONFIRM_TEXT")
+var confirmText = $(js_escape "$CONFIRM_L1") + "\n" + $(js_escape "$CONFIRM_L2")
 var overwriteLabel = $(js_escape "$OVERWRITE_LABEL")
 var skipLabel = $(js_escape "$SKIP_BTN")
 var pickerPrompt = $(js_escape "$PICKER_PROMPT")
