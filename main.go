@@ -98,10 +98,7 @@ func main() {
 	defer log.Close()
 
 	if *discover || *listLocations || *resolveLocation != "" || *printerAtIP != "" || *printerLocation != "" {
-		cfg := config.ParseEmbedded(embeddedConfig)
-		if cfg == nil {
-			cfg = config.LoadRemote(embeddedConfig)
-		}
+		cfg := config.LoadRemote(embeddedConfig)
 		if *discover {
 			localIP := localIPAddr()
 			printerIP := *ip
@@ -151,16 +148,6 @@ func main() {
 					return
 				}
 			}
-			if embCfg := config.ParseEmbedded(embeddedConfig); embCfg != nil {
-				for _, loc := range embCfg.Locations {
-					if loc.Name == *resolveLocation {
-						for _, p := range loc.AllPrinters() {
-							fmt.Printf("IP=%s\nName=%s\n", p.IP, p.Name)
-						}
-						return
-					}
-				}
-			}
 			os.Exit(1)
 		}
 		if *printerAtIP != "" {
@@ -191,18 +178,6 @@ func main() {
 			if loc.Name == *location {
 				printers = loc.AllPrinters()
 				break
-			}
-		}
-		if len(printers) == 0 {
-			// fallback: check embedded config
-			embCfg := config.ParseEmbedded(embeddedConfig)
-			if embCfg != nil {
-				for _, loc := range embCfg.Locations {
-					if loc.Name == *location {
-						printers = loc.AllPrinters()
-						break
-					}
-				}
 			}
 		}
 		if len(printers) == 0 {
@@ -398,11 +373,6 @@ func runInstall(cfg *config.Config, driversDir, printerIP, printerName string, s
 	p, probeErr := scanner.ProbeSingleIP(printerIP)
 	brand := ""
 	model := cfg.LookupModelByIP(printerIP)
-	if model == "" {
-		if embCfg := config.ParseEmbedded(embeddedConfig); embCfg != nil {
-			model = embCfg.LookupModelByIP(printerIP)
-		}
-	}
 	if probeErr == nil {
 		brand = p.Brand
 		if p.Model != "" {
