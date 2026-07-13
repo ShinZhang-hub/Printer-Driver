@@ -133,7 +133,9 @@ func main() {
 		if *resolveLocation != "" {
 			for _, loc := range cfg.Locations {
 				if loc.Name == *resolveLocation {
-					fmt.Printf("IP=%s\nName=%s\n", loc.PrinterIP, loc.PrinterName)
+					for _, p := range loc.AllPrinters() {
+						fmt.Printf("IP=%s\nName=%s\n", p.IP, p.Name)
+					}
 					return
 				}
 			}
@@ -162,20 +164,25 @@ func main() {
 	cfg := config.LoadRemote(embeddedConfig)
 
 	if *location != "" {
-		found := false
+		var printers []config.PrinterInfo
 		for _, loc := range cfg.Locations {
 			if loc.Name == *location {
-				*ip = loc.PrinterIP
-				*name = loc.PrinterName
-				found = true
+				printers = loc.AllPrinters()
 				break
 			}
 		}
-		if !found {
+		if len(printers) == 0 {
 			fmt.Fprintf(os.Stderr, "error: location %q not found in config\n", *location)
 			os.Exit(1)
 		}
-		log.Info("Using location: %s (IP=%s, Name=%s)", *location, *ip, *name)
+		log.Info("Using location: %s (%d printers)", *location, len(printers))
+		if err := installAllPrinters(cfg, *driversDir, printers, *setDefault); err != nil {
+			log.Error("Installation failed: %v", err)
+			os.Exit(1)
+		}
+		os.WriteFile(filepath.Join(os.TempDir(), "printer-installer-status.txt"), []byte(installer.ResultMessage), 0644)
+		log.Info("Installation successful")
+		return
 	}
 
 	if adminMode {
@@ -382,6 +389,20 @@ func runInstall(cfg *config.Config, driversDir, printerIP, printerName string, s
 		printerName = entry.ModelName
 	}
 	return installPrinter(cfg, entry.InfFile, entry.ModelName, printerIP, printerName, cfg.PortNumber, cfg.Protocol, setDefault)
+}
+
+func installAllPrinters(cfg *config.Config, driversDir string, printers []config.PrinterInfo, setDefault bool) error {
+	var msgs []string
+	for i, p := range printers {
+		log.Info("Installing printer %d/%d: %s @ %s", i+1, len(printers), p.Name, p.IP)
+		defaultThis := setDefault && i == 0
+		if err := runInstall(cfg, driversDir, p.IP, p.Name, defaultThis); err != nil {
+			return fmt.Errorf("printer %s: %w", p.Name, err)
+		}
+		msgs = append(msgs, installer.ResultMessage)
+	}
+	installer.ResultMessage = strings.Join(msgs, "\n")
+	return nil
 }
 
 func installPrinter(cfg *config.Config, infFile, modelName, printerIP, printerName string, portNum int, protocol string, setDefault bool) error {

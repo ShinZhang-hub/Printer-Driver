@@ -20,14 +20,31 @@ type Config struct {
 	Drivers            []DriverConfig   `json:"drivers"`
 }
 
+type PrinterInfo struct {
+	IP    string `json:"ip"`
+	Name  string `json:"name,omitempty"`
+	Model string `json:"model,omitempty"`
+}
+
 type LocationConfig struct {
-	Name        string   `json:"name"`
-	Subnets     []string `json:"subnets"`
-	PrinterIP   string   `json:"printer_ip"`
-	PrinterName string   `json:"printer_name,omitempty"`
-	PrinterModel string  `json:"printer_model,omitempty"`
-	PortNumber  int      `json:"port_number,omitempty"`
-	Protocol    string   `json:"protocol,omitempty"`
+	Name         string        `json:"name"`
+	Subnets      []string      `json:"subnets"`
+	PrinterIP    string        `json:"printer_ip,omitempty"`
+	PrinterName  string        `json:"printer_name,omitempty"`
+	PrinterModel string        `json:"printer_model,omitempty"`
+	Printers     []PrinterInfo `json:"printers,omitempty"`
+	PortNumber   int           `json:"port_number,omitempty"`
+	Protocol     string        `json:"protocol,omitempty"`
+}
+
+func (l *LocationConfig) AllPrinters() []PrinterInfo {
+	if len(l.Printers) > 0 {
+		return l.Printers
+	}
+	if l.PrinterIP != "" {
+		return []PrinterInfo{{IP: l.PrinterIP, Name: l.PrinterName, Model: l.PrinterModel}}
+	}
+	return nil
 }
 
 type DriverConfig struct {
@@ -76,8 +93,11 @@ func (c *Config) MatchLocation(localIP string) *LocationConfig {
 }
 
 func (c *Config) GetPrinterIP(localIP string) string {
-	if loc := c.MatchLocation(localIP); loc != nil && loc.PrinterIP != "" {
-		return loc.PrinterIP
+	if loc := c.MatchLocation(localIP); loc != nil {
+		all := loc.AllPrinters()
+		if len(all) > 0 {
+			return all[0].IP
+		}
 	}
 	if len(c.PrinterIPs) > 0 {
 		return c.PrinterIPs[0]
@@ -86,23 +106,31 @@ func (c *Config) GetPrinterIP(localIP string) string {
 }
 
 func (c *Config) GetPrinterName(localIP string) string {
-	if loc := c.MatchLocation(localIP); loc != nil && loc.PrinterName != "" {
-		return loc.PrinterName
+	if loc := c.MatchLocation(localIP); loc != nil {
+		all := loc.AllPrinters()
+		if len(all) > 0 && all[0].Name != "" {
+			return all[0].Name
+		}
 	}
 	return ""
 }
 
 func (c *Config) GetPrinterModel(localIP string) string {
-	if loc := c.MatchLocation(localIP); loc != nil && loc.PrinterModel != "" {
-		return loc.PrinterModel
+	if loc := c.MatchLocation(localIP); loc != nil {
+		all := loc.AllPrinters()
+		if len(all) > 0 && all[0].Model != "" {
+			return all[0].Model
+		}
 	}
 	return ""
 }
 
 func (c *Config) LookupModelByIP(ip string) string {
 	for _, loc := range c.Locations {
-		if loc.PrinterIP == ip && loc.PrinterModel != "" {
-			return loc.PrinterModel
+		for _, p := range loc.AllPrinters() {
+			if p.IP == ip && p.Model != "" {
+				return p.Model
+			}
 		}
 	}
 	return ""
@@ -110,8 +138,10 @@ func (c *Config) LookupModelByIP(ip string) string {
 
 func (c *Config) LookupLocationByPrinterName(name string) *LocationConfig {
 	for i := range c.Locations {
-		if c.Locations[i].PrinterName == name {
-			return &c.Locations[i]
+		for _, p := range c.Locations[i].AllPrinters() {
+			if p.Name == name {
+				return &c.Locations[i]
+			}
 		}
 	}
 	return nil

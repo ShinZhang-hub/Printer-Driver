@@ -26,12 +26,20 @@ DETECTED_IP=$(echo "$DISCOVERED" | grep "^IP=" | head -1 | cut -d= -f2)
 DETECTED_MODEL=$(echo "$DISCOVERED" | grep "^Model=" | head -1 | cut -d= -f2)
 DETECTED_LOCATION=$(echo "$DISCOVERED" | grep "^Location=" | head -1 | cut -d= -f2)
 
+# --- Build printer list for detected location ---
+ALL_PRINTER_NAMES=""
+ALL_PRINTER_IPS=""
 DETECTED_NAME=""
 if [ -n "$DETECTED_LOCATION" ]; then
 	RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$DETECTED_LOCATION" 2>/dev/null)
-	DETECTED_NAME=$(echo "$RESOLVED" | grep "^Name=" | head -1 | cut -d= -f2)
-	DETECTED_IP2=$(echo "$RESOLVED" | grep "^IP=" | head -1 | cut -d= -f2)
-	[ -n "$DETECTED_IP2" ] && DETECTED_IP="$DETECTED_IP2"
+	while IFS= read -r line; do
+		case "$line" in
+			Name=*) ALL_PRINTER_NAMES="${ALL_PRINTER_NAMES}${ALL_PRINTER_NAMES:+,}$(echo "$line" | cut -d= -f2-)" ;;
+			IP=*)   ALL_PRINTER_IPS="${ALL_PRINTER_IPS}${ALL_PRINTER_IPS:+,}$(echo "$line" | cut -d= -f2-)" ;;
+		esac
+	done <<< "$RESOLVED"
+	DETECTED_NAME=$(echo "$ALL_PRINTER_NAMES" | cut -d, -f1)
+	DETECTED_IP=$(echo "$ALL_PRINTER_IPS" | cut -d, -f1)
 fi
 
 ALL_LOCATIONS=$("$BINARY" --drivers "$DRIVERS_DIR" --list-locations 2>/dev/null)
@@ -89,6 +97,12 @@ CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
 CONFIRM_L1=$(echo -e "$CONFIRM_TEXT" | head -1)
 CONFIRM_L2=$(echo -e "$CONFIRM_TEXT" | tail -1)
 
+# Build multi-printer summary
+PRINTER_SUMMARY="$DETECTED_NAME"
+if [ $(echo "$ALL_PRINTER_NAMES" | tr ',' '\n' | wc -l | tr -d ' ') -gt 1 ]; then
+	PRINTER_SUMMARY="$ALL_PRINTER_NAMES"
+fi
+
 # Build printer-to-location mapping for JXA
 PRINTER_MAP_JS=""
 if [ -n "$PRINTER_MAP" ]; then
@@ -108,7 +122,7 @@ var locItemsNoDetect = [$LOC_ITEMS_NODETECT]
 var deleteItems = [$DELETE_ITEMS]
 var printerMap = {$PRINTER_MAP_JS}
 var detectedLoc = $(js_escape "$DETECTED_LOCATION")
-var detectedName = $(js_escape "$DETECTED_NAME")
+var detectedNames = $(js_escape "$PRINTER_SUMMARY")
 var detectedIP = $(js_escape "$DETECTED_IP")
 var model = $(js_escape "$DETECTED_MODEL")
 var conflictName = $(js_escape "$EXISTING_NAME")
