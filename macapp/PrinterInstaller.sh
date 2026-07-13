@@ -167,7 +167,7 @@ hr()
 
 // 3. Conflict
 if (conflictName != "") {
-	txt(conflictLabel + " (" + conflictName + ")", X1)
+	txt(conflictLabel, X1)
 	var conflictPopup = pp([skipLabel, overwriteLabel], X2)
 	hr()
 }

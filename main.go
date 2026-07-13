@@ -172,6 +172,18 @@ func main() {
 			}
 		}
 		if len(printers) == 0 {
+			// fallback: check embedded config
+			embCfg := config.ParseEmbedded(embeddedConfig)
+			if embCfg != nil {
+				for _, loc := range embCfg.Locations {
+					if loc.Name == *location {
+						printers = loc.AllPrinters()
+						break
+					}
+				}
+			}
+		}
+		if len(printers) == 0 {
 			fmt.Fprintf(os.Stderr, "error: location %q not found in config\n", *location)
 			os.Exit(1)
 		}
