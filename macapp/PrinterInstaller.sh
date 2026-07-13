@@ -8,6 +8,9 @@ STATUS_FILE="/tmp/printer-installer-status.txt"
 
 eval "$("$BINARY" --drivers "$DRIVERS_DIR" --ui-env 2>/dev/null)"
 
+# --- Clean stale status file ---
+rm -f "$STATUS_FILE" 2>/dev/null
+
 # --- Rosetta ---
 if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/arch -x86_64 /bin/ls >/dev/null 2>&1; then
 	osascript -e "do shell script \"softwareupdate --install-rosetta --agree-to-license\" with administrator privileges" 2>/dev/null
@@ -373,6 +376,7 @@ fi
 
 if [ -n "$COMBINED_SCRIPT" ]; then
 	: > "$LOG"
+	rm -f "$STATUS_FILE" 2>/dev/null
 	ERR=$(osascript -e "do shell script \"$COMBINED_SCRIPT\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\"" 2>&1)
 	EXIT_CODE=$?
 	rm -f /tmp/printer-installer-delete.txt
