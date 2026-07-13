@@ -41,10 +41,11 @@ if [ -n "$DETECTED_LOCATION" ]; then
 	DETECTED_IP=$(echo "$ALL_PRINTER_IPS" | cut -d, -f1)
 fi
 
-ALL_LOCATIONS=$("$BINARY" --drivers "$DRIVERS_DIR" --list-locations 2>/dev/null)
+ALL_LOCATIONS=$("$BINARY" --drivers "$DRIVERS_DIR" --list-locations 2>/dev/null) &
 EXISTING_NAME=""
-[ -n "$DETECTED_IP" ] && EXISTING_NAME=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$DETECTED_IP" 2>/dev/null)
-ALL_PRINTERS=$("$BINARY" --drivers "$DRIVERS_DIR" --debug-printers 2>/dev/null)
+[ -n "$DETECTED_IP" ] && EXISTING_NAME=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$DETECTED_IP" 2>/dev/null) &
+ALL_PRINTERS=$("$BINARY" --drivers "$DRIVERS_DIR" --debug-printers 2>/dev/null) &
+wait
 
 # --- Location lists ---
 LOC_ITEMS_ALL=""
@@ -146,6 +147,9 @@ fi
 
 cat > /tmp/printer-installer-ui.jxa <<ENDJXA
 ObjC.import('Cocoa')
+
+// Force dialog to front
+$.NSRunningApplication.currentApplication.activateWithOptions($.NSApplicationActivateIgnoringOtherApps)
 
 var locItemsAll = [$LOC_ITEMS_ALL]
 var locItemsNoDetect = [$LOC_ITEMS_NODETECT]
