@@ -92,10 +92,16 @@ var stringsMap = map[string]map[string]string{
 		"zh": "已删除：",
 	},
 	"CONFIRM_FMT": {
-		"en": "Detected you are at %s.\\nUncheck to select a different location",
-		"ja": "%s にいることを検出しました。\\n別の場所を選ぶにはチェックを外してください",
-		"ko": "%s에 있는 것으로 감지되었습니다.\\n다른 위치를 선택하려면 체크를 해제하세요",
-		"zh": "检测到您在 %s，\\n若不是，请取消勾选选择正确位置",
+		"en": "Detected you are at %s",
+		"ja": "%s にいることを検出しました",
+		"ko": "%s에 있는 것으로 감지되었습니다",
+		"zh": "检测到您在 %s",
+	},
+	"UNCHECK_HINT": {
+		"en": "Uncheck to select a different location:",
+		"ja": "チェックを外して別の場所を選択：",
+		"ko": "체크 해제하여 다른 위치 선택：",
+		"zh": "若不是，请取消勾选选择正确位置：",
 	},
 	"YES_LABEL": {
 		"en": "Yes",
