@@ -43,6 +43,7 @@ app: darwin
 	cp macapp/Info.plist "bin/PrinterInstaller.app/Contents/"
 	cp mac_printer_driver.dmg "bin/PrinterInstaller.app/Contents/Resources/drivers/fujifilm/"
 	chmod +x "bin/PrinterInstaller.app/Contents/MacOS/PrinterInstaller"
+	xattr -cr "bin/PrinterInstaller.app" 2>/dev/null || true
 	@echo "=== 构建完成: bin/PrinterInstaller.app ==="
 	@echo "双击 PrinterInstaller.app 即可运行（已内嵌驱动，无需额外文件）"
 
