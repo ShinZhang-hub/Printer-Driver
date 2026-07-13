@@ -49,7 +49,11 @@ func main() {
 	flag.Parse()
 
 	if *uiEnv {
-		fmt.Print(i18n.AllEnv(""))
+		if runtime.GOOS == "windows" {
+			writeConsole(i18n.AllEnv(""))
+		} else {
+			fmt.Print(i18n.AllEnv(""))
+		}
 		return
 	}
 

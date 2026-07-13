@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 
 $Script:DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Script:BINARY = Join-Path $DIR "printer-installer.exe"

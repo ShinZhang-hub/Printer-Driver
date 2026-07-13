@@ -12,6 +12,40 @@ import (
 	"unsafe"
 )
 
+func writeConsole(s string) {
+	// Go writes UTF-8 to stdout, but when piped to PowerShell it's decoded using
+	// the system code page (e.g., GBK for zh-CN), causing garbled text.
+	// Convert UTF-8 to the active console code page for pipe compatibility.
+	kernel32 := syscall.NewLazyDLL("kernel32.dll")
+	proc := kernel32.NewProc("GetStdHandle")
+	handle, _, _ := proc.Call(uintptr(0xFFFFFFF5)) // STD_OUTPUT_HANDLE = -11
+	var mode uint32
+	if kernel32.NewProc("GetConsoleMode").Call(handle, uintptr(unsafe.Pointer(&mode))) == 0 {
+		// Not a console — piped. Convert to active code page.
+		utf16, _ := syscall.UTF16FromString(s)
+		cp := kernel32.NewProc("GetConsoleOutputCP")
+		codePage, _, _ := cp.Call()
+		if codePage == 0 {
+			codePage = 65001 // UTF-8 fallback
+		}
+		// WideCharToMultiByte: CP_ACP -> UTF-16 -> code page
+		wcm := kernel32.NewProc("WideCharToMultiByte")
+		cbLen, _, _ := wcm.Call(codePage, 0,
+			uintptr(unsafe.Pointer(&utf16[0])), uintptr(len(utf16)-1),
+			0, 0, 0, 0)
+		if cbLen > 0 {
+			buf := make([]byte, cbLen)
+			wcm.Call(codePage, 0,
+				uintptr(unsafe.Pointer(&utf16[0])), uintptr(len(utf16)-1),
+				uintptr(unsafe.Pointer(&buf[0])), cbLen, 0, 0)
+			os.Stdout.Write(buf)
+			return
+		}
+	}
+	// Console or fallback — Go handles UTF-8 correctly via WriteConsoleW
+	os.Stdout.WriteString(s)
+}
+
 func hideConsole() {
 	syscall.NewLazyDLL("kernel32.dll").NewProc("FreeConsole").Call()
 }
