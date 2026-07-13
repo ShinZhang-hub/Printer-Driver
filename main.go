@@ -89,9 +89,13 @@ func main() {
 		return
 	}
 
-	if runtime.GOOS == "windows" && !isAdmin() {
+	needsAdmin := !*discover && !*listLocations && *resolveLocation == "" && *printerAtIP == "" && *printerLocation == "" && !*uiEnv && !*debugPrinters && *deletePrintersFile == "" && !*hashPassword && *debugOthers == ""
+	if runtime.GOOS == "windows" && !isAdmin() && needsAdmin {
 		elevateSelf()
 		return
+	}
+	if runtime.GOOS == "windows" && isAdmin() && needsAdmin {
+		hideConsole()
 	}
 
 	adminMode := *admin || isShiftPressed()
@@ -219,10 +223,14 @@ func main() {
 	}
 
 	if runtime.GOOS == "windows" && *ip == "" && *name == "" && *location == "" {
-		exeDir := filepath.Dir(os.Args[0])
+		exePath, _ := os.Executable()
+		exeDir := filepath.Dir(exePath)
 		psPath := filepath.Join(exeDir, "PrinterInstaller.ps1")
+		if _, err := os.Stat(psPath); err != nil {
+			psPath = filepath.Join(exeDir, "..", "winapp", "PrinterInstaller.ps1")
+		}
 		if _, err := os.Stat(psPath); err == nil {
-			exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", psPath).Start()
+			exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", psPath).Start()
 			return
 		}
 	}

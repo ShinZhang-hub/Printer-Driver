@@ -12,6 +12,7 @@ import (
 
 func isAdmin() bool    { return true }
 func elevateSelf()     {}
+func hideConsole()     {}
 
 func isShiftPressed() bool {
 	cmd := exec.Command("osascript", "-l", "JavaScript", "-e",

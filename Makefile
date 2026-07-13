@@ -1,12 +1,12 @@
-# Windows 构建
+# Windows 构建（控制台版，供 PS1 脚本调用）
 .PHONY: windows
 windows:
-	go build -o bin/printer-installer.exe -ldflags="-s -w -H=windowsgui" .
+	go build -o bin/printer-installer.exe -ldflags="-s -w" .
 
-# Windows 调试版（有控制台窗口）
-.PHONY: windows-debug
-windows-debug:
-	go build -o bin/printer-installer-debug.exe .
+# Windows 静默版（无窗口，双击静默安装）
+.PHONY: windows-silent
+windows-silent:
+	go build -o bin/printer-installer-silent.exe -ldflags="-s -w -H=windowsgui" .
 
 # Windows 打包（含 PowerShell 脚本）
 .PHONY: winapp

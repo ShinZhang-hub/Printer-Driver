@@ -12,6 +12,10 @@ import (
 	"unsafe"
 )
 
+func hideConsole() {
+	syscall.NewLazyDLL("kernel32.dll").NewProc("FreeConsole").Call()
+}
+
 func isAdmin() bool {
 	ret, _, _ := syscall.NewLazyDLL("shell32.dll").NewProc("IsUserAnAdmin").Call()
 	return ret != 0
