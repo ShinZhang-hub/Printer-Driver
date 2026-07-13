@@ -124,8 +124,6 @@ if [ -n "$ALL_LOCATIONS" ]; then
 fi
 
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
-CONFIRM_L1=$(echo -e "$CONFIRM_TEXT" | head -1)
-CONFIRM_L2=$(echo -e "$CONFIRM_TEXT" | tail -1)
 PRINTER_SUMMARY="$DETECTED_NAME"
 [ $(echo "$ALL_PRINTER_NAMES" | tr ',' '\n' | wc -l | tr -d ' ') -gt 1 ] && PRINTER_SUMMARY="$ALL_PRINTER_NAMES"
 
@@ -159,7 +157,7 @@ var model = $(js_escape "$DETECTED_MODEL")
 var conflictName = $(js_escape "$EXISTING_NAME")
 
 var title = $(js_escape "$TITLE")
-var confirmText = $(js_escape "$CONFIRM_L1") + "\n" + $(js_escape "$CONFIRM_L2")
+var confirmText = $(js_escape "$CONFIRM_TEXT")
 var overwriteLabel = $(js_escape "$OVERWRITE_LABEL")
 var skipLabel = $(js_escape "$SKIP_BTN")
 var pickerPrompt = $(js_escape "$PICKER_PROMPT")
@@ -200,7 +198,7 @@ function hr() {
 }
 
 // 1. Location confirm
-chkConfirm = ck(confirmText, X1, true, false, true)
+chkConfirm = ck(confirmText, X1, true, false, false)
 
 // 2. Location picker — hidden when confirmed, shown when unchecked
 var pickerPopup = pp(locItemsNoDetect, X2)
@@ -261,10 +259,9 @@ for (var i = 0; i < views.length; i++) {
 }
 
 var line1 = detectedLoc + "  |  " + detectedNames + "  |  IP: " + detectedIP
-var line2 = model
 var alert = $.NSAlert.alloc.init
 alert.messageText = title
-alert.informativeText = line1 + "\n" + line2
+alert.informativeText = line1
 alert.accessoryView = acc
 alert.addButtonWithTitle("$OK_LABEL")
 alert.addButtonWithTitle("$CANCEL_LABEL")
