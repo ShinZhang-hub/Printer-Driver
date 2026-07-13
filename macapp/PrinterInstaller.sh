@@ -83,6 +83,8 @@ fi
 # --- Escape ---
 js_escape() { local s="$1"; s="${s//\\/\\\\}"; s="${s//\"/\\\"}"; echo "\"$s\""; }
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
+# Replace literal \n with actual newline for JXA
+CONFIRM_TEXT=$(echo -e "$CONFIRM_TEXT")
 
 # Build printer-to-location mapping for JXA
 PRINTER_MAP_JS=""
@@ -149,9 +151,12 @@ function sp() {
 // 1. Location confirm
 chkConfirm = ck(confirmText, X1, true, false)
 
-// 2. Location picker (disabled by default)
-pickerPopup = pp(locItemsNoDetect, X2)
-pickerPopup.enabled = false
+// 2. Location picker — two popups toggled by #1
+var itemsDetect = [$(js_escape "$DETECTED_LOCATION")]
+var ppKeep = pp(itemsDetect, X2)      // shown when checked: detected location
+var ppPick = pp(locItemsNoDetect, X2) // shown when unchecked: other locations
+var pickerPopup = ppPick  // alias for result reading
+ppPick.hidden = true
 
 sp()
 
@@ -179,8 +184,10 @@ ObjC.registerSubclass({
 	name: "TH",
 	methods: {"t:": {types:["void",["id"]], implementation:function(s) {
 		var on = (chkConfirm.state == $.NSOnState)
-		pickerPopup.enabled = !on
-		var curLoc = on ? detectedLoc : pickerPopup.titleOfSelectedItem.js
+		ppKeep.hidden = !on
+		ppPick.hidden = on
+		pickerPopup = on ? ppKeep : ppPick
+		var curLoc = on ? detectedLoc : ppPick.titleOfSelectedItem.js
 		for (var i = 0; i < delBoxes.length; i++) {
 			var ploc = printerMap[delBoxes[i].title.js] || ""
 			delBoxes[i].enabled = (ploc != curLoc)
