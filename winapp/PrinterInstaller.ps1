@@ -5,6 +5,20 @@ $Script:BINARY = Join-Path $DIR "printer-installer.exe"
 $Script:LOG = "$env:TEMP\printer-installer-result.log"
 $Script:STATUS_FILE = "$env:TEMP\printer-installer-status.txt"
 
+# --- Self-extract: if EXE not present, decode from embedded base64 ---
+if (-not (Test-Path $Script:BINARY)) {
+    $selfScript = Get-Content -Path $MyInvocation.MyCommand.Path -Raw
+    if ($selfScript -match "`n#__EMBED__`n([A-Za-z0-9+/=]+)") {
+        $b64 = $matches[1]
+        $exeBytes = [Convert]::FromBase64String($b64)
+        $Script:BINARY = Join-Path $env:TEMP "printer-installer-extracted.exe"
+        [IO.File]::WriteAllBytes($Script:BINARY, $exeBytes)
+    } else {
+        [System.Windows.Forms.MessageBox]::Show("EXE not found and no embedded data.", "Error", "OK", "Error")
+        exit 1
+    }
+}
+
 # --- Load UI strings from binary ---
 $envStrings = & $BINARY --ui-env 2>$null
 $envStrings -split "`n" | ForEach-Object {

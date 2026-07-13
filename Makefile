@@ -18,6 +18,17 @@ winapp: windows
 	@echo "=== 构建完成: bin/PrinterInstaller/ ==="
 	@echo "以管理员身份运行 PrinterInstaller.ps1（需 PowerShell 5.1+）"
 
+# Windows 单文件版（exe内嵌ps1）
+.PHONY: winapp-standalone
+winapp-standalone: windows
+	mkdir -p "bin/PrinterInstaller"
+	# Build self-contained PS1 with embedded EXE
+	cp winapp/PrinterInstaller.ps1 "bin/PrinterInstaller/PrinterInstaller-standalone.ps1"
+	openssl base64 -in bin/printer-installer.exe | tr -d '\n' > /tmp/exe-b64.txt
+	b64size=$$(wc -c < /tmp/exe-b64.txt | tr -d ' ') && sed -i '' "s|___EXE_BASE64___|$$b64size|" "bin/PrinterInstaller/PrinterInstaller-standalone.ps1"
+	@echo "=== 单文件版构建完成: bin/PrinterInstaller/PrinterInstaller-standalone.ps1 ==="
+	@echo "以管理员身份运行此ps1即可（无需exe)"
+
 # macOS 构建 (arm64, Apple Silicon)
 .PHONY: darwin-arm64
 darwin-arm64:
