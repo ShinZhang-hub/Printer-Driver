@@ -168,7 +168,7 @@ var delPrompt = $(js_escape "$CHOOSE_PROMPT")
 
 var CW = 480, M = 20, X1 = M, X2 = M + 16, LH = 22
 var Y = 4, views = []
-var pickerPopup, chkConfirm, delBoxes = []
+var pickerPopup, pickerLabel, chkConfirm, delBoxes = []
 
 function txt(s, x) {
 	var f = $.NSTextField.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x, LH))
@@ -202,9 +202,20 @@ function hr() {
 // 1. Location confirm
 chkConfirm = ck(confirmText, X1, true, false, true)
 
-// 2. Location picker — hidden when confirmed, shown when unchecked
-var pickerPopup = pp(locItemsNoDetect, X2)
+// 2. Location picker — inline with label, hidden when confirmed
+var pickerLabel, pickerPopup
+var pickerY = Y  // remember Y for inline placement
+pickerLabel = $.NSTextField.alloc.initWithFrame($.NSMakeRect(X1, Y, 180, LH))
+pickerLabel.stringValue = pickerPrompt
+pickerLabel.editable = false; pickerLabel.bordered = false; pickerLabel.drawsBackground = false
+pickerLabel.font = $.NSFont.systemFontOfSize(12)
+var lblW = 180
+pickerPopup = pp(locItemsNoDetect, X1 + lblW + 6)
+pickerPopup.frame = $.NSMakeRect(X1 + lblW + 6, Y, CW - X1 - lblW - 26, 24)
+pickerLabel.hidden = true
 pickerPopup.hidden = true
+views.push(pickerLabel)
+Y += 28  // advance Y for both together
 
 hr()
 
@@ -234,6 +245,7 @@ ObjC.registerSubclass({
 	name: "TH",
 	methods: {"t:": {types:["void",["id"]], implementation:function(s) {
 		var on = (chkConfirm.state == $.NSOnState)
+		pickerLabel.hidden = on
 		pickerPopup.hidden = on
 		var curLoc = on ? detectedLoc : pickerPopup.titleOfSelectedItem.js
 		conflictPopup.enabled = (conflictMap[curLoc] === true)
