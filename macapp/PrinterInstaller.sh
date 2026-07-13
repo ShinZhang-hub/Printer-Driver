@@ -343,7 +343,7 @@ if [ -n "$CHOSEN_LOC" ]; then
 			if [ -z "$EXIST" ]; then SKIP_ALL=false; break; fi
 		done
 		if [ "$SKIP_ALL" = true ]; then
-			SKIP_MSG=$(echo "$SKIP_INSTALL_MSG" | sed "s/%s/$CHOSEN_FIRST_NAMES/")
+			SKIP_MSG=$(echo "$SKIP_INSTALL_MSG" | sed "s/%s/$CHOSEN_NAMES/")
 		else
 			COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
 		fi
@@ -352,7 +352,7 @@ if [ -n "$CHOSEN_LOC" ]; then
 	fi
 fi
 if [ -n "$TO_DELETE" ]; then
-	CHOSEN_FIRST_NAME=$(echo "$CHOSEN_FIRST_NAMES" | cut -d, -f1)
+	CHOSEN_FIRST_NAME=$(echo "$CHOSEN_NAMES" | cut -d, -f1)
 	: > /tmp/printer-installer-delete.txt
 	IFS=',' read -ra DLIST <<< "$TO_DELETE"
 	for d in "${DLIST[@]}"; do
@@ -389,7 +389,7 @@ elif [ -s "$STATUS_FILE" ]; then
 	RAW_MSG=$(tr -d '"' < "$STATUS_FILE")
 	RAW_MSG=$(echo "$RAW_MSG" | sed "s/ installed$/$INSTALLED_LABEL/")
 	if [ "$DO_OVERWRITE" = "true" ]; then
-		SUCCESS_MSG="✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_FIRST_NAMES/")"
+		SUCCESS_MSG="✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_NAMES/")"
 	else
 		SUCCESS_MSG="✅ $RAW_MSG"
 	fi
