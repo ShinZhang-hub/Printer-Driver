@@ -54,12 +54,6 @@ func Install(p Params) error {
 	}
 	closeProgressWindow()
 	log.Info("Installation complete")
-
-	names := getOtherPrinterNames(p.PrinterName)
-	log.Info("Other printers after install (excluding %s): %d found: %v", p.PrinterName, len(names), names)
-	if len(names) > 0 {
-		ResultMessage += "\nOther printers: " + strings.Join(names, ", ")
-	}
 	return nil
 }
 

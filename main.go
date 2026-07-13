@@ -411,16 +411,20 @@ func runInstall(cfg *config.Config, driversDir, printerIP, printerName string, s
 }
 
 func installAllPrinters(cfg *config.Config, driversDir string, printers []config.PrinterInfo, setDefault bool) error {
-	var msgs []string
+	var names []string
 	for i, p := range printers {
 		log.Info("Installing printer %d/%d: %s @ %s", i+1, len(printers), p.Name, p.IP)
 		defaultThis := setDefault && i == 0
 		if err := runInstall(cfg, driversDir, p.IP, p.Name, defaultThis); err != nil {
 			return fmt.Errorf("printer %s: %w", p.Name, err)
 		}
-		msgs = append(msgs, installer.ResultMessage)
+		names = append(names, p.Name)
 	}
-	installer.ResultMessage = strings.Join(msgs, "\n")
+	if len(names) == 1 {
+		installer.ResultMessage = names[0] + " installed"
+	} else {
+		installer.ResultMessage = strings.Join(names, ", ") + " installed"
+	}
 	return nil
 }
 
