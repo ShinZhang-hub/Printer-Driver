@@ -271,6 +271,7 @@ ObjC.registerSubclass({
 })
 chkConfirm.target = $.TH.alloc.init
 chkConfirm.action = 't:'
+pickerPopup.target = chkConfirm.target; pickerPopup.action = 't:'
 
 // Assemble
 Y += 8
@@ -328,6 +329,8 @@ if [ -n "$CHOSEN_LOC" ]; then
 	CHOSEN_RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$CHOSEN_LOC" 2>/dev/null)
 	CHOSEN_IPS=""
 	CHOSEN_NAMES=""
+	echo "DEBUG CHOSEN_LOC=$CHOSEN_LOC" >> /tmp/printer-installer-debug.txt
+	echo "DEBUG RESOLVED=$CHOSEN_RESOLVED" >> /tmp/printer-installer-debug.txt
 	while IFS= read -r line; do
 		case "$line" in
 			IP=*) CHOSEN_IPS="${CHOSEN_IPS}${CHOSEN_IPS:+,}$(echo "$line" | cut -d= -f2-)" ;;
@@ -344,6 +347,7 @@ if [ -n "$CHOSEN_LOC" ]; then
 		done
 		if [ "$SKIP_ALL" = true ]; then
 			SKIP_MSG=$(echo "$SKIP_INSTALL_MSG" | sed "s/%s/$CHOSEN_NAMES/")
+			echo "DEBUG SKIP_MSG=$SKIP_MSG" >> /tmp/printer-installer-debug.txt
 		else
 			COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
 		fi
