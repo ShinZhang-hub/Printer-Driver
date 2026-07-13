@@ -14,7 +14,9 @@ fi
 # --- Shift → admin ---
 SHIFT=$(osascript -l JavaScript -e "ObjC.import('Cocoa'); ($.NSEvent.modifierFlags & 131072) != 0 ? '1' : '0'" 2>/dev/null)
 if [ "$SHIFT" = "1" ]; then
-	osascript -e "do shell script \"'$BINARY' --drivers \"$DRIVERS_DIR\" --admin > '/tmp/printer-installer-result.log' 2>&1\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\""
+	osascript 2>/dev/null <<ENDADMIN
+do shell script "'$BINARY' --drivers '$DRIVERS_DIR' --admin > /tmp/printer-installer-result.log 2>&1" with administrator privileges with prompt "$ADMIN_INSTALL_PROMPT"
+ENDADMIN
 	exit 0
 fi
 

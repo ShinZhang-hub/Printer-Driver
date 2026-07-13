@@ -23,6 +23,15 @@
       "printer_model": "FF Apeos C3070",
       "port_number": 9100,
       "protocol": "raw"
+    },
+    {
+      "name": "Tokyo - Mori Tower",
+      "subnets": ["30.61.29.0/24"],
+      "printer_ip": "30.61.30.30",
+      "printer_name": "Printer-Tencent",
+      "printer_model": "FF Apeos C3070",
+      "port_number": 9100,
+      "protocol": "raw"
     }
   ]
 }
