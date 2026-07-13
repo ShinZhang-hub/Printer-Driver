@@ -124,6 +124,7 @@ function pp(items, x) {
 }
 function sp() {
 	var b = $.NSBox.alloc.initWithFrame($.NSMakeRect(X1, Y, CW - X1, 1))
+	b.title = ""
 	b.boxType = $.NSSeparator; views.push(b); Y += 8
 }
 
