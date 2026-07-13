@@ -368,7 +368,7 @@ fi
 SUCCESS_MSG=""
 
 if [ -n "$SKIP_MSG" ]; then
-	SUCCESS_MSG="✅ $SKIP_MSG"
+	SUCCESS_MSG="ℹ️ $SKIP_MSG"
 elif [ -s "$STATUS_FILE" ]; then
 	RAW_MSG=$(tr -d '"' < "$STATUS_FILE")
 	if [ "$DO_OVERWRITE" = "true" ]; then
@@ -390,7 +390,11 @@ if [ -n "$TO_DELETE" ]; then
 	done
 	if [ -n "$DEL_NAMES" ]; then
 		REMOVE_LINE="$(echo "$REMOVED_MSG" | sed "s/%s/$DEL_NAMES/")"
-		SUCCESS_MSG="$SUCCESS_MSG"$'\n'"$REMOVE_LINE"
+		if [ -z "$SUCCESS_MSG" ]; then
+			SUCCESS_MSG="🗑️ $REMOVE_LINE"
+		else
+			SUCCESS_MSG="$SUCCESS_MSG"$'\n'"🗑️ $REMOVE_LINE"
+		fi
 	fi
 fi
 
