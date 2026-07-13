@@ -262,6 +262,9 @@ var line1 = detectedLoc + "  |  " + detectedNames + "  |  IP: " + detectedIP
 var alert = $.NSAlert.alloc.init
 alert.messageText = title
 alert.informativeText = line1
+var iconPath = $(js_escape "$DIR/../Resources/AppIcon.icns")
+var icon = $.NSImage.alloc.initWithContentsOfFile(iconPath)
+if (icon) alert.icon = icon
 alert.accessoryView = acc
 alert.addButtonWithTitle("$OK_LABEL")
 alert.addButtonWithTitle("$CANCEL_LABEL")
