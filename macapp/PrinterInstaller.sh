@@ -124,6 +124,8 @@ if [ -n "$ALL_LOCATIONS" ]; then
 fi
 
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
+CONFIRM_L1=$(echo -e "$CONFIRM_TEXT" | head -1)
+CONFIRM_L2=$(echo -e "$CONFIRM_TEXT" | tail -1)
 PRINTER_SUMMARY="$DETECTED_NAME"
 [ $(echo "$ALL_PRINTER_NAMES" | tr ',' '\n' | wc -l | tr -d ' ') -gt 1 ] && PRINTER_SUMMARY="$ALL_PRINTER_NAMES"
 
@@ -157,10 +159,10 @@ var model = $(js_escape "$DETECTED_MODEL")
 var conflictName = $(js_escape "$EXISTING_NAME")
 
 var title = $(js_escape "$TITLE")
-var confirmText = $(js_escape "$CONFIRM_TEXT")
+var confirmText = $(js_escape "$CONFIRM_L1") + "\n" + $(js_escape "$CONFIRM_L2")
 var overwriteLabel = $(js_escape "$OVERWRITE_LABEL")
 var skipLabel = $(js_escape "$SKIP_BTN")
-var uncheckHint = $(js_escape "$UNCHECK_HINT")
+var pickerPrompt = $(js_escape "$PICKER_PROMPT")
 var conflictLabel = $(js_escape "$CONFLICT_LABEL")
 var delPrompt = $(js_escape "$CHOOSE_PROMPT")
 
@@ -197,21 +199,23 @@ function hr() {
 	views.push(b); Y += 6
 }
 
-// 1. Location confirm (single line)
-chkConfirm = ck(confirmText, X1, true, false, false)
+// 1. Location confirm
+chkConfirm = ck(confirmText, X1, true, false, true)
 
-// 2. Hint + picker inline — hidden when confirmed
-var hintW = 180
-pickerLabel = $.NSTextField.alloc.initWithFrame($.NSMakeRect(X1, Y, hintW, LH))
-pickerLabel.stringValue = uncheckHint
+// 2. Location picker — inline with label, hidden when confirmed
+var pickerLabel, pickerPopup
+var pickerY = Y  // remember Y for inline placement
+pickerLabel = $.NSTextField.alloc.initWithFrame($.NSMakeRect(X1, Y, 180, LH))
+pickerLabel.stringValue = pickerPrompt
 pickerLabel.editable = false; pickerLabel.bordered = false; pickerLabel.drawsBackground = false
 pickerLabel.font = $.NSFont.systemFontOfSize(12)
+var lblW = 180
+pickerPopup = pp(locItemsNoDetect, X1 + lblW + 6)
+pickerPopup.frame = $.NSMakeRect(X1 + lblW + 6, Y, CW - X1 - lblW - 26, 24)
 pickerLabel.hidden = true
-views.push(pickerLabel)
-pickerPopup = pp(locItemsNoDetect, X1 + hintW + 6)
-pickerPopup.frame = $.NSMakeRect(X1 + hintW + 6, Y, CW - X1 - hintW - 26, 24)
 pickerPopup.hidden = true
-Y += 28
+views.push(pickerLabel)
+Y += 28  // advance Y for both together
 
 hr()
 
