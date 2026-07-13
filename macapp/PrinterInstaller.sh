@@ -308,20 +308,11 @@ TO_DELETE=$(echo "$RESULT" | grep "^DELETE=" | cut -d= -f2- | tr '\n' ',' | sed 
 if [ "$CONFIRMED" = "true" ]; then CHOSEN_LOC="$DETECTED_LOCATION"
 else CHOSEN_LOC="$PICKED_LOC"; fi
 
-# --- Install printers for chosen location ---
+# --- Build combined install+delete script ---
+COMBINED_SCRIPT=""
 if [ -n "$CHOSEN_LOC" ]; then
-	: > "$LOG"
-	ERR=$(osascript -e "do shell script \"'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\"" 2>&1)
-	EXIT_CODE=$?
-	if [ $EXIT_CODE -ne 0 ]; then
-		case "$ERR" in *[Cc]ancel*|*-128*|*not\ authorized*) exit 0 ;; esac
-		ERR_MSG=$(head -20 "$LOG" 2>/dev/null | tr -d '"' || echo "Unknown error")
-		osascript -e "display dialog \"$FAIL_PREFIX\\n$ERR_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" with icon stop" 2>/dev/null
-		exit 1
-	fi
+	COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
 fi
-
-# --- Delete selected printers ---
 if [ -n "$TO_DELETE" ]; then
 	CHOSEN_NAME=""
 	if [ -n "$CHOSEN_LOC" ]; then
@@ -337,12 +328,26 @@ if [ -n "$TO_DELETE" ]; then
 		echo "$d" >> /tmp/printer-installer-delete.txt
 	done
 	if [ -s /tmp/printer-installer-delete.txt ]; then
-		osascript -e "do shell script \"'$BINARY' --delete-printers-file /tmp/printer-installer-delete.txt > '$LOG' 2>&1\" with administrator privileges with prompt \"$ADMIN_DELETE_PROMPT\"" 2>/dev/null
+		COMBINED_SCRIPT="$COMBINED_SCRIPT"$'\n'"'$BINARY' --delete-printers-file /tmp/printer-installer-delete.txt >> '$LOG' 2>&1"
 	fi
+fi
+
+if [ -n "$COMBINED_SCRIPT" ]; then
+	: > "$LOG"
+	ERR=$(osascript -e "do shell script \"$COMBINED_SCRIPT\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\"" 2>&1)
+	EXIT_CODE=$?
 	rm -f /tmp/printer-installer-delete.txt
+	if [ $EXIT_CODE -ne 0 ]; then
+		case "$ERR" in *[Cc]ancel*|*-128*|*not\ authorized*) exit 0 ;; esac
+		ERR_MSG=$(head -20 "$LOG" 2>/dev/null | tr -d '"' || echo "Unknown error")
+		osascript -e "display dialog \"$FAIL_PREFIX\\n$ERR_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" with icon stop" 2>/dev/null
+		exit 1
+	fi
 fi
 
 # --- Success ---
 RAW_MSG=""
 [ -s "$STATUS_FILE" ] && RAW_MSG=$(tr -d '"' < "$STATUS_FILE")
+# Translate "installed" to system language
+RAW_MSG=$(echo "$RAW_MSG" | sed "s/ installed$/$INSTALLED_LABEL/")
 osascript -e "display dialog \"✅ $RAW_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
