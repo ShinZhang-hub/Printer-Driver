@@ -202,12 +202,9 @@ function hr() {
 // 1. Location confirm
 chkConfirm = ck(confirmText, X1, true, false, true)
 
-// 2. Location picker — show detected when confirmed, others when unchecked
-var itemsDetected = [$(js_escape "$DETECTED_LOCATION")]
-var ppDetect = pp(itemsDetected, X2)     // confirmed: shows detected
-var ppOther = pp(locItemsNoDetect, X2)   // unchecked: shows others
-if (ppOther) { ppOther.hidden = true }
-var pickerPopup = ppDetect
+// 2. Location picker — disabled when confirmed, enabled when unchecked
+var pickerPopup = pp(locItemsNoDetect, X2)
+pickerPopup.enabled = false
 
 hr()
 
@@ -237,10 +234,8 @@ ObjC.registerSubclass({
 	name: "TH",
 	methods: {"t:": {types:["void",["id"]], implementation:function(s) {
 		var on = (chkConfirm.state == $.NSOnState)
-		ppDetect.hidden = !on
-		if (ppOther) ppOther.hidden = on
-		pickerPopup = on ? ppDetect : (ppOther || ppDetect)
-		var curLoc = on ? detectedLoc : (ppOther ? ppOther.titleOfSelectedItem.js : detectedLoc)
+		pickerPopup.enabled = !on
+		var curLoc = on ? detectedLoc : pickerPopup.titleOfSelectedItem.js
 		conflictPopup.enabled = (conflictMap[curLoc] === true)
 		var curIPs = (locIPMap[curLoc] || "").split(",")
 		for (var i = 0; i < delBoxes.length; i++) {
@@ -255,7 +250,6 @@ ObjC.registerSubclass({
 chkConfirm.target = $.TH.alloc.init
 chkConfirm.action = 't:'
 pickerPopup.target = chkConfirm.target; pickerPopup.action = 't:'
-if (ppOther) { ppOther.target = chkConfirm.target; ppOther.action = 't:' }
 
 // Assemble
 Y += 8
