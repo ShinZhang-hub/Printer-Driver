@@ -3,9 +3,8 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 BINARY="$DIR/printer-installer-darwin"
 DRIVERS_DIR="$DIR/../Resources/drivers"
-DRVARG="--drivers '$DRIVERS_DIR'"
 
-eval "$("$BINARY" $DRVARG --ui-env 2>/dev/null)"
+eval "$("$BINARY" --drivers "$DRIVERS_DIR" --ui-env 2>/dev/null)"
 
 # --- Rosetta ---
 if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/arch -x86_64 /bin/ls >/dev/null 2>&1; then
@@ -15,12 +14,12 @@ fi
 # --- Shift → admin ---
 SHIFT=$(osascript -l JavaScript -e "ObjC.import('Cocoa'); ($.NSEvent.modifierFlags & 131072) != 0 ? '1' : '0'" 2>/dev/null)
 if [ "$SHIFT" = "1" ]; then
-	osascript -e "do shell script \"'$BINARY' $DRVARG --admin > '/tmp/printer-installer-result.log' 2>&1\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\""
+	osascript -e "do shell script \"'$BINARY' --drivers "$DRIVERS_DIR" --admin > '/tmp/printer-installer-result.log' 2>&1\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\""
 	exit 0
 fi
 
 # --- Discover ---
-DISCOVERED=$("$BINARY" $DRVARG --discover 2>/dev/null)
+DISCOVERED=$("$BINARY" --drivers "$DRIVERS_DIR" --discover 2>/dev/null)
 DETECTED_IP=$(echo "$DISCOVERED" | grep "^IP=" | head -1 | cut -d= -f2)
 DETECTED_MODEL=$(echo "$DISCOVERED" | grep "^Model=" | head -1 | cut -d= -f2)
 DETECTED_LOCATION=$(echo "$DISCOVERED" | grep "^Location=" | head -1 | cut -d= -f2)
@@ -28,16 +27,16 @@ DETECTED_LOCATION=$(echo "$DISCOVERED" | grep "^Location=" | head -1 | cut -d= -
 # --- Resolve ---
 DETECTED_NAME=""
 if [ -n "$DETECTED_LOCATION" ]; then
-	RESOLVED=$("$BINARY" $DRVARG --resolve-location "$DETECTED_LOCATION" 2>/dev/null)
+	RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$DETECTED_LOCATION" 2>/dev/null)
 	DETECTED_NAME=$(echo "$RESOLVED" | grep "^Name=" | head -1 | cut -d= -f2)
 	DETECTED_IP2=$(echo "$RESOLVED" | grep "^IP=" | head -1 | cut -d= -f2)
 	[ -n "$DETECTED_IP2" ] && DETECTED_IP="$DETECTED_IP2"
 fi
 
-ALL_LOCATIONS=$("$BINARY" $DRVARG --list-locations 2>/dev/null)
+ALL_LOCATIONS=$("$BINARY" --drivers "$DRIVERS_DIR" --list-locations 2>/dev/null)
 EXISTING_NAME=""
-[ -n "$DETECTED_IP" ] && EXISTING_NAME=$("$BINARY" $DRVARG --printer-at-ip "$DETECTED_IP" 2>/dev/null)
-ALL_PRINTERS=$("$BINARY" $DRVARG --debug-printers 2>/dev/null)
+[ -n "$DETECTED_IP" ] && EXISTING_NAME=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$DETECTED_IP" 2>/dev/null)
+ALL_PRINTERS=$("$BINARY" --drivers "$DRIVERS_DIR" --debug-printers 2>/dev/null)
 
 # --- Location dropdown items ---
 LOC_ITEMS=""
@@ -226,7 +225,7 @@ if (alert.runModal != $.NSAlertFirstButtonReturn) { "" } else {
 }
 ENDJXA
 
-RESULT=$(osascript -l JavaScript "$JXA_SCRIPT" 2>/dev/null)
+RESULT=$(osascript -l JavaScript "$JXA_SCRIPT" 2>&1)
 
 # --- Parse ---
 [ -z "$RESULT" ] && exit 0
@@ -244,7 +243,7 @@ fi
 
 CHOSEN_NAME=""
 if [ -n "$CHOSEN_LOC" ]; then
-	RESOLVED=$("$BINARY" $DRVARG --resolve-location "$CHOSEN_LOC" 2>/dev/null)
+	RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$CHOSEN_LOC" 2>/dev/null)
 	CHOSEN_NAME=$(echo "$RESOLVED" | grep "^Name=" | head -1 | cut -d= -f2)
 fi
 
