@@ -129,13 +129,14 @@ function txt(s, x) {
 	f.font = $.NSFont.systemFontOfSize(12)
 	views.push(f); Y += LH + 2
 }
-function ck(s, x, checked, disabled) {
-	var b = $.NSButton.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x, LH + 2))
+function ck(s, x, checked, disabled, multiline) {
+	var h = multiline ? LH * 2 + 4 : LH + 2
+	var b = $.NSButton.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x, h))
 	b.title = s; b.setButtonType($.NSSwitchButton)
 	b.font = $.NSFont.systemFontOfSize(12)
 	if (checked) b.state = $.NSOnState
 	if (disabled) b.enabled = false
-	views.push(b); Y += LH + 2
+	views.push(b); Y += h + 2
 	return b
 }
 function pp(items, x) {
@@ -150,7 +151,7 @@ function sp() {
 }
 
 // 1. Location confirm
-chkConfirm = ck(confirmText, X1, true, false)
+chkConfirm = ck(confirmText, X1, true, false, true)
 
 // 2. Location picker — two popups toggled by #1
 var itemsDetect = [$(js_escape "$DETECTED_LOCATION")]
