@@ -27,20 +27,12 @@
     {
       "name": "Tokyo - Mori Tower",
       "subnets": ["30.61.34.0/24"],
-      "printer_ip": "30.61.34.29",
-      "printer_name": "Printer-BG",
-      "printer_model": "FF Apeos C3070",
       "port_number": 9100,
-      "protocol": "raw"
-    },
-    {
-      "name": "Tokyo - Mori Tower",
-      "subnets": ["30.61.34.0/24"],
-      "printer_ip": "30.61.34.30",
-      "printer_name": "Printer-Game",
-      "printer_model": "FF Apeos C3070",
-      "port_number": 9100,
-      "protocol": "raw"
+      "protocol": "raw",
+      "printers": [
+        {"ip": "30.61.34.29", "name": "Printer-BG", "model": "FF Apeos C3070"},
+        {"ip": "30.61.34.30", "name": "Printer-Game", "model": "FF Apeos C3070"}
+      ]
     }
   ]
 }
