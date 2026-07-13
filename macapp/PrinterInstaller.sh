@@ -33,7 +33,7 @@ ALL_PRINTER_NAMES=""
 ALL_PRINTER_IPS=""
 DETECTED_NAME=""
 if [ -n "$DETECTED_LOCATION" ]; then
-	RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$DETECTED_LOCATION" 2>/dev/null)
+	RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --no-snmp --resolve-location "$DETECTED_LOCATION" 2>/dev/null)
 	while IFS= read -r line; do
 		case "$line" in
 			Name=*) ALL_PRINTER_NAMES="${ALL_PRINTER_NAMES}${ALL_PRINTER_NAMES:+,}$(echo "$line" | cut -d= -f2-)" ;;
@@ -103,7 +103,7 @@ if [ -n "$ALL_LOCATIONS" ]; then
 		for name in "${NAMES[@]}"; do
 			name=$(echo "$name" | sed 's/^ *//;s/ *$//')
 			[ -z "$name" ] && continue
-			RESOLVED_LOC=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$name" 2>/dev/null)
+			RESOLVED_LOC=$("$BINARY" --drivers "$DRIVERS_DIR" --no-snmp --resolve-location "$name" 2>/dev/null)
 			LOC_IPS=""
 			while IFS= read -r line; do
 				case "$line" in IP=*) LOC_IPS="${LOC_IPS}${LOC_IPS:+,}$(echo "$line" | cut -d= -f2-)" ;; esac

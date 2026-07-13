@@ -98,7 +98,15 @@ func main() {
 	defer log.Close()
 
 	if *discover || *listLocations || *resolveLocation != "" || *printerAtIP != "" || *printerLocation != "" {
-		cfg := config.LoadRemote(embeddedConfig)
+		var cfg *config.Config
+		if *noSnmp {
+			cfg = config.ParseEmbedded(embeddedConfig)
+			if cfg == nil {
+				cfg = config.LoadRemote(embeddedConfig)
+			}
+		} else {
+			cfg = config.LoadRemote(embeddedConfig)
+		}
 		if *discover {
 			localIP := localIPAddr()
 			printerIP := *ip
