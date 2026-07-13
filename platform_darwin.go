@@ -10,6 +10,9 @@ import (
 	"syscall"
 )
 
+func isAdmin() bool    { return true }
+func elevateSelf()     {}
+
 func isShiftPressed() bool {
 	cmd := exec.Command("osascript", "-l", "JavaScript", "-e",
 		"ObjC.import('Cocoa'); ($.NSEvent.modifierFlags & 131072) != 0 ? '1' : '0'")

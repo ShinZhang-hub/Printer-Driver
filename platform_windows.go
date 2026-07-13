@@ -12,6 +12,21 @@ import (
 	"unsafe"
 )
 
+func isAdmin() bool {
+	ret, _, _ := syscall.NewLazyDLL("shell32.dll").NewProc("IsUserAnAdmin").Call()
+	return ret != 0
+}
+
+func elevateSelf() {
+	exe, _ := os.Executable()
+	verb, _ := syscall.UTF16PtrFromString("runas")
+	file, _ := syscall.UTF16PtrFromString(exe)
+	args, _ := syscall.UTF16PtrFromString(strings.Join(os.Args[1:], " "))
+	syscall.NewLazyDLL("shell32.dll").NewProc("ShellExecuteW").Call(
+		0, uintptr(unsafe.Pointer(verb)), uintptr(unsafe.Pointer(file)),
+		uintptr(unsafe.Pointer(args)), 0, 5)
+}
+
 func isShiftPressed() bool {
 	mod := syscall.NewLazyDLL("user32.dll")
 	proc := mod.NewProc("GetAsyncKeyState")

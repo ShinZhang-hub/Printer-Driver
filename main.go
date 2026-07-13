@@ -88,6 +88,11 @@ func main() {
 		return
 	}
 
+	if runtime.GOOS == "windows" && !isAdmin() {
+		elevateSelf()
+		return
+	}
+
 	adminMode := *admin || isShiftPressed()
 
 	if adminMode {
