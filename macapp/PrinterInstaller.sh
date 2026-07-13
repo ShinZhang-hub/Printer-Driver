@@ -120,15 +120,13 @@ var Y = 0
 
 function label(text, x, bold) {
     var h = LH
-    var f = $.NSTextField.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x, h))
+    var w = CW - x
+    var f = $.NSTextField.alloc.initWithFrame($.NSMakeRect(x, Y, w, h))
     f.stringValue = text
     f.editable = false
     f.bordered = false
     f.drawsBackground = false
     f.font = bold ? $.NSFont.boldSystemFontOfSize(12) : $.NSFont.systemFontOfSize(11)
-    f.sizeToFit()
-    h = f.frame.size.height + 2
-    f.frame = $.NSMakeRect(x, Y, CW - x, h)
     views.push(f)
     Y += h + 2
     return f
@@ -150,7 +148,6 @@ function checkbox(text, x, tag, checked) {
 function popup(items, x, tag, selIdx) {
     var h = 24
     var pop = $.NSPopUpButton.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x - 20, h))
-    pop.removeAllItems()
     for (var i = 0; i < items.length; i++) {
         pop.addItemWithTitle(items[i])
     }
