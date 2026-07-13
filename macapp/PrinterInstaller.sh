@@ -78,8 +78,14 @@ if [ -n "$ALL_LOCATIONS" ]; then
 	done <<< "$ALL_LOCATIONS"
 fi
 
-# --- Escape for JSON ---
-escape_json() { echo "$1" | python3 -c "import json,sys; print(json.dumps(sys.stdin.read().strip()))" 2>/dev/null; }
+# --- Escape for JavaScript string literal ---
+js_escape() {
+	local s="$1"
+	s="${s//\\/\\\\}"
+	s="${s//\"/\\\"}"
+	s="${s//$'\n'/\\n}"
+	echo "\"$s\""
+}
 
 # --- Call JXA dialog ---
 RESULT=$(osascript -l JavaScript 2>/dev/null <<ENDJXA
@@ -88,17 +94,17 @@ ObjC.import('Cocoa')
 // --- Receive data from shell ---
 var locItems = [$LOC_ITEMS]
 var otherNames = [$OTHER_NAMES]
-var conflictName = $(escape_json "$EXISTING_NAME")
-var detectedLoc = $(escape_json "$DETECTED_LOCATION")
-var targetName = $(escape_json "$TARGET_NAME")
-var targetIP = $(escape_json "$TARGET_IP")
-var model = $(escape_json "$DETECTED_MODEL")
+var conflictName = $(js_escape "$EXISTING_NAME")
+var detectedLoc = $(js_escape "$DETECTED_LOCATION")
+var targetName = $(js_escape "$TARGET_NAME")
+var targetIP = $(js_escape "$TARGET_IP")
+var model = $(js_escape "$DETECTED_MODEL")
 
 // --- i18n ---
-var confirmText = $(escape_json "$CONFIRM_TEXT")
-var overwriteLabel = $(escape_json "$OVERWRITE_LABEL")
-var delLabel = $(escape_json "$DEL_BTN")
-var pickerPrompt = $(escape_json "$PICKER_PROMPT")
+var confirmText = $(js_escape "$CONFIRM_TEXT")
+var overwriteLabel = $(js_escape "$OVERWRITE_LABEL")
+var delLabel = $(js_escape "$DEL_BTN")
+var pickerPrompt = $(js_escape "$PICKER_PROMPT")
 var okLabel = "$OK_LABEL"
 var cancelLabel = "$CANCEL_LABEL"
 
@@ -186,19 +192,12 @@ if (conflictName != "") {
     separator()
 }
 
-// Section 2: Location picker (initially hidden)
+// Section 2: Location picker
 label(pickerPrompt, X1, true)
 var popupLoc = popup(locItems, X2, 20, 0)
-popupLoc.hidden = true
 
 // Section 1: Location confirm
 var chkConfirm = checkbox(confirmText, X1, 10, true)
-
-// Toggle picker visibility
-chkConfirm.action = 'toggleConfirm:'
-chkConfirm.target = function() {
-    popupLoc.hidden = (chkConfirm.state == $.NSOnState)
-}
 
 // --- Build accessory view ---
 Y += 10
@@ -226,20 +225,20 @@ var response = alert.runModal
 
 // --- Collect results ---
 if (response == $.NSAlertFirstButtonReturn) {
-    var result = {
-        confirm: chkConfirm.state == $.NSOnState,
-        location: popupLoc.titleOfSelectedItem.js,
-        overwrite: typeof chkOverwrite != 'undefined' ? (chkOverwrite.state == $.NSOnState) : true,
-        deletePrinters: []
+    var lines = []
+    lines.push("CONFIRM=" + (chkConfirm.state == $.NSOnState ? "true" : "false"))
+    lines.push("LOCATION=" + (popupLoc.titleOfSelectedItem.js || ""))
+    if (typeof chkOverwrite != 'undefined') {
+        lines.push("OVERWRITE=" + (chkOverwrite.state == $.NSOnState ? "true" : "false"))
     }
     if (typeof delBoxes != 'undefined') {
         for (var i = 0; i < delBoxes.length; i++) {
             if (delBoxes[i].state == $.NSOnState) {
-                result.deletePrinters.push(delBoxes[i].title.js)
+                lines.push("DELETE=" + delBoxes[i].title.js)
             }
         }
     }
-    JSON.stringify(result)
+    lines.join("\n")
 } else {
     ""
 }
@@ -251,12 +250,12 @@ if [ -z "$RESULT" ]; then
 	exit 0
 fi
 
-CONFIRMED=$(echo "$RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); print('yes' if d['confirm'] else 'no')" 2>/dev/null)
-PICKED_LOC=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin)['location'])" 2>/dev/null)
-OVERWRITE=$(echo "$RESULT" | python3 -c "import json,sys; print('yes' if json.load(sys.stdin)['overwrite'] else 'no')" 2>/dev/null)
-DELETES=$(echo "$RESULT" | python3 -c "import json,sys; print(','.join(json.load(sys.stdin)['deletePrinters']))" 2>/dev/null)
+CONFIRMED=$(echo "$RESULT" | grep "^CONFIRM=" | cut -d= -f2)
+PICKED_LOC=$(echo "$RESULT" | grep "^LOCATION=" | cut -d= -f2-)
+OVERWRITE=$(echo "$RESULT" | grep "^OVERWRITE=" | cut -d= -f2)
+DELETES=$(echo "$RESULT" | grep "^DELETE=" | cut -d= -f2- | tr '\n' ', ' | sed 's/, $//')
 
-if [ "$CONFIRMED" = "yes" ]; then
+if [ "$CONFIRMED" = "true" ]; then
 	FINAL_LOC="$DETECTED_LOCATION"
 else
 	FINAL_LOC="$PICKED_LOC"
