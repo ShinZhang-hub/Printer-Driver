@@ -104,6 +104,9 @@ js_escape() { local s="$1"; s="${s//\\/\\\\}"; s="${s//\"/\\\"}"; echo "\"$s\"";
 
 # Build location-to-IPs mapping for toggle
 LOC_IP_MAP_JS=""
+# Build location-to-IPs mapping for toggle + conflict map
+LOC_IP_MAP_JS=""
+CONFLICT_MAP_JS=""
 if [ -n "$ALL_LOCATIONS" ]; then
 	while IFS=',' read -ra NAMES; do
 		for name in "${NAMES[@]}"; do
@@ -116,6 +119,15 @@ if [ -n "$ALL_LOCATIONS" ]; then
 			done <<< "$RESOLVED_LOC"
 			if [ -z "$LOC_IP_MAP_JS" ]; then LOC_IP_MAP_JS="\"$name\":\"$LOC_IPS\""
 			else LOC_IP_MAP_JS="$LOC_IP_MAP_JS, \"$name\":\"$LOC_IPS\""; fi
+			# Check conflict: does any printer exist at these IPs?
+			CONFLICT_FOUND=false
+			for ip in $(echo "$LOC_IPS" | tr ',' ' '); do
+				[ -z "$ip" ] && continue
+				EXIST=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$ip" 2>/dev/null)
+				if [ -n "$EXIST" ]; then CONFLICT_FOUND=true; break; fi
+			done
+			if [ -z "$CONFLICT_MAP_JS" ]; then CONFLICT_MAP_JS="\"$name\":$CONFLICT_FOUND"
+			else CONFLICT_MAP_JS="$CONFLICT_MAP_JS, \"$name\":$CONFLICT_FOUND"; fi
 		done
 	done <<< "$ALL_LOCATIONS"
 fi
@@ -158,6 +170,7 @@ var printerIPMap = {$PRINTER_IP_MAP_JS}
 var installIPs = $(js_escape "$ALL_PRINTER_IPS")
 var installIPList = installIPs ? installIPs.split(",") : []
 var locIPMap = {$LOC_IP_MAP_JS}
+var conflictMap = {$CONFLICT_MAP_JS}
 var detectedLoc = $(js_escape "$DETECTED_LOCATION")
 var detectedNames = $(js_escape "$PRINTER_SUMMARY")
 var detectedIP = $(js_escape "$DETECTED_IP")
@@ -218,12 +231,12 @@ Y = saveY  // only count one popup
 
 hr()
 
-// 3. Conflict
-if (conflictName != "") {
-	txt(conflictLabel, X1)
-	var conflictPopup = pp([skipLabel, overwriteLabel], X2)
-	hr()
-}
+// 3. Conflict (always show, enabled only when printers exist at chosen location IPs)
+txt(conflictLabel, X1)
+var conflictPopup = pp([skipLabel, overwriteLabel], X2)
+var hasConflict = conflictMap[detectedLoc] === true
+conflictPopup.enabled = hasConflict
+hr()
 
 // 4. Delete
 if (deleteItems.length > 0 && deleteItems[0] != "") {
@@ -248,6 +261,7 @@ ObjC.registerSubclass({
 		if (ppPick) ppPick.hidden = on
 		pickerPopup = on ? ppKeep : (ppPick || ppKeep)
 		var curLoc = on ? detectedLoc : (ppPick ? ppPick.titleOfSelectedItem.js : detectedLoc)
+		conflictPopup.enabled = (conflictMap[curLoc] === true)
 		var curIPs = (locIPMap[curLoc] || "").split(",")
 		for (var i = 0; i < delBoxes.length; i++) {
 			var label = delBoxes[i].title.js
@@ -285,9 +299,7 @@ if (alert.runModal != $.NSAlertFirstButtonReturn) { "CANCEL" } else {
 	var lines = []
 	lines.push("CONFIRM=" + (chkConfirm.state == $.NSOnState ? "true" : "false"))
 	lines.push("LOCATION=" + (pickerPopup.titleOfSelectedItem.js || detectedLoc.js))
-	if (typeof conflictPopup != 'undefined') {
-		lines.push("OVERWRITE=" + (conflictPopup.indexOfSelectedItem == 1 ? "true" : "false"))
-	} else { lines.push("OVERWRITE=false") }
+	lines.push("OVERWRITE=" + (conflictPopup.indexOfSelectedItem == 1 ? "true" : "false"))
 	for (var i = 0; i < delBoxes.length; i++) {
 		if (delBoxes[i].state == $.NSOnState) {
 			var label = delBoxes[i].title.js
