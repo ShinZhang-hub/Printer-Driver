@@ -153,7 +153,6 @@ var conflictMap = {$CONFLICT_MAP_JS}
 var detectedLoc = $(js_escape "$DETECTED_LOCATION")
 var detectedNames = $(js_escape "$PRINTER_SUMMARY")
 var detectedIP = $(js_escape "$DETECTED_IP")
-var model = $(js_escape "$DETECTED_MODEL")
 var conflictName = $(js_escape "$EXISTING_NAME")
 
 var title = $(js_escape "$TITLE")
