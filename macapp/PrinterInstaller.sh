@@ -384,24 +384,17 @@ if [ -n "$COMBINED_SCRIPT" ]; then
 	fi
 fi
 
-# --- Success ---
+# --- Success (unified dialog for all outcomes) ---
 SUCCESS_MSG=""
-SCRIPT_RAN=false
-[ -n "$COMBINED_SCRIPT" ] && SCRIPT_RAN=true
 
-if [ -n "$SKIP_MSG" ]; then
-	SUCCESS_MSG="ℹ️ $SKIP_MSG"
-elif [ "$SCRIPT_RAN" = true ]; then
-	if [ -s "$STATUS_FILE" ]; then
-		RAW_MSG=$(tr -d '"' < "$STATUS_FILE")
-		RAW_MSG=$(echo "$RAW_MSG" | sed "s/ installed$/$INSTALLED_LABEL/")
-		if [ "$DO_OVERWRITE" = "true" ]; then
-			SUCCESS_MSG="✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_NAMES/")"
-		else
-			SUCCESS_MSG="✅ $RAW_MSG"
-		fi
+if [ "$SCRIPT_RAN" = true ] || [ -n "$SKIP_MSG" ]; then
+	if [ -n "$SKIP_MSG" ]; then
+		SUCCESS_MSG="ℹ️ $SKIP_MSG"
+	elif [ "$DO_OVERWRITE" = "true" ]; then
+		SUCCESS_MSG="✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_NAMES/")"
 	else
-		SUCCESS_MSG="✅ $INSTALLED_LABEL"
+		SUCCESS_MSG="✅ $(echo "$INSTALLED_LABEL" | sed "s/^ //")"
+		[ -n "$CHOSEN_NAMES" ] && SUCCESS_MSG="✅ $CHOSEN_NAMES$INSTALLED_LABEL"
 	fi
 fi
 
