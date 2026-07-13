@@ -65,24 +65,60 @@ if [ -n "$ALL_LOCATIONS" ]; then
 	done <<< "$ALL_LOCATIONS"
 fi
 
-# --- Delete items + location map ---
+# --- Build printer info: name, IP, location ---
+PRINTER_INFO_JS=""        # for JXA: {name, ip, loc}
+INSTALL_IPS=""             # comma-sep IPs at detected location
+if [ -n "$ALL_PRINTER_IPS" ]; then
+	INSTALL_IPS="$ALL_PRINTER_IPS"
+fi
+
 DELETE_ITEMS=""
 PRINTER_MAP=""
+PRINTER_IPS=""  # parallel to DELETE_ITEMS: IP for each printer
+
 if [ -n "$ALL_PRINTERS" ]; then
 	IFS=',' read -ra PNAMES <<< "$ALL_PRINTERS"
 	for pn in "${PNAMES[@]}"; do
 		pn=$(echo "$pn" | sed 's/^ *//;s/ *$//')
 		[ -z "$pn" ] && continue
+		# Get IP from lpstat -v
+		PN_IP=$(lpstat -v 2>/dev/null | grep "[^a-zA-Z]$pn" | head -1 | sed -n 's/.*socket:\/\/\([0-9.]*\).*/\1/p')
+		[ -z "$PN_IP" ] && PN_IP=$(lpstat -v 2>/dev/null | grep "$pn" | head -1 | sed -n 's/.*:\/\/\([0-9.]*\).*/\1/p')
+		[ -z "$PN_IP" ] && PN_IP="?"
+		
 		PLOC=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-location "$pn" 2>/dev/null || echo "")
-		if [ -z "$DELETE_ITEMS" ]; then DELETE_ITEMS="\"$pn\""
-		else DELETE_ITEMS="$DELETE_ITEMS, \"$pn\""; fi
+		
+		# Display format: Printer-BG (30.61.34.29)
+		DISPLAY="$pn ($PN_IP)"
+		if [ -z "$DELETE_ITEMS" ]; then DELETE_ITEMS="\"$DISPLAY\""
+		else DELETE_ITEMS="$DELETE_ITEMS, \"$DISPLAY\""; fi
 		if [ -z "$PRINTER_MAP" ]; then PRINTER_MAP="$pn=$PLOC"
 		else PRINTER_MAP="$PRINTER_MAP|$pn=$PLOC"; fi
+		if [ -z "$PRINTER_IPS" ]; then PRINTER_IPS="$pn=$PN_IP"
+		else PRINTER_IPS="$PRINTER_IPS|$pn=$PN_IP"; fi
 	done
 fi
 
 # --- Escape ---
 js_escape() { local s="$1"; s="${s//\\/\\\\}"; s="${s//\"/\\\"}"; echo "\"$s\""; }
+
+# Build location-to-IPs mapping for toggle
+LOC_IP_MAP_JS=""
+if [ -n "$ALL_LOCATIONS" ]; then
+	while IFS=',' read -ra NAMES; do
+		for name in "${NAMES[@]}"; do
+			name=$(echo "$name" | sed 's/^ *//;s/ *$//')
+			[ -z "$name" ] && continue
+			RESOLVED_LOC=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$name" 2>/dev/null)
+			LOC_IPS=""
+			while IFS= read -r line; do
+				case "$line" in IP=*) LOC_IPS="${LOC_IPS}${LOC_IPS:+,}$(echo "$line" | cut -d= -f2-)" ;; esac
+			done <<< "$RESOLVED_LOC"
+			if [ -z "$LOC_IP_MAP_JS" ]; then LOC_IP_MAP_JS="\"$name\":\"$LOC_IPS\""
+			else LOC_IP_MAP_JS="$LOC_IP_MAP_JS, \"$name\":\"$LOC_IPS\""; fi
+		done
+	done <<< "$ALL_LOCATIONS"
+fi
 
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
 CONFIRM_L1=$(echo -e "$CONFIRM_TEXT" | head -1)
@@ -90,13 +126,21 @@ CONFIRM_L2=$(echo -e "$CONFIRM_TEXT" | tail -1)
 PRINTER_SUMMARY="$DETECTED_NAME"
 [ $(echo "$ALL_PRINTER_NAMES" | tr ',' '\n' | wc -l | tr -d ' ') -gt 1 ] && PRINTER_SUMMARY="$ALL_PRINTER_NAMES"
 
-# Build printer-to-location JS map
+# Build printer-to-location and printer-to-IP JS maps
 PRINTER_MAP_JS=""
+PRINTER_IP_MAP_JS=""
 if [ -n "$PRINTER_MAP" ]; then
 	IFS='|' read -ra PMAP <<< "$PRINTER_MAP"
 	for m in "${PMAP[@]}"; do
 		pn=$(echo "$m" | cut -d= -f1); pl=$(echo "$m" | cut -d= -f2-)
 		[ -z "$PRINTER_MAP_JS" ] && PRINTER_MAP_JS="\"$pn\":\"$pl\"" || PRINTER_MAP_JS="$PRINTER_MAP_JS, \"$pn\":\"$pl\""
+	done
+fi
+if [ -n "$PRINTER_IPS" ]; then
+	IFS='|' read -ra IPMAP <<< "$PRINTER_IPS"
+	for m in "${IPMAP[@]}"; do
+		pn=$(echo "$m" | cut -d= -f1); pip=$(echo "$m" | cut -d= -f2-)
+		[ -z "$PRINTER_IP_MAP_JS" ] && PRINTER_IP_MAP_JS="\"$pn\":\"$pip\"" || PRINTER_IP_MAP_JS="$PRINTER_IP_MAP_JS, \"$pn\":\"$pip\""
 	done
 fi
 
@@ -107,6 +151,10 @@ var locItemsAll = [$LOC_ITEMS_ALL]
 var locItemsNoDetect = [$LOC_ITEMS_NODETECT]
 var deleteItems = [$DELETE_ITEMS]
 var printerMap = {$PRINTER_MAP_JS}
+var printerIPMap = {$PRINTER_IP_MAP_JS}
+var installIPs = $(js_escape "$ALL_PRINTER_IPS")
+var installIPList = installIPs ? installIPs.split(",") : []
+var locIPMap = {$LOC_IP_MAP_JS}
 var detectedLoc = $(js_escape "$DETECTED_LOCATION")
 var detectedNames = $(js_escape "$PRINTER_SUMMARY")
 var detectedIP = $(js_escape "$DETECTED_IP")
@@ -176,9 +224,12 @@ if (conflictName != "") {
 if (deleteItems.length > 0 && deleteItems[0] != "") {
 	txt(delPrompt, X1)
 	for (var i = 0; i < deleteItems.length; i++) {
-		var pname = deleteItems[i]
-		var ploc = printerMap[pname] || ""
-		var disabled = (ploc == detectedLoc)
+		var pname = deleteItems[i]  // "Printer-BG (30.61.34.29)"
+		var parts = pname.split(" (")
+		var realName = parts[0]
+		var pip = printerIPMap[realName] || ""
+		// Disable if this printer's IP is in the install IPs for detected location
+		var disabled = installIPList.indexOf(pip) >= 0
 		delBoxes.push(ck(pname, X2, false, disabled))
 	}
 }
@@ -192,9 +243,13 @@ ObjC.registerSubclass({
 		if (ppPick) ppPick.hidden = on
 		pickerPopup = on ? ppKeep : (ppPick || ppKeep)
 		var curLoc = on ? detectedLoc : (ppPick ? ppPick.titleOfSelectedItem.js : detectedLoc)
+		var curIPs = (locIPMap[curLoc] || "").split(",")
 		for (var i = 0; i < delBoxes.length; i++) {
-			var ploc = printerMap[delBoxes[i].title.js] || ""
-			delBoxes[i].enabled = (ploc != curLoc)
+			var label = delBoxes[i].title.js
+			var parts = label.split(" (")
+			var realName = parts[0]
+			var pip = printerIPMap[realName] || ""
+			delBoxes[i].enabled = (curIPs.indexOf(pip) < 0)
 		}
 	}}}
 })
@@ -227,7 +282,11 @@ if (alert.runModal != $.NSAlertFirstButtonReturn) { "CANCEL" } else {
 		lines.push("OVERWRITE=" + (conflictPopup.indexOfSelectedItem == 1 ? "true" : "false"))
 	} else { lines.push("OVERWRITE=false") }
 	for (var i = 0; i < delBoxes.length; i++) {
-		if (delBoxes[i].state == $.NSOnState) lines.push("DELETE=" + delBoxes[i].title.js)
+		if (delBoxes[i].state == $.NSOnState) {
+			var label = delBoxes[i].title.js
+			var parts = label.split(" (")
+			lines.push("DELETE=" + parts[0])  // send only the name
+		}
 	}
 	lines.join("\n")
 }
