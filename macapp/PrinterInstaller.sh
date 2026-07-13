@@ -35,12 +35,8 @@ if [ -n "$DETECTED_LOCATION" ]; then
 fi
 
 ALL_LOCATIONS=$("$BINARY" $DRVARG --list-locations 2>/dev/null)
-
-# --- Conflict ---
 EXISTING_NAME=""
 [ -n "$DETECTED_IP" ] && EXISTING_NAME=$("$BINARY" $DRVARG --printer-at-ip "$DETECTED_IP" 2>/dev/null)
-
-# --- All printers ---
 ALL_PRINTERS=$("$BINARY" $DRVARG --debug-printers 2>/dev/null)
 
 # --- Location dropdown items ---
@@ -84,7 +80,7 @@ js_escape() {
 
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
 
-# --- Write JXA script to temp file ---
+# --- Write JXA ---
 JXA_SCRIPT="/tmp/printer-installer-ui.jxa"
 cat > "$JXA_SCRIPT" <<ENDJXA
 ObjC.import('Cocoa')
@@ -102,101 +98,104 @@ var confirmText = $(js_escape "$CONFIRM_TEXT")
 var overwriteLabel = $(js_escape "$OVERWRITE_LABEL")
 var skipLabel = $(js_escape "$SKIP_BTN")
 var pickerPrompt = $(js_escape "$PICKER_PROMPT")
+var conflictLabel = $(js_escape "$CONFLICT_LABEL")
 var delPrompt = $(js_escape "$CHOOSE_PROMPT")
 var okLabel = "$OK_LABEL"
 var cancelLabel = "$CANCEL_LABEL"
 
 // --- Layout ---
-var CW = 480, M = 20, LH = 24, X1 = M, X2 = M + 20
-var views = [], Y = 6
+var CW = 480, M = 20, X1 = M, X2 = M + 20, LH = 22
+var views = [], hiddenViews = [], Y = 4
+var pickerLabel, popupLoc, lastSep1
 
-function label(t, x, bold) {
+function row(t, x, tag) {
 	var f = $.NSTextField.alloc.initWithFrame($.NSMakeRect(x, Y, CW-x, LH))
 	f.stringValue = t; f.editable = false; f.bordered = false; f.drawsBackground = false
-	f.font = bold ? $.NSFont.boldSystemFontOfSize(12) : $.NSFont.systemFontOfSize(11)
-	views.push(f); Y += LH + 4; return f
+	f.font = $.NSFont.systemFontOfSize(12)
+	if (tag != null) f.tag = tag
+	views.push(f); Y += LH + 2; return f
 }
-function checkbox(t, x, tag, checked) {
+function chk(t, x, tag, checked) {
 	var b = $.NSButton.alloc.initWithFrame($.NSMakeRect(x, Y, CW-x, LH+2))
 	b.title = t; b.setButtonType($.NSSwitchButton); b.tag = tag
 	b.font = $.NSFont.systemFontOfSize(12)
 	if (checked) b.state = $.NSOnState
-	views.push(b); Y += LH + 4; return b
+	views.push(b); Y += LH + 2; return b
 }
-function popup(items, x, tag) {
+function pop(items, x, tag) {
 	var p = $.NSPopUpButton.alloc.initWithFrame($.NSMakeRect(x, Y, CW-x-20, 24))
 	for (var i = 0; i < items.length; i++) p.addItemWithTitle(items[i])
 	p.tag = tag; p.font = $.NSFont.systemFontOfSize(12)
-	views.push(p); Y += 30; return p
+	views.push(p); Y += 28; return p
 }
 function sep() {
 	var b = $.NSBox.alloc.initWithFrame($.NSMakeRect(X1, Y, CW-X1, 1))
-	b.boxType = $.NSSeparator; views.push(b); Y += 10; return b
+	b.boxType = $.NSSeparator; views.push(b); Y += 8; return b
 }
 
-// 1. Location confirm checkbox
-var chkConfirm = checkbox(confirmText, X1, 10, true)
+// 1. Location confirm
+var chkConfirm = chk(confirmText, X1, 10, true)
 
-// 2. Location picker (hidden by default, shown when #1 unchecked)
-var pickerLabel = label(pickerPrompt, X1, true)
-var popupLoc = popup(locItems, X2, 20)
+// 2. Location picker (hidden by default, folds in/out)
+pickerLabel = row(pickerPrompt, X1, 21)
+popupLoc = pop(locItems, X2, 22)
+pickerLabel.hidden = true
+popupLoc.hidden = true
+hiddenViews.push(pickerLabel, popupLoc)
 
-sep()
+lastSep1 = sep()
 
-// 3. Conflict: dropdown Skip/Overwrite
+// 3. Conflict (popup Skip/Overwrite)
 if (conflictName != "") {
-	var conflictInfo = conflictName + " (IP: " + detectedIP + ")"
-	label(conflictInfo + ":", X1, true)
-	var conflictPopup = popup([skipLabel, overwriteLabel], X2, 30)
+	row(conflictLabel, X1, 31)
+	var conflictPopup = pop([skipLabel, overwriteLabel], X2, 32)
+	sep()
 }
-
-sep()
 
 // 4. Delete other printers
 if (deleteItems.length > 0 && deleteItems[0] != "") {
-	label(delPrompt, X1, false)
+	row(delPrompt, X1, 41)
 	var delBoxes = []
 	for (var i = 0; i < deleteItems.length; i++) {
-		delBoxes.push(checkbox(deleteItems[i], X2, 200+i, false))
+		delBoxes.push(chk(deleteItems[i], X2, 200+i, false))
 	}
 }
 
-// --- Register toggle handler ---
+// --- Assemble accessory ---
+Y += 4; var totalH = Y
+var acc = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW, totalH))
+
+function relayout() {
+	// Filter out hidden views and recalculate
+	var vy = 4
+	for (var i = 0; i < views.length; i++) {
+		var v = views[i]
+		if (v.hidden) { v.setFrameOrigin($.NSMakePoint(-100, -100)); continue }
+		var r = v.frame
+		v.frame = $.NSMakeRect(r.origin.x, totalH - vy - r.size.height, r.size.width, r.size.height)
+		vy += r.size.height + (v.tag && v.tag >= 20 ? 2 : 2)
+	}
+	// Adjust total height
+	var newH = vy + 8
+	acc.setFrameSize($.NSMakeSize(CW, newH))
+}
+
+relayout()
+
+// --- Toggle handler ---
 ObjC.registerSubclass({
 	name: "ToggleHandler",
-	methods: {
-		"toggle:": {
-			types: ["void", ["id"]],
-			implementation: function(sender) {
-				var show = (chkConfirm.state != $.NSOnState)
-				popupLoc.hidden = !show
-				pickerLabel.hidden = !show
-				// Re-layout accessory view after showing/hiding
-				var h = 0
-				for (var i = 0; i < views.length; i++) {
-					if (!views[i].hidden) h = Math.max(h, views[i].frame.origin.y + views[i].frame.size.height)
-				}
-				acc.setFrameSize($.NSMakeSize(CW, h + 10))
-			}
+	methods: {"toggle:": {types:["void",["id"]], implementation:function(s) {
+		var show = (chkConfirm.state != $.NSOnState)
+		for (var i = 0; i < hiddenViews.length; i++) {
+			hiddenViews[i].hidden = !show
 		}
-	}
+		relayout()
+	}}}
 })
 var handler = $.ToggleHandler.alloc.init
 chkConfirm.target = handler
 chkConfirm.action = 'toggle:'
-
-// Initial state: hide picker
-popupLoc.hidden = true
-pickerLabel.hidden = true
-
-// --- Assemble ---
-Y += 8; var totalH = Y
-var acc = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW, totalH))
-for (var i = 0; i < views.length; i++) {
-	var v = views[i], r = v.frame
-	v.frame = $.NSMakeRect(r.origin.x, totalH - r.origin.y - r.size.height, r.size.width, r.size.height)
-	acc.addSubview(v)
-}
 
 // --- Show ---
 var info = detectedLoc + "  |  " + detectedName + "  |  IP: " + detectedIP + "  |  " + model
@@ -212,8 +211,7 @@ if (alert.runModal != $.NSAlertFirstButtonReturn) { "" } else {
 	lines.push("CONFIRM=" + (chkConfirm.state == $.NSOnState ? "true" : "false"))
 	lines.push("LOCATION=" + (popupLoc.titleOfSelectedItem.js || detectedLoc.js))
 	if (typeof conflictPopup != 'undefined') {
-		var pick = conflictPopup.indexOfSelectedItem
-		lines.push("OVERWRITE=" + (pick == 1 ? "true" : "false"))
+		lines.push("OVERWRITE=" + (conflictPopup.indexOfSelectedItem == 1 ? "true" : "false"))
 	} else {
 		lines.push("OVERWRITE=false")
 	}
@@ -230,7 +228,7 @@ ENDJXA
 
 RESULT=$(osascript -l JavaScript "$JXA_SCRIPT" 2>/dev/null)
 
-# --- Parse result ---
+# --- Parse ---
 [ -z "$RESULT" ] && exit 0
 
 CONFIRMED=$(echo "$RESULT" | grep "^CONFIRM=" | cut -d= -f2)
@@ -238,14 +236,12 @@ PICKED_LOC=$(echo "$RESULT" | grep "^LOCATION=" | cut -d= -f2-)
 DO_OVERWRITE=$(echo "$RESULT" | grep "^OVERWRITE=" | cut -d= -f2)
 TO_DELETE=$(echo "$RESULT" | grep "^DELETE=" | cut -d= -f2- | tr '\n' ', ' | sed 's/, $//')
 
-# --- Determine chosen location ---
 if [ "$CONFIRMED" = "true" ]; then
 	CHOSEN_LOC="$DETECTED_LOCATION"
 else
 	CHOSEN_LOC="$PICKED_LOC"
 fi
 
-# --- Filter delete list ---
 CHOSEN_NAME=""
 if [ -n "$CHOSEN_LOC" ]; then
 	RESOLVED=$("$BINARY" $DRVARG --resolve-location "$CHOSEN_LOC" 2>/dev/null)
@@ -263,14 +259,13 @@ if [ -n "$TO_DELETE" ]; then
 	done
 fi
 
-# --- Output ---
 echo ""
 echo "========== Analysis =========="
 echo "Confirmed:   $CONFIRMED"
 echo "Location:    $CHOSEN_LOC"
 echo "Printer:     ${CHOSEN_NAME:-$DETECTED_NAME}"
 [ "$DO_OVERWRITE" = "true" ] && echo "Overwrite:   yes"
-[ "$DO_OVERWRITE" = "false" ] && echo "Skip:        yes (keep existing)"
+[ "$DO_OVERWRITE" = "false" ] && echo "Skip:        yes"
 [ -n "$FILTERED_DELETE" ] && echo "To delete:   $FILTERED_DELETE"
 [ -z "$FILTERED_DELETE" ] && echo "To delete:   none"
 echo "=============================="

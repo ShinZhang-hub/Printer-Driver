@@ -121,11 +121,11 @@ var stringsMap = map[string]map[string]string{
 		"ko": "프린터 이름을 입력하세요：",
 		"zh": "请输入打印机名称：",
 	},
-	"CONFLICT_FMT": {
-		"en": "⚠️Existing printer at this IP (%s):\\n%s\\n\\nChoose action:",
-		"ja": "⚠️同じIPのプリンターが見つかりました（%s）：\\n%s\\n\\n操作を選択してください：",
-		"ko": "⚠️이 IP(%s)의 프린터가 이미 있습니다:\\n%s\\n\\n작업을 선택하세요:",
-		"zh": "⚠️发现同IP的打印机（%s）：\\n%s\\n\\n请选择操作：",
+	"CONFLICT_LABEL": {
+		"en": "If a printer already exists at this IP, please choose:",
+		"ja": "同じIPにプリンターが既に存在する場合、選択してください：",
+		"ko": "같은 IP에 프린터가 이미 있는 경우 선택하세요：",
+		"zh": "如果同IP打印机已存在，请选择：",
 	},
 	"OVERWRITE_LABEL": {
 		"en": "Overwrite",
