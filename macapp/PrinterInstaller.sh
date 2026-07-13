@@ -329,15 +329,26 @@ SKIP_MSG=""
 COMBINED_SCRIPT=""
 
 if [ -n "$CHOSEN_LOC" ]; then
+	# Resolve CHOSEN location's printers (not detected)
+	CHOSEN_RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$CHOSEN_LOC" 2>/dev/null)
+	CHOSEN_IPS=""
+	CHOSEN_NAMES=""
+	while IFS= read -r line; do
+		case "$line" in
+			IP=*) CHOSEN_IPS="${CHOSEN_IPS}${CHOSEN_IPS:+,}$(echo "$line" | cut -d= -f2-)" ;;
+			Name=*) CHOSEN_NAMES="${CHOSEN_NAMES}${CHOSEN_NAMES:+,}$(echo "$line" | cut -d= -f2-)" ;;
+		esac
+	done <<< "$CHOSEN_RESOLVED"
+
 	if [ "$DO_OVERWRITE" = "false" ]; then
 		SKIP_ALL=true
-		for ip in $(echo "$ALL_PRINTER_IPS" | tr ',' ' '); do
+		for ip in $(echo "$CHOSEN_IPS" | tr ',' ' '); do
 			[ -z "$ip" ] && continue
 			EXIST=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$ip" 2>/dev/null)
 			if [ -z "$EXIST" ]; then SKIP_ALL=false; break; fi
 		done
 		if [ "$SKIP_ALL" = true ]; then
-			SKIP_MSG=$(echo "$SKIP_INSTALL_MSG" | sed "s/%s/$DETECTED_NAME/")
+			SKIP_MSG=$(echo "$SKIP_INSTALL_MSG" | sed "s/%s/$CHOSEN_FIRST_NAMES/")
 		else
 			COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
 		fi
@@ -346,17 +357,13 @@ if [ -n "$CHOSEN_LOC" ]; then
 	fi
 fi
 if [ -n "$TO_DELETE" ]; then
-	CHOSEN_NAME=""
-	if [ -n "$CHOSEN_LOC" ]; then
-		RESOLVED=$("$BINARY" --drivers "$DRIVERS_DIR" --resolve-location "$CHOSEN_LOC" 2>/dev/null)
-		CHOSEN_NAME=$(echo "$RESOLVED" | grep "^Name=" | head -1 | cut -d= -f2)
-	fi
+	CHOSEN_FIRST_NAME=$(echo "$CHOSEN_FIRST_NAMES" | cut -d, -f1)
 	: > /tmp/printer-installer-delete.txt
 	IFS=',' read -ra DLIST <<< "$TO_DELETE"
 	for d in "${DLIST[@]}"; do
 		d=$(echo "$d" | sed 's/^ *//;s/ *$//')
 		[ -z "$d" ] && continue
-		[ "$d" = "$CHOSEN_NAME" ] && continue
+		[ "$d" = "$CHOSEN_FIRST_NAME" ] && continue
 		echo "$d" >> /tmp/printer-installer-delete.txt
 	done
 	if [ -s /tmp/printer-installer-delete.txt ]; then
@@ -386,7 +393,7 @@ elif [ -s "$STATUS_FILE" ]; then
 	RAW_MSG=$(tr -d '"' < "$STATUS_FILE")
 	RAW_MSG=$(echo "$RAW_MSG" | sed "s/ installed$/$INSTALLED_LABEL/")
 	if [ "$DO_OVERWRITE" = "true" ]; then
-		SUCCESS_MSG="✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$DETECTED_NAME/")"
+		SUCCESS_MSG="✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_FIRST_NAMES/")"
 	else
 		SUCCESS_MSG="✅ $RAW_MSG"
 	fi
@@ -399,7 +406,7 @@ if [ -n "$TO_DELETE" ]; then
 	for d in "${DLIST2[@]}"; do
 		d=$(echo "$d" | sed 's/^ *//;s/ *$//')
 		[ -z "$d" ] && continue
-		[ "$d" = "$CHOSEN_NAME" ] && continue
+		[ "$d" = "$CHOSEN_FIRST_NAME" ] && continue
 		[ -z "$DEL_NAMES" ] && DEL_NAMES="$d" || DEL_NAMES="$DEL_NAMES, $d"
 	done
 	if [ -n "$DEL_NAMES" ]; then
