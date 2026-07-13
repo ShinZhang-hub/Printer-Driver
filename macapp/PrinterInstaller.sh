@@ -177,7 +177,7 @@ function txt(s, x) {
 	var f = $.NSTextField.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x, LH))
 	f.stringValue = s; f.editable = false; f.bordered = false; f.drawsBackground = false
 	f.font = $.NSFont.systemFontOfSize(12)
-	views.push(f); Y += LH + 2
+	views.push(f); Y += LH + 1
 }
 function ck(s, x, checked, disabled, multiline) {
 	var h = multiline ? LH * 2 + 4 : LH + 2
@@ -186,20 +186,20 @@ function ck(s, x, checked, disabled, multiline) {
 	b.font = $.NSFont.systemFontOfSize(12)
 	if (checked) b.state = $.NSOnState
 	if (disabled) b.enabled = false
-	views.push(b); Y += h + 2; return b
+	views.push(b); Y += h + 1; return b
 }
 function pp(items, x) {
 	if (items.length == 0) return null
 	var p = $.NSPopUpButton.alloc.initWithFrame($.NSMakeRect(x, Y, CW - x - 20, 24))
 	for (var i = 0; i < items.length; i++) p.addItemWithTitle(items[i])
 	p.font = $.NSFont.systemFontOfSize(12)
-	views.push(p); Y += 28; return p
+	views.push(p); Y += 26; return p
 }
 function hr() {
 	var b = $.NSView.alloc.initWithFrame($.NSMakeRect(X1, Y, CW - X1, 1))
 	b.wantsLayer = true
 	b.layer.backgroundColor = $.NSColor.separatorColor.CGColor
-	views.push(b); Y += 4
+	views.push(b); Y += 6
 }
 
 // 1. Location confirm
