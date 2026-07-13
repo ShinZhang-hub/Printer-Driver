@@ -80,10 +80,10 @@ var stringsMap = map[string]map[string]string{
 		"zh": "跳过",
 	},
 	"CHOOSE_PROMPT": {
-		"en": "Select printers to delete:",
-		"ja": "削除するプリンターを選択してください：",
-		"ko": "삭제할 프린터를 선택하세요：",
-		"zh": "请选择要删除的打印机：",
+		"en": "If needed, check printers to delete:",
+		"ja": "必要に応じて削除するプリンターをチェックしてください：",
+		"ko": "필요한 경우 삭제할 프린터를 선택하세요：",
+		"zh": "如果需要，请勾选需要删除的打印机：",
 	},
 	"DELETED_PREFIX": {
 		"en": "Deleted:",
