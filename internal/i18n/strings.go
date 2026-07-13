@@ -80,10 +80,10 @@ var stringsMap = map[string]map[string]string{
 		"zh": "跳过",
 	},
 	"CHOOSE_PROMPT": {
-		"en": "If needed, check printers to delete:",
+		"en": "If needed, check printers to remove:",
 		"ja": "必要に応じて削除するプリンターをチェックしてください：",
-		"ko": "필요한 경우 삭제할 프린터를 선택하세요：",
-		"zh": "如果需要，请勾选需要删除的打印机：",
+		"ko": "필요한 경우 제거할 프린터를 선택하세요：",
+		"zh": "如果需要移除，请勾选需要移除的打印机：",
 	},
 	"DELETED_PREFIX": {
 		"en": "Deleted:",
@@ -92,10 +92,10 @@ var stringsMap = map[string]map[string]string{
 		"zh": "已删除：",
 	},
 	"CONFIRM_FMT": {
-		"en": "Is this the printer for %s?",
-		"ja": "%sのプリンターですか？",
-		"ko": "%s의 프린터입니까?",
-		"zh": "是在%s安装打印机吗？",
+		"en": "Is this the printer for %s?\\nUncheck to select a different location",
+		"ja": "%sのプリンターですか？\\nチェックを外すと別の場所を選択できます",
+		"ko": "%s의 프린터입니까?\\n체크 해제 시 다른 위치를 선택할 수 있습니다",
+		"zh": "是在%s安装打印机吗？\\n不是的话，取消勾选以选择正确位置",
 	},
 	"YES_LABEL": {
 		"en": "Yes",
@@ -110,10 +110,10 @@ var stringsMap = map[string]map[string]string{
 		"zh": "否",
 	},
 	"PICKER_PROMPT": {
-		"en": "Select the location for this printer:",
-		"ja": "このプリンターの設置場所を選択してください：",
-		"ko": "이 프린터의 위치를 선택하세요：",
-		"zh": "请选择这台打印机的位置：",
+		"en": "Select the correct location:",
+		"ja": "正しい場所を選択してください：",
+		"ko": "올바른 위치를 선택하세요：",
+		"zh": "请选择正确的位置：",
 	},
 	"NAME_PROMPT": {
 		"en": "Enter a name for this printer:",
