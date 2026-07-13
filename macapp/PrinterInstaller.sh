@@ -224,13 +224,9 @@ function hr() {
 // 1. Location confirm
 chkConfirm = ck(confirmText, X1, true, false, true)
 
-// 2. Location picker — overlapping popups
-var ppKeep = pp([detectedLoc], X2)
-var saveY = Y
-var ppPick = pp(locItemsNoDetect, X2)
-if (ppPick) { ppPick.frame = ppKeep.frame; ppPick.hidden = true }
-var pickerPopup = ppKeep
-Y = saveY  // only count one popup
+// 2. Location picker — disabled when confirmed, enabled when unchecked
+var pickerPopup = pp(locItemsNoDetect, X2)
+pickerPopup.enabled = false
 
 hr()
 
@@ -260,10 +256,8 @@ ObjC.registerSubclass({
 	name: "TH",
 	methods: {"t:": {types:["void",["id"]], implementation:function(s) {
 		var on = (chkConfirm.state == $.NSOnState)
-		ppKeep.hidden = !on
-		if (ppPick) ppPick.hidden = on
-		pickerPopup = on ? ppKeep : (ppPick || ppKeep)
-		var curLoc = on ? detectedLoc : (ppPick ? ppPick.titleOfSelectedItem.js : detectedLoc)
+		pickerPopup.enabled = !on
+		var curLoc = on ? detectedLoc : pickerPopup.titleOfSelectedItem.js
 		conflictPopup.enabled = (conflictMap[curLoc] === true)
 		var curIPs = (locIPMap[curLoc] || "").split(",")
 		for (var i = 0; i < delBoxes.length; i++) {
@@ -277,8 +271,6 @@ ObjC.registerSubclass({
 })
 chkConfirm.target = $.TH.alloc.init
 chkConfirm.action = 't:'
-// Also fire on popup selection change
-if (ppPick) { ppPick.target = chkConfirm.target; ppPick.action = 't:' }
 
 // Assemble
 Y += 8
