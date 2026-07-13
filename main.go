@@ -38,6 +38,7 @@ func main() {
 	hashPassword := flag.Bool("hash-password", false, "Read password from stdin and print bcrypt hash")
 	deletePrintersFile := flag.String("delete-printers-file", "", "Path to file with printer names to delete (one per line)")
 	discover := flag.Bool("discover", false, "Probe printer and output discovered info")
+	noSnmp := flag.Bool("no-snmp", false, "Skip SNMP probe when discovering")
 	listLocations := flag.Bool("list-locations", false, "List all location names from config")
 	resolveLocation := flag.String("resolve-location", "", "Resolve location name to PrinterIP and PrinterName")
 	printerAtIP := flag.String("printer-at-ip", "", "Returns printer name at given IP if exists")
@@ -97,19 +98,30 @@ func main() {
 	defer log.Close()
 
 	if *discover || *listLocations || *resolveLocation != "" || *printerAtIP != "" || *printerLocation != "" {
-		cfg := config.LoadRemote(embeddedConfig)
+		cfg := config.ParseEmbedded(embeddedConfig)
+		if cfg == nil {
+			cfg = config.LoadRemote(embeddedConfig)
+		}
 		if *discover {
 			localIP := localIPAddr()
 			printerIP := *ip
 			if printerIP == "" {
 				printerIP = cfg.GetPrinterIP(localIP)
 			}
-			p, err := scanner.ProbeSingleIP(printerIP)
 			model := ""
 			brand := ""
-			if err == nil {
-				model = p.Model
-				brand = p.Brand
+			if !*noSnmp {
+				p, err := scanner.ProbeSingleIP(printerIP)
+				if err == nil {
+					model = p.Model
+					brand = p.Brand
+				}
+			}
+			if model == "" {
+				model = cfg.GetPrinterModel(localIP)
+				if model == "" {
+					model = cfg.LookupModelByIP(printerIP)
+				}
 			}
 			loc := cfg.MatchLocation(localIP)
 			locName := ""

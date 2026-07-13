@@ -20,8 +20,8 @@ if [ "$SHIFT" = "1" ]; then
 	exit 0
 fi
 
-# --- Discover ---
-DISCOVERED=$("$BINARY" --drivers "$DRIVERS_DIR" --discover 2>/dev/null)
+# --- Detect location by subnet (no SNMP, config only) ---
+DISCOVERED=$("$BINARY" --drivers "$DRIVERS_DIR" --discover --no-snmp 2>/dev/null)
 DETECTED_IP=$(echo "$DISCOVERED" | grep "^IP=" | head -1 | cut -d= -f2)
 DETECTED_MODEL=$(echo "$DISCOVERED" | grep "^Model=" | head -1 | cut -d= -f2)
 DETECTED_LOCATION=$(echo "$DISCOVERED" | grep "^Location=" | head -1 | cut -d= -f2)
