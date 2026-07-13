@@ -139,6 +139,16 @@ func main() {
 					return
 				}
 			}
+			if embCfg := config.ParseEmbedded(embeddedConfig); embCfg != nil {
+				for _, loc := range embCfg.Locations {
+					if loc.Name == *resolveLocation {
+						for _, p := range loc.AllPrinters() {
+							fmt.Printf("IP=%s\nName=%s\n", p.IP, p.Name)
+						}
+						return
+					}
+				}
+			}
 			os.Exit(1)
 		}
 		if *printerAtIP != "" {
