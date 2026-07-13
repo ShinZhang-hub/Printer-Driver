@@ -72,6 +72,7 @@ func Defaults() *Config {
 }
 
 func (c *Config) Save() error {
+	c.Touch()
 	if err := saveLocal(c); err != nil {
 		return fmt.Errorf("failed to save local config: %w", err)
 	}
