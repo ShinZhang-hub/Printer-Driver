@@ -365,17 +365,33 @@ if [ -n "$COMBINED_SCRIPT" ]; then
 fi
 
 # --- Success ---
+SUCCESS_MSG=""
+
 if [ -n "$SKIP_MSG" ]; then
-	osascript -e "display dialog \"✅ $SKIP_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
+	SUCCESS_MSG="✅ $SKIP_MSG"
 elif [ -s "$STATUS_FILE" ]; then
 	RAW_MSG=$(tr -d '"' < "$STATUS_FILE")
 	if [ "$DO_OVERWRITE" = "true" ]; then
-		OVERWRITE_MSG=$(echo "$OVERWRITTEN_MSG" | sed "s/%s/$DETECTED_NAME/")
-		osascript -e "display dialog \"✅ $OVERWRITE_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
+		SUCCESS_MSG="✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$DETECTED_NAME/")"
 	else
-		RAW_MSG=$(echo "$RAW_MSG" | sed "s/ installed$/$INSTALLED_LABEL/")
-		osascript -e "display dialog \"✅ $RAW_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
+		SUCCESS_MSG="✅ $RAW_MSG"
 	fi
-else
-	osascript -e "display dialog \"✅ $INSTALLED_LABEL\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
 fi
+
+# Append delete results if any
+if [ -n "$TO_DELETE" ]; then
+	DEL_NAMES=""
+	IFS=',' read -ra DLIST2 <<< "$TO_DELETE"
+	for d in "${DLIST2[@]}"; do
+		d=$(echo "$d" | sed 's/^ *//;s/ *$//')
+		[ -z "$d" ] && continue
+		[ "$d" = "$CHOSEN_NAME" ] && continue
+		[ -z "$DEL_NAMES" ] && DEL_NAMES="$d" || DEL_NAMES="$DEL_NAMES, $d"
+	done
+	if [ -n "$DEL_NAMES" ]; then
+		REMOVE_LINE="$(echo "$REMOVED_MSG" | sed "s/%s/$DEL_NAMES/")"
+		SUCCESS_MSG="$SUCCESS_MSG"$'\n'"$REMOVE_LINE"
+	fi
+fi
+
+[ -n "$SUCCESS_MSG" ] && osascript -e "display dialog \"$SUCCESS_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null

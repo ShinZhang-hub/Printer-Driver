@@ -146,10 +146,10 @@ var stringsMap = map[string]map[string]string{
 		"zh": "安装失败：",
 	},
 	"INSTALLED_LABEL": {
-		"en": " installed",
-		"ja": " インストール完了",
+		"en": " installed successfully",
+		"ja": " 正常にインストールされました",
 		"ko": " 설치 완료",
-		"zh": " 安装成功",
+		"zh": " 已成功安装",
 	},
 	"OTHER_PRINTERS_LABEL": {
 		"en": "Other printers: ",
@@ -204,6 +204,12 @@ var stringsMap = map[string]map[string]string{
 		"ja": "%s を上書きインストールしました",
 		"ko": "%s 덮어쓰기 설치 완료",
 		"zh": "%s 已成功覆盖安装",
+	},
+	"REMOVED_MSG": {
+		"en": "%s removed successfully",
+		"ja": "%s を削除しました",
+		"ko": "%s 제거 완료",
+		"zh": "%s 已成功移除",
 	},
 }
 
