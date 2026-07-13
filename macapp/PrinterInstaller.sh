@@ -257,6 +257,8 @@ ObjC.registerSubclass({
 })
 chkConfirm.target = $.TH.alloc.init
 chkConfirm.action = 't:'
+// Also fire on popup selection change
+if (ppPick) { ppPick.target = chkConfirm.target; ppPick.action = 't:' }
 
 // Assemble
 Y += 8
