@@ -92,10 +92,10 @@ var stringsMap = map[string]map[string]string{
 		"zh": "已删除：",
 	},
 	"CONFIRM_FMT": {
-		"en": "Is this the printer for %s?\\nUncheck to select a different location",
-		"ja": "%sのプリンターですか？\\nチェックを外すと別の場所を選択できます",
-		"ko": "%s의 프린터입니까?\\n체크 해제 시 다른 위치를 선택할 수 있습니다",
-		"zh": "是在%s安装打印机吗？\\n不是的话，取消勾选以选择正确位置",
+		"en": "Detected you are at %s.\\nUncheck to select a different location",
+		"ja": "%s にいることを検出しました。\\n別の場所を選ぶにはチェックを外してください",
+		"ko": "%s에 있는 것으로 감지되었습니다.\\n다른 위치를 선택하려면 체크를 해제하세요",
+		"zh": "检测到您在 %s，\\n若不是，请取消勾选选择正确位置",
 	},
 	"YES_LABEL": {
 		"en": "Yes",

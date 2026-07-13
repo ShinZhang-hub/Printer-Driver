@@ -294,6 +294,7 @@ alert.informativeText = line1 + "\n" + line2
 alert.accessoryView = acc
 alert.addButtonWithTitle("$OK_LABEL")
 alert.addButtonWithTitle("$CANCEL_LABEL")
+alert.window.level = $.NSFloatingWindowLevel
 
 if (alert.runModal != $.NSAlertFirstButtonReturn) { "CANCEL" } else {
 	var lines = []
