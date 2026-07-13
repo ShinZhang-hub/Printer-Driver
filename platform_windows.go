@@ -20,7 +20,8 @@ func writeConsole(s string) {
 	proc := kernel32.NewProc("GetStdHandle")
 	handle, _, _ := proc.Call(uintptr(0xFFFFFFF5)) // STD_OUTPUT_HANDLE = -11
 	var mode uint32
-	if kernel32.NewProc("GetConsoleMode").Call(handle, uintptr(unsafe.Pointer(&mode))) == 0 {
+	ret, _, _ := kernel32.NewProc("GetConsoleMode").Call(handle, uintptr(unsafe.Pointer(&mode)))
+	if ret == 0 {
 		// Not a console — piped. Convert to active code page.
 		utf16, _ := syscall.UTF16FromString(s)
 		cp := kernel32.NewProc("GetConsoleOutputCP")
