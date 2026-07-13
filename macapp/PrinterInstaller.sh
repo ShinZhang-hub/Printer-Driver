@@ -309,9 +309,28 @@ if [ "$CONFIRMED" = "true" ]; then CHOSEN_LOC="$DETECTED_LOCATION"
 else CHOSEN_LOC="$PICKED_LOC"; fi
 
 # --- Build combined install+delete script ---
+SKIP_MSG=""
 COMBINED_SCRIPT=""
+
 if [ -n "$CHOSEN_LOC" ]; then
-	COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
+	if [ "$DO_OVERWRITE" = "false" ]; then
+		# Check if printer already exists at target IPs
+		SKIP_ALL=true
+		while IFS=',' read -ra IPS <<< "$ALL_PRINTER_IPS"; do :; done
+		for ip in $(echo "$ALL_PRINTER_IPS" | tr ',' ' '); do
+			[ -z "$ip" ] && continue
+			EXIST=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$ip" 2>/dev/null)
+			if [ -z "$EXIST" ]; then SKIP_ALL=false; break; fi
+		done
+		if [ "$SKIP_ALL" = true ]; then
+			SKIP_MSG="$DETECTED_NAME $SKIP_INSTALL_MSG"
+			SKIP_MSG=$(echo "$SKIP_INSTALL_MSG" | sed "s/%s/$DETECTED_NAME/")
+		else
+			COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
+		fi
+	else
+		COMBINED_SCRIPT="'$BINARY' --drivers '$DRIVERS_DIR' --location '$CHOSEN_LOC' > '$LOG' 2>&1"
+	fi
 fi
 if [ -n "$TO_DELETE" ]; then
 	CHOSEN_NAME=""
@@ -346,8 +365,17 @@ if [ -n "$COMBINED_SCRIPT" ]; then
 fi
 
 # --- Success ---
-RAW_MSG=""
-[ -s "$STATUS_FILE" ] && RAW_MSG=$(tr -d '"' < "$STATUS_FILE")
-# Translate "installed" to system language
-RAW_MSG=$(echo "$RAW_MSG" | sed "s/ installed$/$INSTALLED_LABEL/")
-osascript -e "display dialog \"✅ $RAW_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
+if [ -n "$SKIP_MSG" ]; then
+	osascript -e "display dialog \"✅ $SKIP_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
+elif [ -s "$STATUS_FILE" ]; then
+	RAW_MSG=$(tr -d '"' < "$STATUS_FILE")
+	if [ "$DO_OVERWRITE" = "true" ]; then
+		OVERWRITE_MSG=$(echo "$OVERWRITTEN_MSG" | sed "s/%s/$DETECTED_NAME/")
+		osascript -e "display dialog \"✅ $OVERWRITE_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
+	else
+		RAW_MSG=$(echo "$RAW_MSG" | sed "s/ installed$/$INSTALLED_LABEL/")
+		osascript -e "display dialog \"✅ $RAW_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
+	fi
+else
+	osascript -e "display dialog \"✅ $INSTALLED_LABEL\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" giving up after 5" 2>/dev/null
+fi

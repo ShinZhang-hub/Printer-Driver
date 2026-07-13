@@ -193,6 +193,18 @@ var stringsMap = map[string]map[string]string{
 		"ko": "프린터 드라이버 설치",
 		"zh": "打印机驱动安装",
 	},
+	"SKIP_INSTALL_MSG": {
+		"en": "%s already exists, no action needed",
+		"ja": "%s は既に存在します。操作不要",
+		"ko": "%s 이(가) 이미 존재합니다. 작업 불필요",
+		"zh": "%s 已存在，无需操作",
+	},
+	"OVERWRITTEN_MSG": {
+		"en": "%s overwritten successfully",
+		"ja": "%s を上書きインストールしました",
+		"ko": "%s 덮어쓰기 설치 완료",
+		"zh": "%s 已成功覆盖安装",
+	},
 }
 
 func Get(key, lang string) string {
