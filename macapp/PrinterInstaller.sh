@@ -376,7 +376,7 @@ fi
 
 if [ -n "$COMBINED_SCRIPT" ]; then
 	: > "$LOG"
-	rm -f "$STATUS_FILE" 2>/dev/null
+	COMBINED_SCRIPT="rm -f '$STATUS_FILE' 2>/dev/null"$'\n'"$COMBINED_SCRIPT"
 	ERR=$(osascript -e "do shell script \"$COMBINED_SCRIPT\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\"" 2>&1)
 	EXIT_CODE=$?
 	rm -f /tmp/printer-installer-delete.txt
