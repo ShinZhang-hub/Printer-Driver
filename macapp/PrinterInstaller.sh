@@ -382,19 +382,24 @@ if [ -n "$COMBINED_SCRIPT" ]; then
 		osascript -e "display dialog \"$FAIL_PREFIX\\n$ERR_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" with icon stop" 2>/dev/null
 		exit 1
 	fi
+	SCRIPT_RAN=true
 fi
 
 # --- Success (unified dialog for all outcomes) ---
 SUCCESS_MSG=""
 
 if [ "$SCRIPT_RAN" = true ] || [ -n "$SKIP_MSG" ]; then
+	# Build success message: all operations aggregated
 	if [ -n "$SKIP_MSG" ]; then
 		SUCCESS_MSG="ℹ️ $SKIP_MSG"
-	elif [ "$DO_OVERWRITE" = "true" ]; then
-		SUCCESS_MSG="✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_NAMES/")"
-	else
-		SUCCESS_MSG="✅ $(echo "$INSTALLED_LABEL" | sed "s/^ //")"
-		[ -n "$CHOSEN_NAMES" ] && SUCCESS_MSG="✅ $CHOSEN_NAMES$INSTALLED_LABEL"
+	fi
+	if [ "$SCRIPT_RAN" = true ]; then
+		if [ "$DO_OVERWRITE" = "true" ]; then
+			[ -n "$SUCCESS_MSG" ] && SUCCESS_MSG="$SUCCESS_MSG"$'\n'
+			SUCCESS_MSG="${SUCCESS_MSG}✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_NAMES/")"
+		elif [ -z "$SKIP_MSG" ]; then
+			SUCCESS_MSG="✅ $CHOSEN_NAMES$INSTALLED_LABEL"
+		fi
 	fi
 fi
 
