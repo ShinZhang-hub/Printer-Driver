@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -216,6 +217,16 @@ func main() {
 		<-done
 		return
 	}
+
+	if runtime.GOOS == "windows" && *ip == "" && *name == "" && *location == "" {
+		exeDir := filepath.Dir(os.Args[0])
+		psPath := filepath.Join(exeDir, "PrinterInstaller.ps1")
+		if _, err := os.Stat(psPath); err == nil {
+			exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", psPath).Start()
+			return
+		}
+	}
+
 	localIP := localIPAddr()
 
 	if *ip == "" {
