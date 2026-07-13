@@ -207,9 +207,11 @@ chkConfirm = ck(confirmText, X1, true, false, true)
 
 // 2. Location picker — overlapping popups
 var ppKeep = pp([detectedLoc], X2)
+var saveY = Y
 var ppPick = pp(locItemsNoDetect, X2)
 if (ppPick) { ppPick.frame = ppKeep.frame; ppPick.hidden = true }
 var pickerPopup = ppKeep
+Y = saveY  // only count one popup
 
 hr()
 
