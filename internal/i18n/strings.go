@@ -187,6 +187,12 @@ var stringsMap = map[string]map[string]string{
 		"ko": "취소",
 		"zh": "取消",
 	},
+	"TITLE": {
+		"en": "Printer Driver Installer",
+		"ja": "プリンタードライバーインストーラー",
+		"ko": "프린터 드라이버 설치",
+		"zh": "打印机驱动安装",
+	},
 }
 
 func Get(key, lang string) string {
