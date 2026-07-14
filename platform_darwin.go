@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -13,6 +14,10 @@ import (
 func isAdmin() bool    { return true }
 func elevateSelf()     {}
 func hideConsole()     {}
+func writeConsole(s string) { fmt.Print(s) }
+func showMessageBox(title, msg string) {
+	exec.Command("osascript", "-e", fmt.Sprintf(`display dialog "%s" buttons {"OK"} default button "OK"`, msg)).Run()
+}
 
 func isShiftPressed() bool {
 	cmd := exec.Command("osascript", "-l", "JavaScript", "-e",

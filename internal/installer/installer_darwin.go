@@ -147,6 +147,29 @@ func ListPrinters(exclude string) string {
 	return strings.Join(names, ", ")
 }
 
+func ListPrintersWithIPs() map[string]string {
+	out, _ := runCmd("lpstat", "-v")
+	result := make(map[string]string)
+	for _, line := range splitLines(out) {
+		name := extractPrinterNameBeforeURI(line, "")
+		if name == "" {
+			continue
+		}
+		if idx := strings.Index(line, "socket://"); idx >= 0 {
+			rest := line[idx+len("socket://"):]
+			if end := strings.IndexAny(rest, ": \n"); end >= 0 {
+				result[name] = rest[:end]
+			}
+		}
+	}
+	return result
+}
+
+func DeletePrinterByName(name string) error {
+	_, err := runCmd("lpadmin", "-x", name)
+	return err
+}
+
 func getOtherPrinterNames(exclude string) []string {
 	out, err := runCmd("lpstat", "-v")
 	var debug strings.Builder
