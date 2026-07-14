@@ -49,7 +49,7 @@ darwin:
 app: darwin
 	mkdir -p "bin/PrinterInstaller.app/Contents/MacOS"
 	mkdir -p "bin/PrinterInstaller.app/Contents/Resources/drivers/fujifilm"
-	cp /System/Library/CoreServices/AddPrinter.app/Contents/Resources/Printer.icns "bin/PrinterInstaller.app/Contents/Resources/AppIcon.icns"
+	cp macapp/icons/AppIcon.icns "bin/PrinterInstaller.app/Contents/Resources/AppIcon.icns"
 	cp bin/printer-installer-darwin "bin/PrinterInstaller.app/Contents/MacOS/"
 	cp macapp/PrinterInstaller.sh "bin/PrinterInstaller.app/Contents/MacOS/PrinterInstaller"
 	cp macapp/Info.plist "bin/PrinterInstaller.app/Contents/"
