@@ -104,6 +104,7 @@ func printerExists(name string) bool {
 func removePrinterByName(name string) error {
 	h, err := openPrinter(name)
 	if err != nil {
+		log.Warn("openPrinter(%s) failed, printer may not exist: %v", name, err)
 		return nil
 	}
 
@@ -208,7 +209,10 @@ func fallbackDeletePrinterByName(name string) error {
 
 
 func removePortByName(name string) {
-	script := `C:\WINDOWS\System32\Printing_Admin_Scripts\ja-JP\prnport.vbs`
+	script := findPrnportVbs()
+	if script == "" {
+		return
+	}
 	runCmd("cscript", "//NoLogo", "//B", script, "-d", "-r", name)
 }
 

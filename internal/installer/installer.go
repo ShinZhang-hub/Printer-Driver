@@ -39,9 +39,6 @@ func Install(p Params) error {
 	log.Info("  Driver: %s", p.InfFile)
 	log.Info("  Port: %s [%s:%d/%s]", p.PortName, p.PrinterIP, p.PortNum, p.Protocol)
 
-	if err := installDriver(p); err != nil {
-		return fmt.Errorf("install driver failed: %w", err)
-	}
 	if err := addPrinter(p); err != nil {
 		return fmt.Errorf("add printer failed: %w", err)
 	}

@@ -1,10 +1,13 @@
 package i18n
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"syscall"
+	"unsafe"
 )
 
 func Detect() string {
@@ -35,14 +38,36 @@ func Detect() string {
 }
 
 func detectWindows() string {
-	out, err := exec.Command("powershell", "-NoProfile", "-Command",
-		"(Get-WinSystemLocale).Name").Output()
-	if err == nil {
-		lang := strings.TrimSpace(string(out))
-		lang = strings.Split(lang, "-")[0]
+	kernel32 := syscall.NewLazyDLL("kernel32.dll")
+	p := kernel32.NewProc("GetUserDefaultUILanguage")
+	langID, _, _ := p.Call()
+	if langID == 0 {
+		return "en"
+	}
+	primary := langID & 0x3FF
+	switch primary {
+	case 0x04:
+		return "zh"
+	case 0x11:
+		return "ja"
+	case 0x12:
+		return "ko"
+	}
+	// Try GetLocaleInfoW for ISO639 name fallback
+	getLocaleInfo := kernel32.NewProc("GetLocaleInfoW")
+	buf := make([]uint16, 16)
+	ret, _, _ := getLocaleInfo.Call(uintptr(langID), 0x59, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
+	if ret > 0 {
+		lang := syscall.UTF16ToString(buf[:ret-1])
 		switch lang {
-		case "ja", "ko", "zh":
-			return lang
+		case "en":
+			return "en"
+		case "zh":
+			return "zh"
+		case "ja":
+			return "ja"
+		case "ko":
+			return "ko"
 		}
 	}
 	return "en"
@@ -140,16 +165,16 @@ var stringsMap = map[string]map[string]string{
 		"zh": "\\n5秒后自动关闭...",
 	},
 	"FAIL_PREFIX": {
-		"en": "Installation failed:",
-		"ja": "インストール失敗：",
-		"ko": "설치 실패：",
-		"zh": "安装失败：",
+		"en": "❌ Installation failed:",
+		"ja": "❌ インストール失敗：",
+		"ko": "❌ 설치 실패：",
+		"zh": "❌ 安装失败：",
 	},
 	"INSTALLED_LABEL": {
-		"en": " installed successfully",
-		"ja": " 正常にインストールされました",
-		"ko": " 설치 완료",
-		"zh": " 已成功安装",
+		"en": "✅ %s installed successfully",
+		"ja": "✅ %s をインストールしました",
+		"ko": "✅ %s 설치 완료",
+		"zh": "✅ %s 已成功安装",
 	},
 	"OTHER_PRINTERS_LABEL": {
 		"en": "Other printers: ",
@@ -194,23 +219,67 @@ var stringsMap = map[string]map[string]string{
 		"zh": "打印机驱动安装",
 	},
 	"SKIP_INSTALL_MSG": {
-		"en": "%s already exists, no action needed",
-		"ja": "%s は既に存在します。操作不要",
-		"ko": "%s 이(가) 이미 존재합니다. 작업 불필요",
-		"zh": "%s 已存在，无需操作",
+		"en": "ℹ️ %s already exists, no action needed",
+		"ja": "ℹ️ %s は既に存在します。操作不要",
+		"ko": "ℹ️ %s 이(가) 이미 존재합니다. 작업 불필요",
+		"zh": "ℹ️ %s 已存在，无需操作",
 	},
 	"OVERWRITTEN_MSG": {
-		"en": "%s overwritten successfully",
-		"ja": "%s を上書きインストールしました",
-		"ko": "%s 덮어쓰기 설치 완료",
-		"zh": "%s 已成功覆盖安装",
+		"en": "✅ %s updated successfully",
+		"ja": "✅ %s を上書きインストールしました",
+		"ko": "✅ %s 덮어쓰기 설치 완료",
+		"zh": "✅ %s 已成功覆盖安装",
 	},
 	"REMOVED_MSG": {
-		"en": "%s removed successfully",
-		"ja": "%s を削除しました",
-		"ko": "%s 제거 완료",
-		"zh": "%s 已成功移除",
+		"en": "🗑️ %s removed successfully",
+		"ja": "🗑️ %s を削除しました",
+		"ko": "🗑️ %s 제거 완료",
+		"zh": "🗑️ %s 已成功移除",
 	},
+	"WINDOW_TITLE": {
+		"en": "Printer Installer",
+		"ja": "プリンターインストーラー",
+		"ko": "프린터 설치 프로그램",
+		"zh": "打印机安装程序",
+	},
+	"LOCATION_PREFIX": {
+		"en": "Location: %s",
+		"ja": "場所: %s",
+		"ko": "위치: %s",
+		"zh": "位置: %s",
+	},
+	"EXISTING_PRINTERS": {
+		"en": "Existing printers (%d), check to remove:",
+		"ja": "既存プリンター (%d)、削除する場合はチェック：",
+		"ko": "기존 프린터 (%d), 제거하려면 선택：",
+		"zh": "现有打印机（%d），如需移除请勾选：",
+	},
+	"DETECTING": {
+		"en": "Detecting...",
+		"ja": "検出中...",
+		"ko": "감지 중...",
+		"zh": "检测中...",
+	},
+	"NO_LOCATION": {
+		"en": "No location detected",
+		"ja": "場所が検出されませんでした",
+		"ko": "위치를 감지할 수 없음",
+		"zh": "未检测到位置",
+	},
+}
+
+var detectedLang string
+
+func init() {
+	detectedLang = Detect()
+}
+
+func T(key string, args ...interface{}) string {
+	s := Get(key, detectedLang)
+	if len(args) > 0 {
+		return fmt.Sprintf(s, args...)
+	}
+	return s
 }
 
 func Get(key, lang string) string {

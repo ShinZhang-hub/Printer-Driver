@@ -81,6 +81,13 @@ func isShiftPressed() bool {
 	return false
 }
 
+func showMessageBox(title, text string) {
+	user32 := syscall.NewLazyDLL("user32.dll")
+	t, _ := syscall.UTF16PtrFromString(text)
+	h, _ := syscall.UTF16PtrFromString(title)
+	user32.NewProc("MessageBoxW").Call(0, uintptr(unsafe.Pointer(t)), uintptr(unsafe.Pointer(h)), 0)
+}
+
 func killExistingInstance() {
 	data, err := os.ReadFile(lockFilePath())
 	if err != nil {
