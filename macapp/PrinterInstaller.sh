@@ -363,16 +363,15 @@ fi
 SUCCESS_MSG=""
 
 if [ "$SCRIPT_RAN" = true ] || [ -n "$SKIP_MSG" ]; then
-	# Build success message: all operations aggregated
 	if [ -n "$SKIP_MSG" ]; then
-		SUCCESS_MSG="ℹ️ $SKIP_MSG"
+		SUCCESS_MSG="$SKIP_MSG"
 	fi
 	if [ "$SCRIPT_RAN" = true ]; then
 		if [ "$DO_OVERWRITE" = "true" ]; then
 			[ -n "$SUCCESS_MSG" ] && SUCCESS_MSG="$SUCCESS_MSG"$'\n'
-			SUCCESS_MSG="${SUCCESS_MSG}✅ $(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_NAMES/")"
+			SUCCESS_MSG="${SUCCESS_MSG}$(echo "$OVERWRITTEN_MSG" | sed "s/%s/$CHOSEN_NAMES/")"
 		elif [ -z "$SKIP_MSG" ]; then
-			SUCCESS_MSG="✅ $CHOSEN_NAMES$INSTALLED_LABEL"
+			SUCCESS_MSG="$(echo "$INSTALLED_LABEL" | sed "s/%s/$CHOSEN_NAMES/")"
 		fi
 	fi
 fi
@@ -390,9 +389,9 @@ if [ -n "$TO_DELETE" ]; then
 	if [ -n "$DEL_NAMES" ]; then
 		REMOVE_LINE="$(echo "$REMOVED_MSG" | sed "s/%s/$DEL_NAMES/")"
 		if [ -z "$SUCCESS_MSG" ]; then
-			SUCCESS_MSG="🗑️ $REMOVE_LINE"
+			SUCCESS_MSG="$REMOVE_LINE"
 		else
-			SUCCESS_MSG="$SUCCESS_MSG"$'\n\n'"🗑️ $REMOVE_LINE"
+			SUCCESS_MSG="$SUCCESS_MSG"$'\n\n'"$REMOVE_LINE"
 		fi
 	fi
 fi
