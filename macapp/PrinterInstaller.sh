@@ -200,8 +200,17 @@ function hr() {
 chkConfirm = ck(confirmText, X1, true, false, false)
 
 // 2. Location picker — hidden when confirmed, shown when unchecked
-var pickerPopup = pp(locItemsNoDetect, X2)
+var pickerLabel, pickerPopup
+pickerLabel = $.NSTextField.alloc.initWithFrame($.NSMakeRect(X1, Y, 160, LH))
+pickerLabel.stringValue = pickerPrompt
+pickerLabel.editable = false; pickerLabel.bordered = false; pickerLabel.drawsBackground = false
+pickerLabel.font = $.NSFont.systemFontOfSize(12)
+pickerLabel.hidden = true
+views.push(pickerLabel)
+pickerPopup = pp(locItemsNoDetect, X1 + 166)
+pickerPopup.frame = $.NSMakeRect(X1 + 166, Y, CW - X1 - 186, 24)
 pickerPopup.hidden = true
+Y += 28  // reserve space for both
 
 hr()
 
@@ -231,7 +240,9 @@ ObjC.registerSubclass({
 	name: "TH",
 	methods: {"t:": {types:["void",["id"]], implementation:function(s) {
 		var on = (chkConfirm.state == $.NSOnState)
+		pickerLabel.hidden = on
 		pickerPopup.hidden = on
+		doLayout()
 		var curLoc = on ? detectedLoc : pickerPopup.titleOfSelectedItem.js
 		conflictPopup.enabled = (conflictMap[curLoc] === true)
 		var curIPs = (locIPMap[curLoc] || "").split(",")
@@ -248,14 +259,35 @@ chkConfirm.target = $.TH.alloc.init
 chkConfirm.action = 't:'
 pickerPopup.target = chkConfirm.target; pickerPopup.action = 't:'
 
+// Layout function: recalculates all view positions from visible only
+function doLayout() {
+	var vy = 4
+	for (var i = 0; i < views.length; i++) {
+		var v = views[i]
+		if (v.hidden) { v.frame = $.NSMakeRect(-200, -200, 1, 1); continue }
+		var r = v.frame
+		r.origin.y = vy
+		v.frame = r
+		vy += r.size.height + 2
+	}
+	acc.frame = $.NSMakeRect(0, 0, CW, vy + 8)
+	// Flip Y for Cocoa
+	var totalH = vy + 8
+	for (var i = 0; i < views.length; i++) {
+		var v = views[i]
+		if (v.hidden) continue
+		var r = v.frame
+		v.frame = $.NSMakeRect(r.origin.x, totalH - r.origin.y - r.size.height - 4, r.size.width, r.size.height)
+	}
+}
+
 // Assemble
 Y += 8
 var acc = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW, Y))
 for (var i = 0; i < views.length; i++) {
-	var v = views[i], r = v.frame
-	v.frame = $.NSMakeRect(r.origin.x, Y - r.origin.y - r.size.height - 4, r.size.width, r.size.height)
-	acc.addSubview(v)
+	acc.addSubview(views[i])
 }
+doLayout()
 
 var line1 = detectedLoc + "  |  " + detectedNames + "  |  IP: " + detectedIP
 var alert = $.NSAlert.alloc.init
