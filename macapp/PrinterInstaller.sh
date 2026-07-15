@@ -255,7 +255,6 @@ if (deleteItems.length > 0 && deleteItems[0] != "") {
 		Y += scrollH + 4
 	}
 }
-}
 
 // Toggle
 ObjC.registerSubclass({
