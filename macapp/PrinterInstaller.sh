@@ -214,16 +214,43 @@ hr()
 
 // 4. Delete
 if (deleteItems.length > 0 && deleteItems[0] != "") {
+	// Add fake test printers for scroll testing
+	deleteItems.push("Fake-A (10.0.0.1)", "Fake-B (10.0.0.2)", "Fake-C (10.0.0.3)", "Fake-D (10.0.0.4)", "Fake-E (10.0.0.5)", "Fake-F (10.0.0.6)")
 	txt(existPromptFmt.replace("%d", deleteItems.length), X1)
+	var delViews = []
 	for (var i = 0; i < deleteItems.length; i++) {
-		var pname = deleteItems[i]  // "Printer-BG (30.61.34.29)"
+		var pname = deleteItems[i]
 		var parts = pname.split(" (")
 		var realName = parts[0]
 		var pip = printerIPMap[realName] || ""
-		// Disable if this printer's IP is in the install IPs for detected location
 		var disabled = installIPList.indexOf(pip) >= 0
-		delBoxes.push(ck(pname, X2, false, disabled))
+		var cb = ck(pname, X2, false, disabled)
+		delBoxes.push(cb)
+		delViews.push(cb)
 	}
+	// Remove checkboxes from views (they were added by ck)
+	for (var j = 0; j < delViews.length; j++) {
+		var idx = views.lastIndexOf(delViews[j])
+		if (idx >= 0) views.splice(idx, 1)
+	}
+	// Scroll container — fixed height, immediately below label
+	var itemH = LH + 2
+	var maxVis = Math.min(deleteItems.length, 5)
+	var scrollH = maxVis * itemH + 4
+	var delH = delViews.length * itemH + 2
+	var delContainer = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW - X2 - 20, delH))
+	for (var j = 0; j < delViews.length; j++) {
+		var dv = delViews[j]
+		dv.frame = $.NSMakeRect(0, delH - (j + 1) * itemH - 2, dv.frame.size.width, itemH)
+		delContainer.addSubview(dv)
+	}
+	var scroll = $.NSScrollView.alloc.initWithFrame($.NSMakeRect(X2, Y, CW - X2 - 20, scrollH))
+	scroll.hasVerticalScroller = true
+	scroll.documentView = delContainer
+	scroll.borderType = $.NSNoBorder
+	views.push(scroll)
+	Y += scrollH + 4
+}
 }
 
 // Toggle
