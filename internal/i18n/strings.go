@@ -228,7 +228,7 @@ var stringsMap = map[string]map[string]string{
 		"en": "Existing printers (%d), check to remove:",
 		"ja": "既存プリンター (%d)、削除する場合はチェック：",
 		"ko": "기존 프린터 (%d), 제거하려면 선택：",
-		"zh": "现有打印机（%d），如需移除请勾选：",
+		"zh": "现有打印机 (%d)，如需移除请勾选：",
 	},
 	"DETECTING": {
 		"en": "Detecting...",

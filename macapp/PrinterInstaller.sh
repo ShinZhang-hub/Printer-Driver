@@ -161,7 +161,7 @@ var overwriteLabel = $(js_escape "$OVERWRITE_LABEL")
 var skipLabel = $(js_escape "$SKIP_BTN")
 var pickerPrompt = $(js_escape "$PICKER_PROMPT")
 var conflictLabel = $(js_escape "$CONFLICT_LABEL")
-var delPrompt = $(js_escape "$CHOOSE_PROMPT")
+var existPromptFmt = $(js_escape "$EXISTING_PRINTERS")
 
 var CW = 480, M = 20, X1 = M, X2 = M + 16, LH = 22
 var Y = 4, views = []
@@ -214,7 +214,7 @@ hr()
 
 // 4. Delete
 if (deleteItems.length > 0 && deleteItems[0] != "") {
-	txt(delPrompt, X1)
+	txt(existPromptFmt.replace("%d", deleteItems.length), X1)
 	for (var i = 0; i < deleteItems.length; i++) {
 		var pname = deleteItems[i]  // "Printer-BG (30.61.34.29)"
 		var parts = pname.split(" (")
