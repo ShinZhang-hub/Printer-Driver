@@ -217,6 +217,7 @@ if (deleteItems.length > 0 && deleteItems[0] != "") {
 	// Add fake test printers for scroll testing
 	deleteItems.push("Fake-A (10.0.0.1)", "Fake-B (10.0.0.2)", "Fake-C (10.0.0.3)", "Fake-D (10.0.0.4)", "Fake-E (10.0.0.5)", "Fake-F (10.0.0.6)")
 	txt(existPromptFmt.replace("%d", deleteItems.length), X1)
+	var scrollY = Y
 	var delViews = []
 	for (var i = 0; i < deleteItems.length; i++) {
 		var pname = deleteItems[i]
@@ -235,6 +236,7 @@ if (deleteItems.length > 0 && deleteItems[0] != "") {
 	}
 	// Scroll container — fixed height, immediately below label
 	var itemH = LH + 2
+	Y = scrollY
 	var maxVis = Math.min(deleteItems.length, 5)
 	var scrollH = maxVis * itemH + 4
 	var delH = delViews.length * itemH + 2
