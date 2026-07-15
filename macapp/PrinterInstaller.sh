@@ -212,7 +212,6 @@ var hasConflict = conflictMap[detectedLoc] === true
 conflictPopup.enabled = hasConflict
 hr()
 
-
 // 4. Delete
 if (deleteItems.length > 0 && deleteItems[0] != "") {
 	txt(existPromptFmt.replace("%d", deleteItems.length), X1)
@@ -229,14 +228,13 @@ if (deleteItems.length > 0 && deleteItems[0] != "") {
 		delViews.push(cb)
 	}
 	if (deleteItems.length > 5) {
-		// Move checkboxes out of views into scroll container
 		for (var j = 0; j < delViews.length; j++) {
 			var idx = views.lastIndexOf(delViews[j])
 			if (idx >= 0) views.splice(idx, 1)
 		}
 		Y = scrollY
-		var itemH = LH + 3, maxVis = 5
-		var scrollH = maxVis * itemH + 4
+		var itemH = LH + 3
+		var scrollH = 5 * itemH + 4
 		var delH = delViews.length * itemH + 2
 		var delContainer = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW - X2 - 20, delH))
 		for (var j = 0; j < delViews.length; j++) {
@@ -253,13 +251,7 @@ if (deleteItems.length > 0 && deleteItems[0] != "") {
 	} else {
 		Y = scrollY + delViews.length * (LH + 3) + 4
 	}
-}
-	var scroll = $.NSScrollView.alloc.initWithFrame($.NSMakeRect(X2, Y, CW - X2 - 20, scrollH))
-	scroll.hasVerticalScroller = true
-	scroll.documentView = delContainer
-	scroll.borderType = $.NSNoBorder
-	views.push(scroll)
-	Y += scrollH + 4
+
 }
 
 // Toggle
