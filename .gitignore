@@ -1,4 +1,7 @@
 bin/
+!bin/config-server
+!bin/config-server-linux
+!bin/config-server.exe
 .DS_Store
 config-server.json
 *.exe
