@@ -212,10 +212,9 @@ var hasConflict = conflictMap[detectedLoc] === true
 conflictPopup.enabled = hasConflict
 hr()
 
+
 // 4. Delete
 if (deleteItems.length > 0 && deleteItems[0] != "") {
-	// Add fake test printers for scroll testing
-	deleteItems.push("Fake-A (10.0.0.1)", "Fake-B (10.0.0.2)", "Fake-C (10.0.0.3)", "Fake-D (10.0.0.4)", "Fake-E (10.0.0.5)", "Fake-F (10.0.0.6)")
 	txt(existPromptFmt.replace("%d", deleteItems.length), X1)
 	var scrollY = Y
 	var delViews = []
@@ -229,23 +228,32 @@ if (deleteItems.length > 0 && deleteItems[0] != "") {
 		delBoxes.push(cb)
 		delViews.push(cb)
 	}
-	// Remove checkboxes from views (they were added by ck)
-	for (var j = 0; j < delViews.length; j++) {
-		var idx = views.lastIndexOf(delViews[j])
-		if (idx >= 0) views.splice(idx, 1)
+	if (deleteItems.length > 5) {
+		// Move checkboxes out of views into scroll container
+		for (var j = 0; j < delViews.length; j++) {
+			var idx = views.lastIndexOf(delViews[j])
+			if (idx >= 0) views.splice(idx, 1)
+		}
+		Y = scrollY
+		var itemH = LH + 3, maxVis = 5
+		var scrollH = maxVis * itemH + 4
+		var delH = delViews.length * itemH + 2
+		var delContainer = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW - X2 - 20, delH))
+		for (var j = 0; j < delViews.length; j++) {
+			var dv = delViews[j]
+			dv.frame = $.NSMakeRect(0, j * itemH, dv.frame.size.width, itemH)
+			delContainer.addSubview(dv)
+		}
+		var scroll = $.NSScrollView.alloc.initWithFrame($.NSMakeRect(X2, Y, CW - X2 - 20, scrollH))
+		scroll.hasVerticalScroller = true
+		scroll.documentView = delContainer
+		scroll.borderType = $.NSNoBorder
+		views.push(scroll)
+		Y = scrollY + scrollH + 4
+	} else {
+		Y = scrollY + delViews.length * (LH + 3) + 4
 	}
-	// Scroll container — fixed height, immediately below label
-	var itemH = LH + 2
-	Y = scrollY
-	var maxVis = Math.min(deleteItems.length, 5)
-	var scrollH = maxVis * itemH + 4
-	var delH = delViews.length * itemH + 2
-	var delContainer = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW - X2 - 20, delH))
-	for (var j = 0; j < delViews.length; j++) {
-		var dv = delViews[j]
-		dv.frame = $.NSMakeRect(0, delH - (j + 1) * itemH - 2, dv.frame.size.width, itemH)
-		delContainer.addSubview(dv)
-	}
+}
 	var scroll = $.NSScrollView.alloc.initWithFrame($.NSMakeRect(X2, Y, CW - X2 - 20, scrollH))
 	scroll.hasVerticalScroller = true
 	scroll.documentView = delContainer
