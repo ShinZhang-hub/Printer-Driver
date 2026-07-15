@@ -354,12 +354,12 @@ Remove-Item "$env:TEMP\printer-installer-delete.txt" -Force -ErrorAction Silentl
 $successMsg = ""
 
 if ($skipMsg) {
-    $successMsg = "ℹ️ $skipMsg"
+    $successMsg = $skipMsg
 } elseif ($scriptRan) {
     if ($overwrite) {
-        $successMsg = "✅ $($Script:OVERWRITTEN_MSG -f $chosenNames)"
+        $successMsg = "$($Script:OVERWRITTEN_MSG -f $chosenNames)"
     } else {
-        $successMsg = "✅ $chosenNames$($Script:INSTALLED_LABEL)"
+        $successMsg = "$($Script:INSTALLED_LABEL -f $chosenNames)"
     }
 }
 
@@ -369,7 +369,7 @@ if ($toDelete -and $toDelete.Count -gt 0) {
     $deleted = ($toDelete | Where-Object { $_ -ne $chosenFirst }) -join ', '
     if ($deleted) {
         if ($successMsg) { $successMsg += "`n`n" }
-        $successMsg += "🗑️ $($Script:REMOVED_MSG -f $deleted)"
+        $successMsg += "$($Script:REMOVED_MSG -f $deleted)"
     }
 }
 
