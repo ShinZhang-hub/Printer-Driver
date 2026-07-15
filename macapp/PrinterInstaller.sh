@@ -221,18 +221,40 @@ var hasConflict = conflictMap[detectedLoc] === true
 conflictPopup.enabled = hasConflict
 hr()
 
+
 // 4. Delete
 if (deleteItems.length > 0 && deleteItems[0] != "") {
+	// Add fake test printers for scroll testing
+	deleteItems.push("Fake-A (10.0.0.1)", "Fake-B (10.0.0.2)", "Fake-C (10.0.0.3)", "Fake-D (10.0.0.4)", "Fake-E (10.0.0.5)", "Fake-F (10.0.0.6)")
 	txt(existPromptFmt.replace("%d", deleteItems.length), X1)
 	for (var i = 0; i < deleteItems.length; i++) {
-		var pname = deleteItems[i]  // "Printer-BG (30.61.34.29)"
+		var pname = deleteItems[i]
 		var parts = pname.split(" (")
 		var realName = parts[0]
 		var pip = printerIPMap[realName] || ""
-		// Disable if this printer's IP is in the install IPs for detected location
 		var disabled = installIPList.indexOf(pip) >= 0
 		delBoxes.push(ck(pname, X2, false, disabled))
 	}
+	// Wrap in scroll view if many items
+	if (deleteItems.length > 5) {
+		var itemH = LH + 3, scrollH = 5 * itemH + 4
+		var delH = deleteItems.length * itemH + 2
+		var delContainer = $.NSView.alloc.initWithFrame($.NSMakeRect(0, 0, CW - X2 - 20, delH))
+		// Move the last N checkboxes from views into delContainer
+		for (var j = 0; j < deleteItems.length; j++) {
+			var dv = views.pop()  // last added views are the checkboxes
+			dv.frame = $.NSMakeRect(0, delH - (j + 1) * itemH - 2, dv.frame.size.width, dv.frame.size.height)
+			delContainer.addSubview(dv)
+		}
+		// Re-add checkboxes to end of delContainer's subviews in reverse
+		var scroll = $.NSScrollView.alloc.initWithFrame($.NSMakeRect(X2, Y, CW - X2 - 20, scrollH))
+		scroll.hasVerticalScroller = true
+		scroll.documentView = delContainer
+		scroll.borderType = $.NSNoBorder
+		views.push(scroll)
+		Y += scrollH + 4
+	}
+}
 }
 
 // Toggle
