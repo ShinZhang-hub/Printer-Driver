@@ -1,43 +1,67 @@
-# 富士胶片 Apeos 打印机驱动安装器
+# PrinterInstaller
 
-一键安装富士胶片打印机驱动，不用手动点下一步。
+macOS / Windows 打印机驱动一键安装工具。
 
-## 怎么用
-
-### 客户端（装打印机的那台电脑）
-
-双击 `install.exe` 即可 —— 全自动，无弹窗。
-
-如果 SNMP 探测不到打印机型号，或者你想指定 IP，**按住 Shift 再双击** —— 会弹出网页管理界面，手动填 IP 和打印机名点安装就行。
-
-### 配置中心（可选）
-
-在服务器上跑 `config-server`（Linux 或 Windows 都行）：
+## macOS 使用
 
 ```bash
-./config-server
+# 构建 .app
+make app
+
+# 分发
+make dmg    # DMG 安装包
+make pkg    # PKG 安装包（推荐内部分发）
+
+# 使用
+双击 PrinterInstaller.app   → 自动检测位置 → 弹窗确认 → 安装
+Shift + 双击                 → 管理面板（配置编辑）
 ```
 
-然后在客户端同目录的 `config.json` 里写上：
+## Windows 使用
 
-```json
-"config_url": "http://你的服务器IP:8080"
+```bash
+# 构建
+make windows
+
+# 双击 printer-installer.exe → Fyne 原生 GUI
 ```
 
-这样客户端每次运行会自动从配置中心拉取最新配置，管理面板里改了也能存回去。
+## 配置服务器
 
-## 文件说明
+```bash
+# 构建（Windows 服务器）
+make config-server-windows
+→ bin/config-server.exe
 
-| 文件 | 用途 |
+# 运行
+config-server.exe     # 监听 :9527
+```
+
+## 目录结构
+
+```
+macapp/                 macOS .app 打包（shell + JXA 弹窗）
+winapp/                 Windows 打包资源
+internal/
+  i18n/                 多语言文案（EN/JA/KO/ZH）
+  installer/            打印机安装/删除
+  fyneui/               Fyne 跨平台 GUI
+  config/               配置文件读取/保存
+  embeds/drivers/       内嵌打印机驱动
+config.json              默认配置（含位置、打印机、子网）
+```
+
+## 按钮一览
+
+| 操作 | 说明 |
 |------|------|
-| `install.exe` | 客户端，双击即装，Shift+双击开管理面板 |
-| `config-server` / `config-server.exe` | 配置中心服务端 |
-| `config.json` | 配置模板（已嵌入 EXE，不放也行） |
+| `make app` | 构建 macOS .app（JXA 原生弹窗） |
+| `make pkg` | 构建 macOS PKG 安装包 |
+| `make dmg` | 构建 macOS DMG 安装包 |
+| `make windows` | 构建 Windows .exe |
+| `make winapp` | 构建 Windows 单文件 ps1 |
+```
 
-## 常见问题
+## 语言
 
-**装完打印不出纸？** 检查打印机 IP 对不对，或者 Shift+双击开面板手动装。
-
-**报错需要管理员权限？** 右键 `install.exe` → 以管理员身份运行。
-
-**配置中心不想搭？** 没关系，config.json 里的配置一样用，只是不能远程同步。
+跟随系统自动切换 EN / JA / KO / ZH。文案在 `internal/i18n/strings.go`。
