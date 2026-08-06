@@ -3,6 +3,8 @@ package fyneui
 import (
 	_ "embed"
 
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -36,9 +38,21 @@ func Run(detectedLoc string, allLocations []string, deletePrinters []string, pri
 	}
 
 	// Summary label
-	summaryText := detectedLoc + "  |  " + i18n.T("LOCATION_PREFIX", "") + "  |  IP: TODO"
-	summaryLabel := widget.NewLabel(summaryText)
+	summaryLabel := widget.NewLabel("")
 	summaryLabel.Alignment = fyne.TextAlignCenter
+	updateSummary := func(loc string) {
+		ips := locIPs[loc]
+		ipText := "IP: -"
+		if len(ips) > 0 {
+			ipText = "IP: " + strings.Join(ips, ", ")
+		}
+		locTxt := i18n.T("LOCATION_PREFIX", loc)
+		if loc == "" {
+			locTxt = i18n.T("NO_LOCATION")
+		}
+		summaryLabel.SetText(locTxt + "  |  " + ipText)
+	}
+	updateSummary(detectedLoc)
 
 	// Section 1: Confirm
 	confirmCheck := widget.NewCheck(i18n.T("CONFIRM_FMT", detectedLoc), func(on bool) {})
@@ -117,14 +131,17 @@ func Run(detectedLoc string, allLocations []string, deletePrinters []string, pri
 		if on {
 			locSelect.Hide()
 			updateDisabled(detectedLoc)
+			updateSummary(detectedLoc)
 		} else {
 			locSelect.Show()
 			updateDisabled(locSelect.Selected)
+			updateSummary(locSelect.Selected)
 		}
 	}
 
 	locSelect.OnChanged = func(s string) {
 		updateDisabled(s)
+		updateSummary(s)
 	}
 
 	installBtn := widget.NewButton(i18n.T("OK_LABEL"), func() {
