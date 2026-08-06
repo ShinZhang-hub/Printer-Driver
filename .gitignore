@@ -5,6 +5,7 @@ bin/
 .DS_Store
 config-server.json
 *.exe
+!internal/embeds/drivers/*.exe
 *.pkg
 *.dmg
 printer-installer

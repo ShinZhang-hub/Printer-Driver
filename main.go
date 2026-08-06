@@ -379,10 +379,25 @@ func resolveDriver(driversDir, brand, extracted string) (*drvpack.DriverPackage,
 		log.Warn("Driver extraction failed: %v, using embedded driver", pkgErr)
 	}
 
+	// No local driver package: use the embedded full installer (same package as
+	// drivers/<brand>), which is complete. The old embedded file set is only a
+	// partial copy and breaks pnputil on fresh machines.
 	tmpDir, err := os.MkdirTemp("", "printer-installer-embedded-")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
 	}
+	if embeddedExe, eerr := embeds.ExtractWindowsInstaller(tmpDir); eerr == nil {
+		if pkg, pkgErr := drvpack.Open(embeddedExe); pkgErr == nil {
+			os.RemoveAll(tmpDir)
+			log.Info("Using embedded driver installer")
+			return pkg, nil
+		} else {
+			log.Warn("Embedded driver installer extraction failed: %v", pkgErr)
+		}
+	} else {
+		log.Warn("No embedded driver installer: %v", eerr)
+	}
+
 	if err := embeds.ExtractDrivers(tmpDir); err != nil {
 		os.RemoveAll(tmpDir)
 		return nil, fmt.Errorf("failed to extract embedded drivers: %w", err)
