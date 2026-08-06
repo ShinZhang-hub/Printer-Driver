@@ -209,6 +209,10 @@ func fallbackDeletePrinterByName(name string) error {
 
 
 func removePortByName(name string) {
+	// PrintManagement module is present by default; prnport.vbs needs the
+	// optional Printing Admin Scripts feature, so try PowerShell first.
+	runCmd("powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
+		fmt.Sprintf(`Remove-PrinterPort -Name "%s" -ErrorAction SilentlyContinue`, name))
 	script := findPrnportVbs()
 	if script == "" {
 		return

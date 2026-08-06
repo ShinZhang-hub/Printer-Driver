@@ -122,7 +122,7 @@ func main() {
 			cfg = config.LoadRemote(embeddedConfig)
 		}
 		if *discover {
-			localIP := localIPAddr()
+			localIP := detectedLocalIP(cfg)
 			printerIP := *ip
 			if printerIP == "" {
 				printerIP = cfg.GetPrinterIP(localIP)
@@ -231,7 +231,7 @@ func main() {
 		return
 	}
 
-	localIP := localIPAddr()
+	localIP := detectedLocalIP(cfg)
 
 	if *ip == "" {
 		*ip = cfg.GetPrinterIP(localIP)
@@ -499,8 +499,36 @@ func localIPAddr() string {
 	return ""
 }
 
+// detectedLocalIP returns a local IPv4 that falls inside one of the configured
+// subnets, preferring it over whatever interface happens to come first. Fresh
+// machines often have VPN/VM/APIPA adapters that sort before the real LAN NIC.
+func detectedLocalIP(cfg *config.Config) string {
+	ip := localIPAddr()
+	if cfg.MatchLocation(ip) != nil {
+		return ip
+	}
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ip
+	}
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if v4 := ipnet.IP.To4(); v4 != nil && !isLinkLocal(v4) {
+				if cfg.MatchLocation(v4.String()) != nil {
+					return v4.String()
+				}
+			}
+		}
+	}
+	return ip
+}
+
+func isLinkLocal(ip net.IP) bool {
+	return ip[0] == 169 && ip[1] == 254
+}
+
 func showNativeUI(cfg *config.Config) {
-	localIP := localIPAddr()
+	localIP := detectedLocalIP(cfg)
 	detectedLoc := ""
 	if loc := cfg.MatchLocation(localIP); loc != nil {
 		detectedLoc = loc.Name

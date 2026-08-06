@@ -52,20 +52,33 @@ func findPrnportVbs() string {
 
 func createPort(p Params) error {
 	removePortByName(p.PortName)
-	script := findPrnportVbs()
-	if script == "" {
-		return fmt.Errorf("prnport.vbs not found")
-	}
-	_, err := runCmd("cscript", "//NoLogo", "//B", script,
-		"-a", "-r", p.PortName,
-		"-h", p.PrinterIP,
-		"-o", p.Protocol,
-		"-n", fmt.Sprintf("%d", p.PortNum))
-	if err != nil {
-		return err
+
+	// New Windows installs lack the optional "Printing Admin Scripts" feature
+	// that ships prnport.vbs, so prefer the built-in PrintManagement module.
+	if err := createPortViaPS(p); err != nil {
+		log.Warn("Add-PrinterPort failed: %v, falling back to prnport.vbs", err)
+		script := findPrnportVbs()
+		if script == "" {
+			return fmt.Errorf("create port failed: Add-PrinterPort unavailable and prnport.vbs not found")
+		}
+		_, err := runCmd("cscript", "//NoLogo", "//B", script,
+			"-a", "-r", p.PortName,
+			"-h", p.PrinterIP,
+			"-o", p.Protocol,
+			"-n", fmt.Sprintf("%d", p.PortNum))
+		if err != nil {
+			return err
+		}
 	}
 	log.Info("Port %s created", p.PortName)
 	return nil
+}
+
+func createPortViaPS(p Params) error {
+	_, err := runCmd("powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
+		fmt.Sprintf(`Add-PrinterPort -Name "%s" -PrinterHostAddress "%s" -PortNumber %d -ErrorAction Stop`,
+			p.PortName, p.PrinterIP, p.PortNum))
+	return err
 }
 
 func addPrinter(p Params) error {

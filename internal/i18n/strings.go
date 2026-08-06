@@ -35,20 +35,6 @@ func Detect() string {
 	return "en"
 }
 
-func detectWindows() string {
-	out, err := exec.Command("powershell", "-NoProfile", "-Command",
-		"(Get-WinSystemLocale).Name").Output()
-	if err == nil {
-		lang := strings.TrimSpace(string(out))
-		lang = strings.Split(lang, "-")[0]
-		switch lang {
-		case "ja", "ko", "zh":
-			return lang
-		}
-	}
-	return "en"
-}
-
 var stringsMap = map[string]map[string]string{
 	"ADMIN_INSTALL_PROMPT": {
 		"en": "Printer driver installation requires admin privileges",
