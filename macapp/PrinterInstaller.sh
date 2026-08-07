@@ -13,10 +13,8 @@ rm -f "$STATUS_FILE" 2>/dev/null
 
 # --- Show loading indicator immediately ---
 osascript 2>/dev/null <<ENDLOAD &
-set dlg to display dialog "$DETECTING" with icon note buttons {"$CANCEL_LABEL"} default button "$CANCEL_LABEL" giving up after 30
-if button returned of dlg is "$CANCEL_LABEL" then
-    do shell script "kill $PPID 2>/dev/null"
-end if
+display dialog "$DETECTING" with icon note buttons {"$CANCEL_LABEL"} default button "$CANCEL_LABEL" giving up after 30
+return "cancelled"
 ENDLOAD
 LOAD_PID=$!
 
@@ -135,6 +133,10 @@ fi
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
 
 # --- Close loading dialog ---
+# Check if user cancelled (process already exited)
+if ! kill -0 $LOAD_PID 2>/dev/null; then
+	exit 0
+fi
 kill $LOAD_PID 2>/dev/null
 wait $LOAD_PID 2>/dev/null
 PRINTER_SUMMARY="$DETECTED_NAME"
