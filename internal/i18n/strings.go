@@ -238,9 +238,9 @@ var stringsMap = map[string]map[string]string{
 	},
 	"INSTALLING": {
 		"en": "Installing/removing printers, please wait...",
-		"ja": "プリンターをインストール/削除中です。お待ちください...",
-		"ko": "프린터 설치/삭제 중입니다. 잠시 기다려 주세요...",
-		"zh": "正在安装/删除打印机，请稍候...",
+		"ja": "プリンターをインストール／削除中です。しばらくお待ちください...",
+		"ko": "프린터 설치/제거 중입니다. 잠시만 기다려 주세요...",
+		"zh": "正在安装/删除打印机，请稍后...",
 	},
 	"NO_LOCATION": {
 		"en": "No location detected",
