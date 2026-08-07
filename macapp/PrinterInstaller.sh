@@ -11,6 +11,12 @@ eval "$("$BINARY" --drivers "$DRIVERS_DIR" --ui-env 2>/dev/null)"
 # --- Clean stale status file ---
 rm -f "$STATUS_FILE" 2>/dev/null
 
+# --- Show loading indicator immediately ---
+osascript 2>/dev/null <<ENDLOAD &
+display dialog "$DETECTING" with icon note buttons {} default button 1 giving up after 30
+ENDLOAD
+LOAD_PID=$!
+
 # --- Rosetta ---
 if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/arch -x86_64 /bin/ls >/dev/null 2>&1; then
 	osascript -e "do shell script \"softwareupdate --install-rosetta --agree-to-license\" with administrator privileges" 2>/dev/null
@@ -124,6 +130,10 @@ if [ -n "$ALL_LOCATIONS" ]; then
 fi
 
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
+
+# --- Close loading dialog ---
+kill $LOAD_PID 2>/dev/null
+wait $LOAD_PID 2>/dev/null
 PRINTER_SUMMARY="$DETECTED_NAME"
 [ $(echo "$ALL_PRINTER_NAMES" | tr ',' '\n' | wc -l | tr -d ' ') -gt 1 ] && PRINTER_SUMMARY="$ALL_PRINTER_NAMES"
 
