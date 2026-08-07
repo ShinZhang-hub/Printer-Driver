@@ -101,7 +101,9 @@ func killExistingInstance() {
 	if _, err := strconv.Atoi(pidStr); err != nil {
 		return
 	}
-	exec.Command("taskkill", "/F", "/PID", pidStr).Run()
+	cmd := exec.Command("taskkill", "/F", "/PID", pidStr)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	cmd.Run()
 	os.Remove(lockFilePath())
 }
 

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+	"time"
 
 	"printer-installer/internal/log"
 )
@@ -206,6 +207,10 @@ func DeletePrintersFromFile(filePath string) error {
 func closeProgressWindow() {
 	closeWindowByTitle("Printer Driver Installation")
 	killProcessByName("ffcomist.exe")
+}
+
+func suppressDriverUI() func() {
+	return HideDriverWindowsLoop(200 * time.Millisecond)
 }
 
 func setDefault(p Params) error {

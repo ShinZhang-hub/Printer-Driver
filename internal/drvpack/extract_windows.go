@@ -11,11 +11,13 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+
+	"printer-installer/internal/installer"
 )
 
 var (
-	kernel32           = syscall.NewLazyDLL("kernel32.dll")
-	procGetShortPath   = kernel32.NewProc("GetShortPathNameW")
+	kernel32         = syscall.NewLazyDLL("kernel32.dll")
+	procGetShortPath = kernel32.NewProc("GetShortPathNameW")
 )
 
 func shortPath(path string) string {
@@ -30,6 +32,7 @@ func shortPath(path string) string {
 
 func runWithTimeout(timeout time.Duration, name string, args ...string) error {
 	cmd := exec.Command(name, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	if err := cmd.Start(); err != nil {
 		return err
 	}
@@ -38,7 +41,7 @@ func runWithTimeout(timeout time.Duration, name string, args ...string) error {
 	select {
 	case <-time.After(timeout):
 		// 杀整个进程树（InnoSetup 可能衍生子进程）
-		exec.Command("taskkill", "/f", "/t", "/pid", fmt.Sprintf("%d", cmd.Process.Pid)).Run()
+		runTaskkill("/f", "/t", "/pid", fmt.Sprintf("%d", cmd.Process.Pid))
 		cmd.Process.Kill()
 		return fmt.Errorf("timeout (%v)", timeout)
 	case err := <-done:
@@ -46,9 +49,17 @@ func runWithTimeout(timeout time.Duration, name string, args ...string) error {
 	}
 }
 
+// runTaskkill invokes taskkill with its console window hidden so the user never
+// sees a terminal flash during installation.
+func runTaskkill(args ...string) {
+	cmd := exec.Command("taskkill", args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	cmd.Run()
+}
+
 func cleanupExtractProcesses() {
-	exec.Command("taskkill", "/f", "/im", "ffcomist.exe").Run()
-	exec.Command("taskkill", "/f", "/im", "Launcher.exe").Run()
+	runTaskkill("/f", "/im", "ffcomist.exe")
+	runTaskkill("/f", "/im", "Launcher.exe")
 }
 
 func extract(exePath string) (string, error) {
@@ -75,7 +86,9 @@ func extract(exePath string) (string, error) {
 			return "", fmt.Errorf("failed to create temp extraction directory: %w", err)
 		}
 
+		stopHide := installer.HideDriverWindowsLoop(200 * time.Millisecond)
 		err := runWithTimeout(60*time.Second, exePath, args...)
+		stopHide()
 		cleanupExtractProcesses()
 		if err != nil {
 			attemptErrs = append(attemptErrs, fmt.Sprintf("%s: %v", strings.Join(args, " "), err))

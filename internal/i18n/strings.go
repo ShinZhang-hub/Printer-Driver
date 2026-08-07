@@ -8,7 +8,21 @@ import (
 	"strings"
 )
 
+// forcedLang optionally overrides language detection. Set at build time with
+// -ldflags "-X printer-installer/internal/i18n.forcedLang=ja" (used to build
+// per-language test builds). PRINTER_INSTALLER_LANG overrides at runtime.
+var forcedLang string
+
 func Detect() string {
+	if forcedLang != "" {
+		return forcedLang
+	}
+	if l := os.Getenv("PRINTER_INSTALLER_LANG"); l != "" {
+		switch l {
+		case "en", "ja", "ko", "zh":
+			return l
+		}
+	}
 	if runtime.GOOS == "windows" {
 		return detectWindows()
 	}
@@ -222,6 +236,12 @@ var stringsMap = map[string]map[string]string{
 		"ko": "감지 중...",
 		"zh": "检测中...",
 	},
+	"INSTALLING": {
+		"en": "Installing/removing printers, please wait...",
+		"ja": "プリンターをインストール/削除中です。お待ちください...",
+		"ko": "프린터 설치/삭제 중입니다. 잠시 기다려 주세요...",
+		"zh": "正在安装/删除打印机，请稍候...",
+	},
 	"NO_LOCATION": {
 		"en": "No location detected",
 		"ja": "場所が検出されませんでした",
@@ -234,6 +254,11 @@ var detectedLang string
 
 func init() {
 	detectedLang = Detect()
+}
+
+// Lang returns the detected UI language code (en, ja, ko, zh).
+func Lang() string {
+	return detectedLang
 }
 
 func T(key string, args ...interface{}) string {

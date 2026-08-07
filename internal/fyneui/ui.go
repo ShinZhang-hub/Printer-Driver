@@ -3,12 +3,13 @@ package fyneui
 import (
 	_ "embed"
 
+	"fmt"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"printer-installer/internal/i18n"
 )
@@ -23,12 +24,19 @@ type Result struct {
 	Cancelled   bool
 }
 
-func Run(detectedLoc string, allLocations []string, deletePrinters []string, printersIPs map[string]string, locIPs map[string][]string) *Result {
+// WorkFunc performs the delete/install work after the user confirms. It runs in
+// the background while the status window is shown, and must return the result
+// text to display (empty means nothing to show).
+type WorkFunc func(*Result) string
+
+func Run(detectedLoc string, allLocations []string, deletePrinters []string, printersIPs map[string]string, locIPs map[string][]string, locNames map[string][]string, work WorkFunc) (*Result, string) {
 	a := app.New()
+	applyCJKTheme(a)
 	w := a.NewWindow(i18n.T("WINDOW_TITLE"))
 	w.SetIcon(fyne.NewStaticResource("printer", iconPng))
 
 	var result *Result
+	messageCh := make(chan string, 1)
 
 	otherLocs := make([]string, 0)
 	for _, l := range allLocations {
@@ -46,11 +54,20 @@ func Run(detectedLoc string, allLocations []string, deletePrinters []string, pri
 		if len(ips) > 0 {
 			ipText = "IP: " + strings.Join(ips, ", ")
 		}
-		locTxt := i18n.T("LOCATION_PREFIX", loc)
-		if loc == "" {
-			locTxt = i18n.T("NO_LOCATION")
+		locTxt := i18n.T("NO_LOCATION")
+		if loc != "" {
+			locTxt = loc
 		}
-		summaryLabel.SetText(locTxt + "  |  " + ipText)
+		namesTxt := ""
+		if names := locNames[loc]; len(names) > 0 {
+			namesTxt = strings.Join(names, ", ")
+		}
+		segments := []string{locTxt}
+		if namesTxt != "" {
+			segments = append(segments, namesTxt)
+		}
+		segments = append(segments, ipText)
+		summaryLabel.SetText(strings.Join(segments, "  |  "))
 	}
 	updateSummary(detectedLoc)
 
@@ -160,10 +177,42 @@ func Run(detectedLoc string, allLocations []string, deletePrinters []string, pri
 			Overwrite:   conflictSelect.Selected == overwriteT,
 			DeleteNames: delNames,
 		}
-		w.Close()
+
+		// Swap to a small status window while the work runs in the background.
+		w.SetCloseIntercept(func() {})
+		w.SetFixedSize(false)
+		w.Resize(fyne.NewSize(360, 170))
+		w.SetFixedSize(true)
+		w.CenterOnScreen()
+		statusLabel := widget.NewLabelWithStyle(i18n.T("INSTALLING"), fyne.TextAlignCenter, fyne.TextStyle{})
+		statusBar := widget.NewProgressBarInfinite()
+		w.SetContent(container.NewPadded(container.NewCenter(container.NewVBox(
+			statusLabel,
+			container.NewPadded(statusBar),
+		))))
+		statusBar.Start()
+
+		go func() {
+			msg := ""
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						msg = fmt.Sprintf("installation error: %v", r)
+					}
+				}()
+				if work != nil {
+					msg = work(result)
+				}
+			}()
+			messageCh <- msg
+			fyne.Do(func() {
+				statusBar.Stop()
+				w.Close()
+			})
+		}()
 	})
 
-	cancelBtn := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
+	cancelBtn := widget.NewButton(i18n.T("CANCEL_LABEL"), func() {
 		result = &Result{Cancelled: true}
 		w.Close()
 	})
@@ -181,22 +230,45 @@ func Run(detectedLoc string, allLocations []string, deletePrinters []string, pri
 		delHeader,
 	)
 
-	btnBox := container.NewHBox(
-		cancelBtn,
-		widget.NewSeparator(),
-		installBtn,
+	btnBox := container.NewCenter(
+		container.NewHBox(cancelBtn, installBtn),
 	)
 
 	content := container.NewBorder(
-		top, btnBox, nil, nil,
+		top, container.NewPadded(btnBox), nil, nil,
 		container.NewScroll(delList),
 	)
 
 	w.SetContent(container.NewPadded(content))
-	w.Resize(fyne.NewSize(500, 480))
+
+	// Size the window to fit the content exactly so the delete list only
+	// scrolls once the window reaches its maximum height. Widgets are measured
+	// with the active theme, so the taller CJK fonts used on Japanese/Chinese
+	// systems are accounted for automatically (Yu Gothic lines are ~30% taller
+	// than Inter, which previously pushed 3 rows into the scroll area).
+	rowH := float32(38)
+	if len(delChecks) > 0 {
+		rowH = delChecks[0].MinSize().Height
+	}
+	const pad = float32(8) // each NewPadded adds theme padding on both sides
+	const maxH = float32(680)
+	height := pad + top.MinSize().Height + btnBox.MinSize().Height + pad + float32(len(delChecks))*rowH + 4
+	if height > maxH {
+		height = maxH
+	}
+	w.Resize(fyne.NewSize(520, height))
 	w.SetFixedSize(true)
 	w.CenterOnScreen()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		bringToFront()
+	}()
 	w.ShowAndRun()
 
-	return result
+	message := ""
+	select {
+	case message = <-messageCh:
+	default:
+	}
+	return result, message
 }

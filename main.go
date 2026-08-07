@@ -564,12 +564,16 @@ func showNativeUI(cfg *config.Config) {
 
 	// For each location, list configured printer IPs
 	locIPs := make(map[string][]string)
+	locNames := make(map[string][]string)
 	for _, loc := range cfg.Locations {
 		var ips []string
+		var names []string
 		for _, p := range loc.AllPrinters() {
 			ips = append(ips, p.IP)
+			names = append(names, p.Name)
 		}
 		locIPs[loc.Name] = ips
+		locNames[loc.Name] = names
 	}
 
 	allLocNames := make([]string, len(cfg.Locations))
@@ -577,56 +581,60 @@ func showNativeUI(cfg *config.Config) {
 		allLocNames[i] = loc.Name
 	}
 
-	result := fyneui.Run(detectedLoc, allLocNames, deleteItems, printersIPs, locIPs)
+	result, message := fyneui.Run(detectedLoc, allLocNames, deleteItems, printersIPs, locIPs, locNames, func(res *fyneui.Result) string {
+		if res == nil {
+			return ""
+		}
+		log.Info("WinUI: location=%s overwrite=%t", res.Location, res.Overwrite)
+
+		// Delete checked printers first
+		var delParts []string
+		for _, name := range res.DeleteNames {
+			log.Info("Removing printer: %s", name)
+			if err := installer.DeletePrinterByName(name); err != nil {
+				log.Warn("Failed to remove printer %s: %v", name, err)
+				delParts = append(delParts, i18n.T("FAIL_PREFIX")+" "+name+": "+err.Error())
+			} else {
+				delParts = append(delParts, i18n.T("REMOVED_MSG", name))
+			}
+		}
+
+		var printers []config.PrinterInfo
+		for _, loc := range cfg.Locations {
+			if loc.Name == res.Location {
+				printers = loc.AllPrinters()
+				break
+			}
+		}
+
+		// Install / skip / overwrite messages
+		var installMsg string
+		if len(printers) > 0 {
+			if err := installAllPrinters(cfg, "drivers", printers, true, res.Overwrite); err != nil {
+				log.Error("Installation failed: %v", err)
+				installMsg = i18n.T("FAIL_PREFIX") + " " + err.Error()
+			} else {
+				installMsg = installer.ResultMessage
+			}
+		}
+
+		var allParts []string
+		if installMsg != "" {
+			allParts = append(allParts, installMsg)
+		}
+		delJoined := strings.Join(delParts, "\n")
+		if delJoined != "" {
+			if installMsg != "" {
+				allParts = append(allParts, "")
+			}
+			allParts = append(allParts, delJoined)
+		}
+		return strings.Join(allParts, "\n")
+	})
 	if result == nil || result.Cancelled {
 		return
 	}
-
-	log.Info("WinUI: location=%s overwrite=%t", result.Location, result.Overwrite)
-
-	// Delete checked printers first
-	var delParts []string
-	for _, name := range result.DeleteNames {
-		log.Info("Removing printer: %s", name)
-		if err := installer.DeletePrinterByName(name); err != nil {
-			log.Warn("Failed to remove printer %s: %v", name, err)
-			delParts = append(delParts, i18n.T("FAIL_PREFIX")+" "+name+": "+err.Error())
-		} else {
-			delParts = append(delParts, i18n.T("REMOVED_MSG", name))
-		}
-	}
-
-	var printers []config.PrinterInfo
-	for _, loc := range cfg.Locations {
-		if loc.Name == result.Location {
-			printers = loc.AllPrinters()
-			break
-		}
-	}
-
-	// Install / skip / overwrite messages
-	var installMsg string
-	if len(printers) > 0 {
-		if err := installAllPrinters(cfg, "drivers", printers, true, result.Overwrite); err != nil {
-			log.Error("Installation failed: %v", err)
-			installMsg = i18n.T("FAIL_PREFIX") + " " + err.Error()
-		} else {
-			installMsg = installer.ResultMessage
-		}
-	}
-
-	var allParts []string
-	if installMsg != "" {
-		allParts = append(allParts, installMsg)
-	}
-	delJoined := strings.Join(delParts, "\n")
-	if delJoined != "" {
-		if installMsg != "" {
-			allParts = append(allParts, "")
-		}
-		allParts = append(allParts, delJoined)
-	}
-	if len(allParts) > 0 {
-		showMessageBox(i18n.T("WINDOW_TITLE"), strings.Join(allParts, "\n"))
+	if message != "" {
+		showMessageBox(i18n.T("WINDOW_TITLE"), message)
 	}
 }

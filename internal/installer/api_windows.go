@@ -23,8 +23,11 @@ var (
 	procAddPrinter        = winspool.NewProc("AddPrinterW")
 	procSetDefaultPrinter = winspool.NewProc("SetDefaultPrinterW")
 
-	procFindWindow  = user32.NewProc("FindWindowW")
-	procPostMessage = user32.NewProc("PostMessageW")
+	procFindWindow               = user32.NewProc("FindWindowW")
+	procPostMessage              = user32.NewProc("PostMessageW")
+	procEnumWindows              = user32.NewProc("EnumWindows")
+	procGetWindowThreadProcessId = user32.NewProc("GetWindowThreadProcessId")
+	procShowWindow               = user32.NewProc("ShowWindow")
 
 	procCreateToolhelp32Snapshot = kernel32.NewProc("CreateToolhelp32Snapshot")
 	procProcess32First           = kernel32.NewProc("Process32FirstW")
@@ -35,9 +38,10 @@ var (
 )
 
 const (
-	processTerminate   = 0x0001
-	th32csSnapProcess  = 0x00000002
-	wmClose            = 0x0010
+	processTerminate      = 0x0001
+	th32csSnapProcess     = 0x00000002
+	wmClose               = 0x0010
+	swHide                = 0x0000
 	printerAttributeLocal = 0x0080
 )
 
@@ -55,27 +59,27 @@ type processEntry32W struct {
 }
 
 type printerInfo2 struct {
-	pServerName          *uint16
-	pPrinterName         *uint16
-	pShareName           *uint16
-	pPortName            *uint16
-	pDriverName          *uint16
-	pComment             *uint16
-	pLocation            *uint16
-	pDevMode             uintptr
-	pSepFile             *uint16
-	pPrintProcessor      *uint16
-	pDatatype            *uint16
-	pParameters          *uint16
-	pSecurityDescriptor  uintptr
-	Attributes           uint32
-	Priority             uint32
-	DefaultPriority      uint32
-	StartTime            uint32
-	UntilTime            uint32
-	Status               uint32
-	cJobs                uint32
-	AveragePPM           uint32
+	pServerName         *uint16
+	pPrinterName        *uint16
+	pShareName          *uint16
+	pPortName           *uint16
+	pDriverName         *uint16
+	pComment            *uint16
+	pLocation           *uint16
+	pDevMode            uintptr
+	pSepFile            *uint16
+	pPrintProcessor     *uint16
+	pDatatype           *uint16
+	pParameters         *uint16
+	pSecurityDescriptor uintptr
+	Attributes          uint32
+	Priority            uint32
+	DefaultPriority     uint32
+	StartTime           uint32
+	UntilTime           uint32
+	Status              uint32
+	cJobs               uint32
+	AveragePPM          uint32
 }
 
 func openPrinter(name string) (syscall.Handle, error) {
@@ -206,8 +210,6 @@ func fallbackDeletePrinterByName(name string) error {
 	return fmt.Errorf("printer %s still exists after printui fallback", name)
 }
 
-
-
 func removePortByName(name string) {
 	// PrintManagement module is present by default; prnport.vbs needs the
 	// optional Printing Admin Scripts feature, so try PowerShell first.
@@ -238,35 +240,13 @@ func killProcessByName(name string) {
 	var pe processEntry32W
 	pe.dwSize = uint32(unsafe.Sizeof(pe))
 
-	// upper-case target name for comparison
-	nameUpper := make([]uint16, len(name)+1)
-	for i, c := range name {
-		if c >= 'a' && c <= 'z' {
-			nameUpper[i] = uint16(c - 0x20)
-		} else {
-			nameUpper[i] = uint16(c)
-		}
-	}
-	nameUpper[len(name)] = 0
-
 	r, _, _ := procProcess32First.Call(snapshot, uintptr(unsafe.Pointer(&pe)))
 	if r == 0 {
 		return
 	}
 
 	for {
-		match := true
-		for i := 0; nameUpper[i] != 0; i++ {
-			c := pe.szExeFile[i]
-			if c >= 'a' && c <= 'z' {
-				c -= 0x20
-			}
-			if c != nameUpper[i] {
-				match = false
-				break
-			}
-		}
-		if match {
+		if processNameMatches(pe.szExeFile[:], name) {
 			h, _, _ := procOpenProcess.Call(processTerminate, 0, uintptr(pe.th32ProcessID))
 			if h != 0 {
 				procTerminateProcess.Call(h, 0)
@@ -278,4 +258,99 @@ func killProcessByName(name string) {
 			break
 		}
 	}
+}
+
+func hideWindowByTitle(title string) {
+	titlePtr, _ := syscall.UTF16PtrFromString(title)
+	r, _, _ := procFindWindow.Call(0, uintptr(unsafe.Pointer(titlePtr)))
+	if r != 0 {
+		procShowWindow.Call(r, swHide)
+	}
+}
+
+func processNameMatches(exe []uint16, name string) bool {
+	if len(name) == 0 {
+		return false
+	}
+	for i := 0; i < len(name); i++ {
+		c := exe[i]
+		if c >= 'a' && c <= 'z' {
+			c -= 0x20
+		}
+		if c != uint16(name[i]) {
+			return false
+		}
+	}
+	return exe[len(name)] == 0
+}
+
+// hidePIDSet is read by hideWindowEnumCB during EnumWindows. It is only
+// accessed from the single driver-UI suppression loop goroutine.
+var hidePIDSet map[uint32]bool
+
+func hideWindowEnumCB(hwnd uintptr, lparam uintptr) uintptr {
+	var pid uint32
+	procGetWindowThreadProcessId.Call(hwnd, uintptr(unsafe.Pointer(&pid)))
+	if hidePIDSet[pid] {
+		procShowWindow.Call(hwnd, swHide)
+	}
+	return 1
+}
+
+// hideWindowsOfProcesses hides all top-level windows owned by the given
+// process image names (e.g. the Fujifilm driver installer UI), without
+// killing the process, so a silent driver installation is not interrupted.
+func hideWindowsOfProcesses(names ...string) {
+	snapshot, _, _ := procCreateToolhelp32Snapshot.Call(th32csSnapProcess, 0)
+	if snapshot == uintptr(syscall.InvalidHandle) {
+		return
+	}
+	defer procCloseHandle.Call(snapshot)
+
+	pidSet := make(map[uint32]bool)
+	var pe processEntry32W
+	pe.dwSize = uint32(unsafe.Sizeof(pe))
+	r, _, _ := procProcess32First.Call(snapshot, uintptr(unsafe.Pointer(&pe)))
+	for r != 0 {
+		for _, n := range names {
+			if processNameMatches(pe.szExeFile[:], n) {
+				pidSet[pe.th32ProcessID] = true
+				break
+			}
+		}
+		r, _, _ = procProcess32Next.Call(snapshot, uintptr(unsafe.Pointer(&pe)))
+	}
+	if len(pidSet) == 0 {
+		return
+	}
+	hidePIDSet = pidSet
+	procEnumWindows.Call(syscall.NewCallback(hideWindowEnumCB), 0)
+}
+
+// HideDriverWindowsLoop repeatedly hides the Fujifilm driver installer's own
+// windows (ffcomist.exe / Launcher.exe and the "Printer Driver Installation"
+// window) so the user never sees them pop up during installation. It returns
+// a stop function to call when installation finishes.
+func HideDriverWindowsLoop(interval time.Duration) func() {
+	stop := make(chan struct{})
+	go func() {
+		defer func() {
+			recover() // best effort: never let a background goroutine kill the app
+		}()
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			hideWindowsOfProcesses("ffcomist.exe", "Launcher.exe")
+			hideWindowByTitle("Printer Driver Installation")
+			select {
+			case <-stop:
+				return
+			case <-time.After(interval):
+			}
+		}
+	}()
+	return func() { close(stop) }
 }

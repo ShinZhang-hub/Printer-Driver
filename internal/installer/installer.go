@@ -39,6 +39,9 @@ func Install(p Params) error {
 	log.Info("  Driver: %s", p.InfFile)
 	log.Info("  Port: %s [%s:%d/%s]", p.PortName, p.PrinterIP, p.PortNum, p.Protocol)
 
+	stopHide := suppressDriverUI()
+	defer stopHide()
+
 	if err := addPrinter(p); err != nil {
 		return fmt.Errorf("add printer failed: %w", err)
 	}
