@@ -50,10 +50,10 @@ if [ -n "$DETECTED_LOCATION" ]; then
 	DETECTED_IP=$(echo "$ALL_PRINTER_IPS" | cut -d, -f1)
 fi
 
-ALL_LOCATIONS=$("$BINARY" --drivers "$DRIVERS_DIR" --list-locations 2>/dev/null)
+ALL_LOCATIONS=$("$BINARY" --drivers "$DRIVERS_DIR" --no-snmp --list-locations 2>/dev/null)
 EXISTING_NAME=""
-[ -n "$DETECTED_IP" ] && EXISTING_NAME=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$DETECTED_IP" 2>/dev/null)
-ALL_PRINTERS=$("$BINARY" --drivers "$DRIVERS_DIR" --debug-printers 2>/dev/null)
+[ -n "$DETECTED_IP" ] && EXISTING_NAME=$("$BINARY" --drivers "$DRIVERS_DIR" --no-snmp --printer-at-ip "$DETECTED_IP" 2>/dev/null)
+ALL_PRINTERS=$("$BINARY" --drivers "$DRIVERS_DIR" --no-snmp --debug-printers 2>/dev/null)
 
 # --- Location lists ---
 LOC_ITEMS_ALL=""
@@ -120,7 +120,7 @@ if [ -n "$ALL_LOCATIONS" ]; then
 			CONFLICT_FOUND=false
 			for ip in $(echo "$LOC_IPS" | tr ',' ' '); do
 				[ -z "$ip" ] && continue
-				EXIST=$("$BINARY" --drivers "$DRIVERS_DIR" --printer-at-ip "$ip" 2>/dev/null)
+				EXIST=$("$BINARY" --drivers "$DRIVERS_DIR" --no-snmp --printer-at-ip "$ip" 2>/dev/null)
 				if [ -n "$EXIST" ]; then CONFLICT_FOUND=true; break; fi
 			done
 			if [ -z "$CONFLICT_MAP_JS" ]; then CONFLICT_MAP_JS="\"$name\":$CONFLICT_FOUND"
