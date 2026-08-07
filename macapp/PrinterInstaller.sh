@@ -388,7 +388,6 @@ ENDDIAL
 
 	kill $PROGRESS_PID 2>/dev/null
 	wait $PROGRESS_PID 2>/dev/null
-	EXIT_CODE=$?
 	rm -f /tmp/printer-installer-delete.txt
 	if [ $EXIT_CODE -ne 0 ]; then
 		case "$ERR" in *[Cc]ancel*|*-128*|*not\ authorized*) exit 0 ;; esac
