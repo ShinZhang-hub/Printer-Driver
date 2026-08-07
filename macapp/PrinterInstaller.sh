@@ -13,9 +13,12 @@ rm -f "$STATUS_FILE" 2>/dev/null
 
 # --- Show loading indicator immediately ---
 osascript 2>/dev/null <<ENDLOAD &
-display dialog "$DETECTING" with icon note buttons {} giving up after 30
+display dialog "$DETECTING" with icon note buttons {"$CANCEL_LABEL"} default button "$CANCEL_LABEL" giving up after 30
 ENDLOAD
 LOAD_PID=$!
+
+# Helper: exit if loading dialog was cancelled
+check_load() { kill -0 $LOAD_PID 2>/dev/null || exit 0; }
 
 # --- Rosetta ---
 if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/arch -x86_64 /bin/ls >/dev/null 2>&1; then
@@ -131,8 +134,13 @@ fi
 
 CONFIRM_TEXT=$(echo "$CONFIRM_FMT" | sed "s/%s/$DETECTED_LOCATION/")
 
-kill $LOAD_PID 2>/dev/null
-wait $LOAD_PID 2>/dev/null
+# --- Close loading dialog ---
+if kill -0 $LOAD_PID 2>/dev/null; then
+	kill $LOAD_PID 2>/dev/null
+	wait $LOAD_PID 2>/dev/null
+else
+	exit 0  # user cancelled
+fi
 PRINTER_SUMMARY="$DETECTED_NAME"
 [ $(echo "$ALL_PRINTER_NAMES" | tr ',' '\n' | wc -l | tr -d ' ') -gt 1 ] && PRINTER_SUMMARY="$ALL_PRINTER_NAMES"
 
