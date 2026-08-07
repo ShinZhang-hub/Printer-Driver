@@ -13,7 +13,7 @@ rm -f "$STATUS_FILE" 2>/dev/null
 
 # --- Show loading indicator immediately ---
 osascript 2>/dev/null <<ENDLOAD &
-display dialog "$DETECTING" with icon note buttons {} default button 1 giving up after 30
+display dialog "$DETECTING" with icon note buttons {} giving up after 30
 ENDLOAD
 LOAD_PID=$!
 
