@@ -388,7 +388,7 @@ if [ -n "$COMBINED_SCRIPT" ]; then
 
 	# Show progress dialog BEFORE password prompt
 	osascript 2>/dev/null <<ENDDIAL &
-display dialog "$INSTALLING" with icon note buttons {} default button 1 giving up after 120
+display dialog "$INSTALLING" with icon note buttons {} giving up after 120
 ENDDIAL
 	PROGRESS_PID=$!
 	sleep 0.5
