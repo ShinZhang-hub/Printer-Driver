@@ -13,7 +13,10 @@ rm -f "$STATUS_FILE" 2>/dev/null
 
 # --- Show loading indicator immediately ---
 osascript 2>/dev/null <<ENDLOAD &
-display dialog "$DETECTING" with icon note buttons {} giving up after 30
+set dlg to display dialog "$DETECTING" with icon note buttons {"$CANCEL_LABEL"} default button "$CANCEL_LABEL" giving up after 30
+if button returned of dlg is "$CANCEL_LABEL" then
+    do shell script "kill $PPID 2>/dev/null"
+end if
 ENDLOAD
 LOAD_PID=$!
 
