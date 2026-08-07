@@ -392,7 +392,8 @@ ENDDIAL
 	rm -f /tmp/printer-installer-delete.txt
 	if [ $EXIT_CODE -ne 0 ]; then
 		case "$ERR" in *[Cc]ancel*|*-128*|*not\ authorized*) exit 0 ;; esac
-		ERR_MSG=$(head -20 "$LOG" 2>/dev/null | tr -d '"' || echo "Unknown error")
+		ERR_MSG=$(grep -v "Fyne error\|Failed to load\|Cause:\|defaults\|\(kCFPreferences" "$LOG" 2>/dev/null | head -5 | tr -d '"' || echo "Unknown error")
+		[ -z "$ERR_MSG" ] && ERR_MSG="Installation failed"
 		osascript -e "display dialog \"$FAIL_PREFIX\\n$ERR_MSG\" buttons {\"$OK_LABEL\"} default button \"$OK_LABEL\" with icon stop" 2>/dev/null
 		exit 1
 	fi
