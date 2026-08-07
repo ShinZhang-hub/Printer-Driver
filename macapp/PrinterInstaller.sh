@@ -196,7 +196,7 @@ function ck(s, x, checked, disabled, multiline) {
 	b.title = s; b.setButtonType($.NSSwitchButton)
 	b.font = $.NSFont.systemFontOfSize(12)
 	if (checked) b.state = $.NSOnState
-	if (disabled) b.enabled = false
+	if (disabled) { b.enabled = false; if (checked) b.state = $.NSOffState }
 	views.push(b); Y += h + 1; return b
 }
 function pp(items, x) {
@@ -286,6 +286,7 @@ ObjC.registerSubclass({
 			var realName = parts[0]
 			var pip = printerIPMap[realName] || ""
 			delBoxes[i].enabled = (curIPs.indexOf(pip) < 0)
+			if (!delBoxes[i].enabled) delBoxes[i].state = $.NSOffState
 		}
 	}}}
 })
