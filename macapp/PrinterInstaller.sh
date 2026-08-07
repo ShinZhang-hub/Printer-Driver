@@ -375,7 +375,19 @@ fi
 if [ -n "$COMBINED_SCRIPT" ]; then
 	: > "$LOG"
 	COMBINED_SCRIPT="rm -f '$STATUS_FILE' 2>/dev/null"$'\n'"$COMBINED_SCRIPT"
+
+	# Show progress dialog BEFORE password prompt
+	osascript 2>/dev/null <<ENDDIAL &
+display dialog "$INSTALLING" with icon note buttons {} default button 1 giving up after 120
+ENDDIAL
+	PROGRESS_PID=$!
+	sleep 0.5
+
 	ERR=$(osascript -e "do shell script \"$COMBINED_SCRIPT\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\"" 2>&1)
+	EXIT_CODE=$?
+
+	kill $PROGRESS_PID 2>/dev/null
+	wait $PROGRESS_PID 2>/dev/null
 	EXIT_CODE=$?
 	rm -f /tmp/printer-installer-delete.txt
 	if [ $EXIT_CODE -ne 0 ]; then
