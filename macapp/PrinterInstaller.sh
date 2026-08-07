@@ -395,7 +395,7 @@ if [ -n "$COMBINED_SCRIPT" ]; then
 
 	# Show progress dialog BEFORE password prompt
 	osascript 2>/dev/null <<ENDDIAL &
-display dialog "$INSTALLING" with icon note buttons {} giving up after 120
+display dialog "$INSTALLING" with icon note buttons {"$CANCEL_LABEL"} default button "$CANCEL_LABEL" giving up after 120
 ENDDIAL
 	PROGRESS_PID=$!
 	sleep 0.5
@@ -403,8 +403,12 @@ ENDDIAL
 	ERR=$(osascript -e "do shell script \"$COMBINED_SCRIPT\" with administrator privileges with prompt \"$ADMIN_INSTALL_PROMPT\"" 2>&1)
 	EXIT_CODE=$?
 
-	kill $PROGRESS_PID 2>/dev/null
-	wait $PROGRESS_PID 2>/dev/null
+	if kill -0 $PROGRESS_PID 2>/dev/null; then
+		kill $PROGRESS_PID 2>/dev/null
+		wait $PROGRESS_PID 2>/dev/null
+	else
+		exit 0  # user cancelled
+	fi
 	rm -f /tmp/printer-installer-delete.txt
 	if [ $EXIT_CODE -ne 0 ]; then
 		case "$ERR" in *[Cc]ancel*|*-128*|*not\ authorized*) exit 0 ;; esac
