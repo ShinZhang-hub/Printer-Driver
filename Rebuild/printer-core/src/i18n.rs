@@ -72,6 +72,23 @@ pub fn detect() -> String {
             }
         }
     }
+    // Windows: query the first system UI language tag.
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(out) = Command::new("powershell")
+            .args([
+                "-NoProfile",
+                "-Command",
+                "(Get-WinUserLanguageList | Select-Object -First 1).LanguageTag",
+            ])
+            .output()
+        {
+            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if let Some(lang) = map_system_locale(&s) {
+                return lang;
+            }
+        }
+    }
     // Fallback to LANG env.
     if let Ok(l) = std::env::var("LANG") {
         if let Some(lang) = map_system_locale(&l) {

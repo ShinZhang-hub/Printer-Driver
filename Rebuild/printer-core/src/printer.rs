@@ -218,69 +218,18 @@ fn failed_text(lang: &str, key: &str, f: &FailedPrinter) -> String {
 
 /// List installed printers as (name, ip). IP is "" when unknown.
 pub fn list_printers_with_ips() -> Vec<(String, String)> {
-    let out = run("lpstat", &["-v"]);
-    let mut result = Vec::new();
-    for line in out.lines() {
-        let name = extract_printer_name(line);
-        if name.is_empty() {
-            continue;
-        }
-        result.push((name.to_string(), socket_host(line).unwrap_or_default()));
-    }
-    result
+    imp::printers()
 }
 
-/// ONE `lpstat -v` pass, returned as ip -> name for O(1) conflict lookups.
-/// Every spawned lpstat pays a CUPS cold-start cost, so the initial state
-/// builder must call this exactly once and reuse it.
+/// ONE platform printer-enumeration pass, returned as ip -> name for O(1)
+/// conflict lookups. macOS pays a CUPS cold-start cost per `lpstat` spawn,
+/// so the initial-state builder calls this exactly once and reuses it.
 pub fn printers_by_ip() -> std::collections::HashMap<String, String> {
     let mut m = std::collections::HashMap::new();
     for (name, ip) in list_printers_with_ips() {
         m.insert(ip, name);
     }
     m
-}
-
-fn socket_host(line: &str) -> Option<String> {
-    let idx = line.find("socket://")?;
-    let rest = &line[idx + "socket://".len()..];
-    let end = rest
-        .find([':', ' ', '\n', '\t'])
-        .unwrap_or(rest.len());
-    Some(rest[..end].to_string())
-}
-
-/// Extract the printer name from an `lpstat -v` line. Handles localized
-/// output (e.g. zh: `用于Printer-BG的设备：socket://...`) by finding the last
-/// `:` / full-width `：` separator before the URI, then taking the last ASCII
-/// word — mirroring the original Go `extractPrinterNameBeforeURI`.
-fn extract_printer_name(line: &str) -> String {
-    let uri_idx = match line.find("://") {
-        Some(i) => i,
-        None => return String::new(),
-    };
-    let prefix = &line[..uri_idx];
-    let mut sep_idx = prefix.rfind(':');
-    if let Some(ff) = prefix.rfind('：') {
-        sep_idx = Some(ff.max(sep_idx.unwrap_or(0)));
-    }
-    let prefix = match sep_idx {
-        Some(i) => &prefix[..i],
-        None => prefix,
-    };
-    let mut last_word = String::new();
-    let mut cur = String::new();
-    for c in prefix.chars() {
-        if c.is_ascii() && !c.is_whitespace() {
-            cur.push(c);
-        } else if !cur.is_empty() {
-            last_word = std::mem::take(&mut cur);
-        }
-    }
-    if !cur.is_empty() {
-        last_word = cur;
-    }
-    last_word
 }
 
 #[cfg(target_os = "macos")]
@@ -407,9 +356,94 @@ mod imp {
     pub fn shell_escape(s: &str) -> String {
         format!("'{}'", s.replace('\'', "'\\''"))
     }
+
+    /// Enumerate installed printers via `lpstat -v`.
+    pub fn printers() -> Vec<(String, String)> {
+        let out = run("lpstat", &["-v"]);
+        let mut result = Vec::new();
+        for line in out.lines() {
+            let name = extract_printer_name(line);
+            if name.is_empty() {
+                continue;
+            }
+            result.push((name.to_string(), socket_host(line).unwrap_or_default()));
+        }
+        result
+    }
+
+    fn run(cmd: &str, args: &[&str]) -> String {
+        match std::process::Command::new(cmd).args(args).output() {
+            Ok(o) => String::from_utf8_lossy(&o.stdout).to_string(),
+            Err(_) => String::new(),
+        }
+    }
+
+    fn socket_host(line: &str) -> Option<String> {
+        let idx = line.find("socket://")?;
+        let rest = &line[idx + "socket://".len()..];
+        let end = rest
+            .find([':', ' ', '\n', '\t'])
+            .unwrap_or(rest.len());
+        Some(rest[..end].to_string())
+    }
+
+    /// Extract the printer name from an `lpstat -v` line. Handles localized
+    /// output (e.g. zh: `用于Printer-BG的设备：socket://...`) by finding the
+    /// last `:` / full-width `：` separator before the URI, then taking the
+    /// last ASCII word — mirroring the Go `extractPrinterNameBeforeURI`.
+    fn extract_printer_name(line: &str) -> String {
+        let uri_idx = match line.find("://") {
+            Some(i) => i,
+            None => return String::new(),
+        };
+        let prefix = &line[..uri_idx];
+        let mut sep_idx = prefix.rfind(':');
+        if let Some(ff) = prefix.rfind('：') {
+            sep_idx = Some(ff.max(sep_idx.unwrap_or(0)));
+        }
+        let prefix = match sep_idx {
+            Some(i) => &prefix[..i],
+            None => prefix,
+        };
+        let mut last_word = String::new();
+        let mut cur = String::new();
+        for c in prefix.chars() {
+            if c.is_ascii() && !c.is_whitespace() {
+                cur.push(c);
+            } else if !cur.is_empty() {
+                last_word = std::mem::take(&mut cur);
+            }
+        }
+        if !cur.is_empty() {
+            last_word = cur;
+        }
+        last_word
+    }
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(target_os = "windows")]
+mod imp {
+    use super::*;
+
+    pub fn install_batch(
+        _cfg: &Config,
+        lang: &str,
+        targets: &[InstallTarget],
+        delete: &[String],
+    ) -> Result<BatchResult, String> {
+        crate::win_installer::install_batch(lang, targets, delete)
+    }
+
+    pub fn printers() -> Vec<(String, String)> {
+        crate::win_installer::printers()
+    }
+
+    pub fn run_admin_script(_script_path: &str, _prompt: &str) -> Result<String, String> {
+        unreachable!("run_admin_script is macOS-only")
+    }
+}
+
+#[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
 mod imp {
     use super::*;
 
@@ -421,6 +455,14 @@ mod imp {
     ) -> Result<BatchResult, String> {
         Err("not implemented on this platform".into())
     }
+
+    pub fn printers() -> Vec<(String, String)> {
+        Vec::new()
+    }
+
+    pub fn run_admin_script(_script_path: &str, _prompt: &str) -> Result<String, String> {
+        unreachable!("run_admin_script is macOS-only")
+    }
 }
 
 pub use imp::{install_batch, run_admin_script};
@@ -428,7 +470,7 @@ pub use imp::{install_batch, run_admin_script};
 /// Parse `I-OK/I-FAIL/D-OK/D-FAIL\t<name>[\t<reason>]` lines emitted by the
 /// batch script. Tab-separated so printer names containing spaces survive.
 /// osascript converts the script's LF line endings to CR, so normalize both.
-fn parse_batch_output(out: &str) -> BatchResult {
+pub(crate) fn parse_batch_output(out: &str) -> BatchResult {
     let mut r = BatchResult::default();
     for line in out.replace('\r', "\n").lines() {
         let mut parts = line.split('\t');
@@ -453,11 +495,4 @@ fn parse_batch_output(out: &str) -> BatchResult {
         }
     }
     r
-}
-
-fn run(cmd: &str, args: &[&str]) -> String {
-    match std::process::Command::new(cmd).args(args).output() {
-        Ok(o) => String::from_utf8_lossy(&o.stdout).to_string(),
-        Err(_) => String::new(),
-    }
 }

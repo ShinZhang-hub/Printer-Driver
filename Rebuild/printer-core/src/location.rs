@@ -32,18 +32,22 @@ fn local_v4_via_ifconfig() -> Vec<Ipv4Addr> {
 
 #[cfg(target_os = "windows")]
 fn local_v4_via_ifconfig() -> Vec<Ipv4Addr> {
+    // Software NICs (VPN/VM adapters) report 169.254.* or unusual addresses;
+    // Get-NetIPAddress gives the real addresses without locale-dependent
+    // `ipconfig` prefixes ("IPv4 地址" on zh-CN).
+    let script = r#"
+$ErrorActionPreference = 'SilentlyContinue'
+(Get-NetIPAddress -AddressFamily IPv4).IPAddress
+"#;
     let mut v4 = Vec::new();
-    if let Ok(out) = std::process::Command::new("ipconfig").output() {
+    if let Ok(out) = std::process::Command::new("powershell")
+        .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script])
+        .output()
+    {
         let text = String::from_utf8_lossy(&out.stdout);
         for line in text.lines() {
-            let line = line.trim();
-            if let Some(rest) = line.strip_prefix("IPv4 Address") {
-                if let Some(idx) = rest.find(':') {
-                    let addr = rest[idx + 1..].trim();
-                    if let Ok(ip) = addr.parse::<Ipv4Addr>() {
-                        v4.push(ip);
-                    }
-                }
+            if let Ok(ip) = line.trim().parse::<Ipv4Addr>() {
+                v4.push(ip);
             }
         }
     }

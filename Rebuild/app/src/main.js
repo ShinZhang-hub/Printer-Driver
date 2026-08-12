@@ -25,10 +25,12 @@ function show(name) {
 // directly avoids viewport-clamping and retina physical/logical mismatches
 // that caused the window to flash wide.
 //
-// Units: innerSize()/outerSize()/setSize() are all PHYSICAL px on macOS, while
-// getBoundingClientRect() is logical (CSS) px. Keep every term in one unit by
-// converting through scaleFactor. The title bar offset (outer - inner) is
-// added back so the content area = card + margins and nothing is clipped.
+// Units: on macOS innerSize()/outerSize()/setSize() are all PHYSICAL px,
+// while getBoundingClientRect() is logical (CSS) px. Keep every term in one
+// unit by converting through scaleFactor and adding back the title bar
+// offset (outer - inner). On Windows these APIs are already logical px with
+// no outer/inner chrome gap for a decoration-less window, so the offset
+// contribution is ~0 and applying the same formula is harmless.
 const WIN_W = 480;
 async function fitWindow() {
   try {
