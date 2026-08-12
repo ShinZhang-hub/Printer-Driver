@@ -1,0 +1,12 @@
+[package]
+name = "printer-core"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+name = "printer_core"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = { version = "2", features = ["json", "tls"] }

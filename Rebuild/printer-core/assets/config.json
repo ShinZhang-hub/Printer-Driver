@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "updated_at": "2026-07-06T00:00:00Z",
+  "config_url": "http://30.61.40.61:9527",
+  "drivers_dir": "drivers",
+  "port_number": 9100,
+  "protocol": "raw",
+  "locations": [
+    {
+      "name": "Osaka - JP Tower",
+      "subnets": ["30.61.40.0/24", "30.61.39.0/24"],
+      "printer_ip": "30.61.40.40",
+      "printer_name": "Printer-Osaka",
+      "printer_model": "FF Apeos C2571",
+      "port_number": 9100,
+      "protocol": "raw"
+    },
+    {
+      "name": "Tokyo - Business Tower",
+      "subnets": ["30.61.30.0/24", "30.61.31.0/24", "30.61.32.0/24", "30.61.33.0/24"],
+      "printer_ip": "30.61.30.30",
+      "printer_name": "Printer-Tencent",
+      "printer_model": "FF Apeos C3070",
+      "port_number": 9100,
+      "protocol": "raw"
+    },
+    {
+      "name": "Tokyo - Mori Tower",
+      "subnets": ["30.61.34.0/24"],
+      "port_number": 9100,
+      "protocol": "raw",
+      "printers": [
+        {"ip": "30.61.34.29", "name": "Printer-BG", "model": "FF Apeos C3070"},
+        {"ip": "30.61.34.30", "name": "Printer-Game", "model": "FF Apeos C3070"}
+      ]
+    }
+  ]
+}

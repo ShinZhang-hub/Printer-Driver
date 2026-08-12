@@ -1,0 +1,110 @@
+use serde::{Deserialize, Serialize};
+
+pub const EMBEDDED_CONFIG: &str = include_str!("../assets/config.json");
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PrinterInfo {
+    pub ip: String,
+    pub name: String,
+    #[serde(default)]
+    pub model: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LocationConfig {
+    pub name: String,
+    #[serde(default)]
+    pub subnets: Vec<String>,
+    #[serde(default)]
+    pub printer_ip: String,
+    #[serde(default)]
+    pub printer_name: String,
+    #[serde(default)]
+    pub printer_model: String,
+    #[serde(default)]
+    pub port_number: u16,
+    #[serde(default)]
+    pub protocol: String,
+    #[serde(default)]
+    pub printers: Vec<PrinterInfo>,
+}
+
+impl LocationConfig {
+    /// All printers of this location. New `printers[]` wins over the legacy
+    /// single `printer_ip`/`printer_name` fields (backward compatible).
+    pub fn all_printers(&self) -> Vec<PrinterInfo> {
+        if !self.printers.is_empty() {
+            self.printers.clone()
+        } else if !self.printer_ip.is_empty() {
+            vec![PrinterInfo {
+                ip: self.printer_ip.clone(),
+                name: if self.printer_name.is_empty() {
+                    self.printer_model.clone()
+                } else {
+                    self.printer_name.clone()
+                },
+                model: self.printer_model.clone(),
+            }]
+        } else {
+            Vec::new()
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Config {
+    pub version: u32,
+    pub updated_at: String,
+    pub config_url: String,
+    #[serde(default)]
+    pub port_number: u16,
+    #[serde(default)]
+    pub protocol: String,
+    #[serde(default)]
+    pub locations: Vec<LocationConfig>,
+}
+
+/// Parse embedded / local JSON config.
+pub fn parse(data: &str) -> Option<Config> {
+    serde_json::from_str(data).ok()
+}
+
+/// Remote-first, embedded fallback (2s timeout).
+pub fn load_remote(embedded: &str) -> Config {
+    let cfg = parse(embedded).unwrap_or_default();
+    if !cfg.config_url.is_empty() {
+        let url = format!("{}/api/v1/config", cfg.config_url);
+        if let Ok(remote) = fetch(&url, 2_000) {
+            if let Some(mut c) = parse(&remote) {
+                c.config_url = cfg.config_url;
+                return c;
+            }
+        }
+    }
+    cfg
+}
+
+pub fn fetch(url: &str, timeout_ms: u64) -> Result<String, String> {
+    let agent = ureq::AgentBuilder::new()
+        .timeout(std::time::Duration::from_millis(timeout_ms))
+        .build();
+    agent
+        .get(url)
+        .call()
+        .map_err(|e| e.to_string())?
+        .into_string()
+        .map_err(|e| e.to_string())
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            version: 1,
+            updated_at: String::new(),
+            config_url: String::new(),
+            port_number: 9100,
+            protocol: "raw".into(),
+            locations: Vec::new(),
+        }
+    }
+}

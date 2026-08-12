@@ -16,3 +16,10 @@ FUJIFILM/
 
 *~
 PrinterInstaller.zip
+
+# Rebuild (Tauri) build artifacts
+Rebuild/target/
+Rebuild/app/node_modules/
+Rebuild/app/dist/
+Rebuild/app/src-tauri/gen/schemas/
+Rebuild/app/src-tauri/gen/android/
