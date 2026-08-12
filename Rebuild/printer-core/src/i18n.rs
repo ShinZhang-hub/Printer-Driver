@@ -20,9 +20,9 @@ pub fn strings(lang: &str) -> HashMap<String, String> {
     m
 }
 
-pub fn t<'a>(lang: &str, key: &str, args: &[&str]) -> String {
+pub fn t(lang: &str, key: &str, args: &[&str]) -> String {
     let s = strings(lang);
-    let fmt = s.get(key).map(|s| s.clone()).unwrap_or_default();
+    let fmt = s.get(key).cloned().unwrap_or_default();
     let mut out = fmt;
     for (i, a) in args.iter().enumerate() {
         // Replace %s sequentially (matches the current behavior of the script).
@@ -117,11 +117,11 @@ const STRINGS: &[(&str, Table)] = &[
     (
         "CONFIRM_FMT",
         [
-            ("en", "Detected at %s, uncheck to pick another location"),
-            ("ja", "%s を検出、チェックを外すと別の場所を選択できます"),
-            ("ko", "%s 감지됨, 체크 해제 시 다른 위치 선택 가능"),
-            ("zh", "检测到您在%s，取消勾选也可选择其他位置"),
-            ("zh-Hant", "偵測到您位於%s，取消勾選也可選擇其他位置"),
+            ("en", "Detected at %s — uncheck to choose another office"),
+            ("ja", "%s を検出 — チェックを外すと他オフィスを選択"),
+            ("ko", "%s 감지 — 해제하면 다른 오피스 선택"),
+            ("zh", "检测到您在 %s — 取消勾选可选其他办公室"),
+            ("zh-Hant", "偵測到您位於 %s — 取消勾選可選其他辦公室"),
         ],
     ),
     (
@@ -137,11 +137,11 @@ const STRINGS: &[(&str, Table)] = &[
     (
         "CONFLICT_LABEL",
         [
-            ("en", "A printer exists at this IP, choose:"),
-            ("ja", "このIPにプリンターが既存、選択："),
-            ("ko", "이 IP에 프린터 존재, 선택："),
-            ("zh", "同IP打印机已存在，请选择："),
-            ("zh-Hant", "此 IP 已有印表機，請選擇："),
+            ("en", "Default printer already exists — overwrite or skip?"),
+            ("ja", "選択オフィスの既定プリンターが既存。上書きかスキップ？"),
+            ("ko", "선택 사무실의 기본 프린터가 이미 있음. 덮어쓰기/건너뛰기？"),
+            ("zh", "所选办公室的默认打印机已存在，覆盖或跳过？"),
+            ("zh-Hant", "所選辦公室的預設印表機已存在，覆蓋或跳過？"),
         ],
     ),
     (
@@ -167,11 +167,11 @@ const STRINGS: &[(&str, Table)] = &[
     (
         "EXISTING_PRINTERS",
         [
-            ("en", "Existing printers (%d), check to remove:"),
-            ("ja", "既存プリンター (%d)、削除する場合はチェック："),
-            ("ko", "기존 프린터 (%d), 제거하려면 선택："),
-            ("zh", "现有打印机 (%d)，如需移除请勾选："),
-            ("zh-Hant", "現有印表機 (%d)，如需移除請勾選："),
+            ("en", "%d printers found — check to remove (selected office default kept)"),
+            ("ja", "既存プリンター %d 台 — 削除は選択（選択オフィス既定は不可）："),
+            ("ko", "기존 프린터 %d 대 — 제거는 선택（선택 사무실 기본은 불가）："),
+            ("zh", "本机已存在 %d 台打印机，勾选可移除（所选办公室默认打印机除外）："),
+            ("zh-Hant", "本機已存在 %d 台印表機，勾選可移除（所選辦公室預設印表機除外）："),
         ],
     ),
     (
@@ -262,6 +262,96 @@ const STRINGS: &[(&str, Table)] = &[
             ("ko", "프린터 드라이버 설치를 위해 관리자 권한이 필요합니다"),
             ("zh", "打印机驱动安装需要管理员权限"),
             ("zh-Hant", "印表機驅動程式安裝需要管理員權限"),
+        ],
+    ),
+    (
+        "INSTALL_FAILED_MSG",
+        [
+            ("en", "❌ %s failed to install after 2 attempts"),
+            ("ja", "❌ %s が2回試行後もインストールに失敗しました"),
+            ("ko", "❌ %s 2회 시도 후에도 설치에 실패했습니다"),
+            ("zh", "❌ %s 两次尝试后仍安装失败"),
+            ("zh-Hant", "❌ %s 兩次嘗試後仍安裝失敗"),
+        ],
+    ),
+    (
+        "REMOVE_FAILED_MSG",
+        [
+            ("en", "❌ %s failed to remove after 2 attempts"),
+            ("ja", "❌ %s が2回試行後も削除に失敗しました"),
+            ("ko", "❌ %s 2회 시도 후에도 제거에 실패했습니다"),
+            ("zh", "❌ %s 两次尝试后仍移除失败"),
+            ("zh-Hant", "❌ %s 兩次嘗試後仍移除失敗"),
+        ],
+    ),
+    (
+        "FAIL_CAUSE_LPADMIN",
+        [
+            ("en", "could not create the print queue (lpadmin error)"),
+            ("ja", "キューの作成に失敗しました（lpadmin エラー）"),
+            ("ko", "인쇄 큐를 만들지 못했습니다 (lpadmin 오류)"),
+            ("zh", "无法创建打印机队列（lpadmin 返回错误）"),
+            ("zh-Hant", "無法建立印表機佇列（lpadmin 回傳錯誤）"),
+        ],
+    ),
+    (
+        "FAIL_CAUSE_VERIFY",
+        [
+            ("en", "queue registration could not be verified"),
+            ("ja", "キューの登録を確認できませんでした"),
+            ("ko", "큐 등록을 확인할 수 없습니다"),
+            ("zh", "队列注册校验未通过（查无此打印机）"),
+            ("zh-Hant", "佇列註冊驗證未通過（查無此印表機）"),
+        ],
+    ),
+    (
+        "FAIL_CAUSE_ENABLE",
+        [
+            ("en", "could not enable the print queue"),
+            ("ja", "キューを有効化できませんでした"),
+            ("ko", "인쇄 큐를 활성화할 수 없습니다"),
+            ("zh", "无法启用打印机队列"),
+            ("zh-Hant", "無法啟用印表機佇列"),
+        ],
+    ),
+    (
+        "FAIL_CAUSE_ACCEPT",
+        [
+            ("en", "could not set the queue to accept new jobs"),
+            ("ja", "新規ジョブを受け付ける設定にできませんでした"),
+            ("ko", "새 작업을 받도록 큐를 설정할 수 없습니다"),
+            ("zh", "无法设置为接受新作业"),
+            ("zh-Hant", "無法設定為接受新作業"),
+        ],
+    ),
+    (
+        "FAIL_CAUSE_DEFAULT",
+        [
+            ("en", "could not set it as the default printer"),
+            ("ja", "既定プリンターに設定できませんでした"),
+            ("ko", "기본 프린터로 설정할 수 없습니다"),
+            ("zh", "无法设为默认打印机"),
+            ("zh-Hant", "無法設為預設印表機"),
+        ],
+    ),
+    (
+        "FAIL_CAUSE_DELETE",
+        [
+            ("en", "could not remove the printer"),
+            ("ja", "プリンターを削除できませんでした"),
+            ("ko", "프린터를 제거할 수 없습니다"),
+            ("zh", "两轮尝试后仍无法删除打印机"),
+            ("zh-Hant", "兩次嘗試後仍無法刪除印表機"),
+        ],
+    ),
+    (
+        "FAIL_CAUSE_UNKNOWN",
+        [
+            ("en", "an unknown error occurred"),
+            ("ja", "不明なエラーが発生しました"),
+            ("ko", "알 수 없는 오류가 발생했습니다"),
+            ("zh", "发生未知错误"),
+            ("zh-Hant", "發生未知錯誤"),
         ],
     ),
 ];

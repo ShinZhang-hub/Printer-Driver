@@ -10,6 +10,14 @@ export async function getStrings(lang) {
   return invoke("get_strings", { lang });
 }
 
+/**
+ * Trigger a background refresh of the shared config (remote fetch with
+ * embedded fallback). Resolves immediately; UI updates via "config-updated".
+ */
+export async function refreshConfig() {
+  return invoke("refresh_config");
+}
+
 /** Terminate the process (same as clicking the window close button). */
 export async function quit() {
   return invoke("quit");

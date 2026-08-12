@@ -31,9 +31,10 @@ pub struct InitialState {
 }
 
 pub fn load_config() -> Config {
-    // NOTE: config is READ-ONLY from the client side. Pushing config edits to
-    // the server is intentionally not implemented (temporarily disabled).
-    config::load_remote(config::EMBEDDED_CONFIG)
+    // Config is cached in-process: the UI reads it instantly at startup
+    // (seeded from the embedded copy), and `config::refresh_config()` swaps
+    // in a fresh remote copy in the background.
+    config::shared_snapshot()
 }
 
 pub fn initial_state() -> InitialState {
@@ -60,6 +61,11 @@ pub fn initial_state() -> InitialState {
         locations.push(l.name.clone());
     }
 
+    // ONE `lpstat -v` call feeds both the existing-printer list and the
+    // per-location conflict checks. Spawning a subprocess per printer (as
+    // before) paid CUPS cold-start multiple times on startup.
+    let by_ip = printer::printers_by_ip();
+
     let mut loc_ips: HashMap<String, Vec<String>> = HashMap::new();
     let mut loc_names: HashMap<String, Vec<String>> = HashMap::new();
     let mut conflict: HashMap<String, bool> = HashMap::new();
@@ -75,15 +81,16 @@ pub fn initial_state() -> InitialState {
         );
         conflict.insert(
             loc.name.clone(),
-            printers
-                .iter()
-                .any(|p| printer::find_printer_by_ip(&p.ip).is_some()),
+            printers.iter().any(|p| by_ip.contains_key(&p.ip)),
         );
     }
 
-    let existing = printer::list_printers_with_ips()
-        .into_iter()
-        .map(|(name, ip)| ExistingPrinter { name, ip })
+    let existing = by_ip
+        .iter()
+        .map(|(ip, name)| ExistingPrinter {
+            name: name.clone(),
+            ip: ip.clone(),
+        })
         .collect();
 
     let detected = detected_location.clone().and_then(|l| {
@@ -102,7 +109,7 @@ pub fn initial_state() -> InitialState {
         lang,
         strings,
         detected_location,
-        detected_name: detected_name,
+        detected_name,
         detected_ip: detected_ip2,
         locations,
         loc_ips,

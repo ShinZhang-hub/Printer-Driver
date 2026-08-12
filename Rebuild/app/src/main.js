@@ -1,6 +1,7 @@
-import { getInitialState, getStrings, confirm, quit } from "./api.js";
+import { getInitialState, getStrings, refreshConfig, confirm, quit } from "./api.js";
+import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { LogicalSize } from "@tauri-apps/api/dpi";
+import { PhysicalSize } from "@tauri-apps/api/dpi";
 
 const $ = (id) => document.getElementById(id);
 const screens = ["loading", "confirm", "progress", "result"];
@@ -16,30 +17,48 @@ const LANGS = [
 
 function show(name) {
   screens.forEach((s) => ($(s).hidden = s !== name));
+  $("lang-menu").hidden = name !== "confirm";
   requestAnimationFrame(fitWindow);
 }
 
 // Tight-fit ONLY the height; width is fixed (never re-set). Measuring #app
 // directly avoids viewport-clamping and retina physical/logical mismatches
 // that caused the window to flash wide.
-const WIN_W = 492;
+//
+// Units: innerSize()/outerSize()/setSize() are all PHYSICAL px on macOS, while
+// getBoundingClientRect() is logical (CSS) px. Keep every term in one unit by
+// converting through scaleFactor. The title bar offset (outer - inner) is
+// added back so the content area = card + margins and nothing is clipped.
+const WIN_W = 480;
 async function fitWindow() {
   try {
     await document.fonts.ready;
     const win = getCurrentWindow();
     const app = document.getElementById("app");
     const rect = app.getBoundingClientRect();
-    const h = Math.ceil(rect.height) + 24; // 6px top/bottom margin + breathing room
-    const cur = await win.innerSize();
-    if (Math.abs(cur.height - h) < 4) return; // already tight, skip resize
-    await win.setSize(new LogicalSize(WIN_W, h));
+    const scale = await win.scaleFactor();
+    const wantInnerW = Math.round(WIN_W * scale);
+    const wantInnerH = Math.round((rect.height + 12 + 20) * scale); // card + 6px margins + 20px bottom safety
+    const [inner, outer] = await Promise.all([win.innerSize(), win.outerSize()]);
+    const decoW = outer.width - inner.width;
+    const decoH = outer.height - inner.height;
+    const targetW = wantInnerW + decoW;
+    const targetH = wantInnerH + decoH;
+    if (Math.abs(outer.height - targetH) < 4 && Math.abs(outer.width - targetW) < 4) return;
+    await win.setSize(new PhysicalSize(targetW, targetH));
   } catch (_) {
     /* ignore */
   }
 }
 
-// Re-measure a few times: CJK fonts swap late and would otherwise grow the
-// card after we sized the window, clipping the bottom buttons.
+// Keep the window matched to the card even when it later grows (CJK fonts
+// swap in after the first measure). ResizeObserver re-fits on every change.
+function watchCard() {
+  const card = document.getElementById("app");
+  new ResizeObserver(() => requestAnimationFrame(fitWindow)).observe(card);
+}
+
+// Re-measure a few times as a fallback; ResizeObserver handles late font swaps.
 function scheduleFit() {
   for (const ms of [0, 120, 350, 700]) {
     setTimeout(fitWindow, ms);
@@ -184,7 +203,7 @@ function updateChosenState() {
   // disable delete checkboxes whose IP belongs to the chosen location
   for (const label of $("delete-list").querySelectorAll("label")) {
     const cb = label.querySelector("input");
-    const disabled = ips.includes(cb.dataset.ip) || (cb.dataset.ip === "" && false);
+    const disabled = ips.includes(cb.dataset.ip);
     cb.disabled = disabled;
     if (disabled) cb.checked = false;
   }
@@ -234,15 +253,38 @@ async function doConfirm() {
   }
 }
 
-function showResult(lines) {
+function showResult(raw) {
   const el = $("result-body");
   el.innerHTML = "";
-  for (const line of lines) {
-    const p = document.createElement("p");
-    p.textContent = line;
-    if (line.includes("❌")) p.className = "fail";
-    el.appendChild(p);
-  }
+  // Normalize: {kind, text} objects from Rust, or plain strings.
+  const messages = raw.map((m) =>
+    typeof m === "string" ? { kind: "install-failed", text: m } : m
+  );
+  // Group install vs remove actions so the result page can visually separate
+  // them (install block, divider, remove block).
+  const installMsgs = messages.filter(
+    (m) => m.kind === "installed" || m.kind === "skipped" || m.kind === "install-failed"
+  );
+  const removeMsgs = messages.filter(
+    (m) => m.kind === "removed" || m.kind === "remove-failed"
+  );
+  const blocks = [installMsgs, removeMsgs].filter((b) => b.length);
+  blocks.forEach((block, bi) => {
+    if (bi > 0) {
+      const hr = document.createElement("hr");
+      hr.className = "result-divider";
+      el.appendChild(hr);
+    }
+    const group = document.createElement("div");
+    group.className = "result-group";
+    for (const msg of block) {
+      const p = document.createElement("p");
+      p.textContent = msg.text;
+      if (msg.text.includes("❌")) p.className = "fail";
+      group.appendChild(p);
+    }
+    el.appendChild(group);
+  });
   show("result");
 }
 
@@ -273,6 +315,7 @@ function wire() {
 (async () => {
   wire();
   buildLangMenu();
+  watchCard();
   try {
     S = await getInitialState();
   } catch (e) {
@@ -283,4 +326,21 @@ function wire() {
   refreshLangMenu();
   renderConfirm();
   show("confirm");
+
+  // Background-config refresh: the UI already renders from the embedded
+  // config; if a newer remote config arrives, reload state and re-render.
+  listen("config-updated", async () => {
+    try {
+      S = await getInitialState();
+    } catch (e) {
+      return; // keep current UI on failure
+    }
+    // Preserve the user's chosen language across the refresh.
+    const keep = lang;
+    lang = S.lang || keep;
+    refreshLangMenu();
+    renderConfirm();
+    requestAnimationFrame(scheduleFit);
+  });
+  refreshConfig().catch(() => {});
 })();

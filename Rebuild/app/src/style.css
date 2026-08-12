@@ -33,7 +33,7 @@ html {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px 20px 16px;
+  padding: 10px 20px 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
@@ -180,7 +180,6 @@ select:disabled {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 10px;
-  padding-bottom: 2px;
 }
 
 button {
@@ -203,3 +202,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 #result-body { white-space: pre-wrap; line-height: 1.5; }
 #result-body .fail { color: var(--danger); }
+
+#result-body .result-group p { margin: 0 0 6px; }
+#result-body .result-group p:last-child { margin-bottom: 0; }
+#result-body .result-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}

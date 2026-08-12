@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use std::sync::{Mutex, OnceLock};
 
 pub const EMBEDDED_CONFIG: &str = include_str!("../assets/config.json");
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PrinterInfo {
     pub ip: String,
     pub name: String,
@@ -10,7 +11,7 @@ pub struct PrinterInfo {
     pub model: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LocationConfig {
     pub name: String,
     #[serde(default)]
@@ -51,7 +52,7 @@ impl LocationConfig {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Config {
     pub version: u32,
     pub updated_at: String,
@@ -69,19 +70,40 @@ pub fn parse(data: &str) -> Option<Config> {
     serde_json::from_str(data).ok()
 }
 
-/// Remote-first, embedded fallback (2s timeout).
-pub fn load_remote(embedded: &str) -> Config {
-    let cfg = parse(embedded).unwrap_or_default();
-    if !cfg.config_url.is_empty() {
-        let url = format!("{}/api/v1/config", cfg.config_url);
-        if let Ok(remote) = fetch(&url, 2_000) {
-            if let Some(mut c) = parse(&remote) {
-                c.config_url = cfg.config_url;
-                return c;
-            }
+/// Global config cache. Seeded from the embedded copy so the UI can render
+/// instantly; `refresh_config` swaps in a fresh remote copy off the UI path.
+static SHARED: OnceLock<Mutex<Config>> = OnceLock::new();
+
+pub fn shared() -> &'static Mutex<Config> {
+    SHARED.get_or_init(|| {
+        Mutex::new(parse(EMBEDDED_CONFIG).unwrap_or_default())
+    })
+}
+
+/// Current snapshot for readers (initial state, install flow).
+pub fn shared_snapshot() -> Config {
+    shared().lock().map(|g| g.clone()).unwrap_or_default()
+}
+
+/// Best-effort remote refresh in the background. Keeps the current cached
+/// value on any failure/timeout so startup is never blocked on the network.
+/// Returns true when a NEW remote config replaced the cached one.
+pub fn refresh_config() -> bool {
+    let orig = shared_snapshot();
+    if orig.config_url.is_empty() {
+        return false;
+    }
+    let url = format!("{}/api/v1/config", orig.config_url);
+    if let Ok(remote) = fetch(&url, 2_000) {
+        if let Some(mut c) = parse(&remote) {
+            c.config_url = orig.config_url;
+            let mut g = shared().lock().unwrap();
+            let changed = *g != c;
+            *g = c;
+            return changed;
         }
     }
-    cfg
+    false
 }
 
 pub fn fetch(url: &str, timeout_ms: u64) -> Result<String, String> {

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use tauri::Emitter;
 
 #[derive(Debug, Deserialize)]
 struct ConfirmRequest {
@@ -10,7 +11,7 @@ struct ConfirmRequest {
 
 #[derive(Debug, Serialize)]
 struct ConfirmResult {
-    messages: Vec<String>,
+    messages: Vec<printer_core::printer::ResultMessage>,
     skipped_all: bool,
     cancelled: bool,
 }
@@ -64,6 +65,19 @@ fn get_strings(lang: String) -> Result<std::collections::HashMap<String, String>
     Ok(printer_core::i18n::strings(&lang))
 }
 
+/// Kick off a background refresh of the shared config. Resolves immediately;
+/// the UI renders from the cached (embedded) config and only refreshes when
+/// the `config-updated` event arrives.
+#[tauri::command]
+fn refresh_config(app: tauri::AppHandle) {
+    std::thread::spawn(move || {
+        let changed = printer_core::config::refresh_config();
+        if changed {
+            let _ = app.emit_to("main", "config-updated", ());
+        }
+    });
+}
+
 /// Terminate the process immediately (same as the window close button).
 #[tauri::command]
 fn quit(app: tauri::AppHandle) {
@@ -77,6 +91,7 @@ pub fn run() {
             get_initial_state,
             confirm,
             get_strings,
+            refresh_config,
             quit
         ])
         .run(tauri::generate_context!())
