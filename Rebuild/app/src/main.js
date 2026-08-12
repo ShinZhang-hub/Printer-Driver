@@ -38,7 +38,7 @@ async function fitWindow() {
     const rect = app.getBoundingClientRect();
     const scale = await win.scaleFactor();
     const wantInnerW = Math.round(WIN_W * scale);
-    const wantInnerH = Math.round((rect.height + 12 + 20) * scale); // card + 6px margins + 20px bottom safety
+    const wantInnerH = Math.round(rect.height * scale); // card fills window exactly
     const [inner, outer] = await Promise.all([win.innerSize(), win.outerSize()]);
     const decoW = outer.width - inner.width;
     const decoH = outer.height - inner.height;
@@ -68,10 +68,6 @@ function scheduleFit() {
 let S = null; // initial state
 let chosenLoc = "";
 let lang = "en";
-
-function langName(code) {
-  return LANGS.find((l) => l.code === code)?.name ?? "";
-}
 
 function buildLangMenu() {
   const drop = $("lang-drop");
@@ -116,13 +112,30 @@ function t(key, ...args) {
   return s;
 }
 
+function esc(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Same as t() but renders **bold** markers as highlighted <b> (for labels).
+function tHTML(key, ...args) {
+  let s = S.strings[key] ?? "";
+  for (const a of args) {
+    s = s.replace("%s", esc(a));
+    s = s.replace("%d", esc(a));
+  }
+  return s.replace(/\*\*(.+?)\*\*/g, '<b class="hl">$1</b>');
+}
+
 function locIPs(loc) {
   return S.loc_ips[loc] ?? [];
 }
 
 function renderConfirm() {
-  // title + summary
-  $("title").textContent = t("TITLE");
+  // title in the drag titlebar + summary
+  $("titlebar").textContent = t("TITLE");
   $("summary").textContent = [
     S.detected_location ?? t("NO_LOCATION"),
     S.detected_name,
@@ -149,7 +162,7 @@ function renderConfirm() {
   }
 
   // conflict
-  $("conflict-label").textContent = t("CONFLICT_LABEL");
+  $("conflict-label").innerHTML = tHTML("CONFLICT_LABEL");
   $("conflict").innerHTML = "";
   for (const v of [t("SKIP_BTN"), t("OVERWRITE_LABEL")]) {
     const opt = document.createElement("option");
@@ -159,7 +172,7 @@ function renderConfirm() {
   }
 
   // delete list
-  $("existing-label").textContent = t("EXISTING_PRINTERS", S.existing.length);
+  $("existing-label").innerHTML = tHTML("EXISTING_PRINTERS", S.existing.length);
   $("delete-list").innerHTML = "";
   for (const p of S.existing) {
     const label = document.createElement("label");

@@ -14,7 +14,7 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--card);
   color: var(--text);
   font-size: 13px;
   user-select: none;
@@ -28,13 +28,25 @@ html {
 
 #app {
   position: relative;
-  width: 480px;
-  margin: 6px auto;
+  width: 100%;
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 20px 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 0 20px 10px;
+}
+
+#titlebar {
+  height: 28px;
+  margin: 0 -20px 6px;
+  padding: 3px 0 0 78px;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #lang-menu {
@@ -98,12 +110,6 @@ html {
 
 #lang-drop button.active {
   font-weight: 600;
-}
-
-h1 {
-  font-size: 15px;
-  margin: 0 0 6px;
-  padding-right: 34px;
 }
 
 hr {
@@ -175,6 +181,13 @@ select:disabled {
 
 .muted { color: var(--muted); }
 
+#conflict-label .hl,
+#existing-label .hl {
+  color: #1d1d1f;
+  font-weight: 700;
+  font-style: normal;
+}
+
 .btns {
   display: flex;
   justify-content: flex-end;
@@ -200,7 +213,26 @@ button.secondary {
 
 button:disabled { opacity: 0.5; cursor: default; }
 
-#result-body { white-space: pre-wrap; line-height: 1.5; }
+.screen { display: block; }
+
+.screen[hidden] {
+  display: none !important;
+}
+
+#result {
+  display: flex;
+  flex-direction: column;
+}
+
+#result-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6px 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
 #result-body .fail { color: var(--danger); }
 
 #result-body .result-group p { margin: 0 0 6px; }
