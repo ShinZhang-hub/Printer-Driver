@@ -30,7 +30,7 @@ pub struct InstallRequest {
 }
 
 /// Result messages to show (localized, one per action).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct InstallOutcome {
     /// Ordered, grouped messages. `kind` lets the UI visually group install
     /// vs remove blocks (e.g. a divider between them).

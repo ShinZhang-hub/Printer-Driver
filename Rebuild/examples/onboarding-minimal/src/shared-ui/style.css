@@ -1,3 +1,9 @@
+/* PrinterInstaller 可复用 UI 资产（shared-ui）
+ * 说明：这是从独立安装器 app/src/style.css 抽取出的通用样式，
+ * 不包含窗口壳（titlebar / fitWindow / 静默启动）相关。
+ * onboarding 程序直接 link 此文件即可获得一致观感。
+ */
+
 :root {
   --bg: #e8e8ed;
   --card: #ffffff;
@@ -12,118 +18,25 @@
 
 * { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  background: var(--card);
-  color: var(--text);
-  font-size: 13px;
-  user-select: none;
-  -webkit-user-select: none;
-  overflow: hidden;
-}
-
-html {
-  overflow: hidden;
-}
-
-#app {
-  position: relative;
-  width: 100%;
-  background: var(--card);
-  padding: 0 20px 10px;
-}
-
-#titlebar {
-  height: 28px;
-  margin: 0 -20px 12.5px;
-  padding: 3px 0 0 78px;
-  display: flex;
-  align-items: center;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  user-select: none;
-  -webkit-user-select: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#lang-menu {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 10;
-}
-
-#lang-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  font-size: 15px;
-  line-height: 1;
-  padding: 3px 5px;
-  cursor: pointer;
-  color: var(--text);
-}
-
-#lang-btn:hover {
-  border-color: var(--border);
-  background: #f2f2f6;
-}
-
-#lang-drop {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  min-width: 130px;
-  background: #fff;
+/* 通用分组/卡片容器 */
+.group {
   border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  background: var(--card);
 }
 
-#lang-drop[hidden] {
-  display: none;
-}
-
-#lang-drop button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: var(--text);
-  text-align: left;
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-#lang-drop button:hover {
-  background: #f2f2f6;
-}
-
-#lang-drop button.active {
-  font-weight: 600;
-}
-
-hr {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 12px 0;
-}
-
+/* 摘要行 */
 .summary {
   font-size: 12px;
   color: var(--muted);
   margin: 0 0 4px;
 }
 
+.muted { color: var(--muted); }
+
+/* 勾选行 */
 .row {
   display: flex;
   align-items: center;
@@ -137,6 +50,7 @@ hr {
   height: 15px;
 }
 
+/* 下拉框 */
 select {
   width: 100%;
   min-width: 0;
@@ -153,6 +67,14 @@ select:disabled {
   background: #fafafa;
 }
 
+/* 分隔线 */
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+/* 删除列表 */
 #delete-list {
   overflow: visible;
   border: 1px solid var(--border);
@@ -179,15 +101,14 @@ select:disabled {
   text-decoration: line-through;
 }
 
-.muted { color: var(--muted); }
-
-#conflict-label .hl,
-#existing-label .hl {
+/* 关键词高亮（覆盖/跳过、数量数字） */
+.hl {
   color: #1d1d1f;
   font-weight: 700;
   font-style: normal;
 }
 
+/* 按钮 */
 .btns {
   display: flex;
   justify-content: flex-end;
@@ -213,17 +134,7 @@ button.secondary {
 
 button:disabled { opacity: 0.5; cursor: default; }
 
-.screen { display: block; }
-
-.screen[hidden] {
-  display: none !important;
-}
-
-#result {
-  display: flex;
-  flex-direction: column;
-}
-
+/* 结果区 */
 #result-body {
   flex: 1;
   display: flex;
@@ -233,10 +144,11 @@ button:disabled { opacity: 0.5; cursor: default; }
   white-space: pre-wrap;
   line-height: 1.5;
 }
-#result-body .fail { color: var(--danger); }
 
+#result-body .fail { color: var(--danger); }
 #result-body .result-group p { margin: 0 0 6px; }
 #result-body .result-group p:last-child { margin-bottom: 0; }
+
 #result-body .result-divider {
   border: none;
   border-top: 1px solid var(--border);

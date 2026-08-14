@@ -335,12 +335,24 @@ function wire() {
     S = await getInitialState();
   } catch (e) {
     showResult(["❌ failed to load state: " + e]);
+    try {
+      await getCurrentWindow().show();
+    } catch (_) {
+      /* ignore */
+    }
     return;
   }
   lang = S.lang || "en";
   refreshLangMenu();
   renderConfirm();
   show("confirm");
+  // Window starts hidden (visible:false) so no white/loading flash on launch;
+  // reveal it once the interactive confirm UI is fully rendered.
+  try {
+    await getCurrentWindow().show();
+  } catch (_) {
+    /* ignore */
+  }
 
   // Background-config refresh: the UI already renders from the embedded
   // config; if a newer remote config arrives, reload state and re-render.

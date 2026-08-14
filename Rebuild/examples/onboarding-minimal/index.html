@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>入职指引（printer-core + shared-ui 接入示例）</title>
+    <link rel="stylesheet" href="/src/shared-ui/style.css" />
+    <style>
+      body { margin: 24px; background: #f5f5f7; }
+      h2 { font-size: 18px; }
+      .step { margin: 16px 0 8px; font-size: 14px; color: #555; }
+    </style>
+  </head>
+  <body>
+    <h2>入职指引 - 打印机配置步骤</h2>
+
+    <div class="group">
+      <div class="step">① 选择位置（自动识别，可手动切换）</div>
+      <p id="summary" class="summary"></p>
+      <label class="row" id="confirm-row">
+        <input type="checkbox" id="chk-confirm" checked />
+        <span id="confirm-label"></span>
+      </label>
+      <div id="picker-wrap" hidden>
+        <label class="row muted" id="picker-label"></label>
+        <select id="picker"></select>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="step">② 已有打印机冲突处理</div>
+      <p class="muted" id="conflict-label"></p>
+      <select id="conflict"></select>
+    </div>
+
+    <div class="group">
+      <div class="step">③ 本机已有打印机（可勾选移除，默认打印机除外）</div>
+      <p class="muted" id="existing-label"></p>
+      <div id="delete-list"></div>
+    </div>
+
+    <div class="group">
+      <div id="result-body"></div>
+      <div class="btns">
+        <button id="btn-ok"></button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

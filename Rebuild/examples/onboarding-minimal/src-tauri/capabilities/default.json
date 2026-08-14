@@ -1,0 +1,6 @@
+{
+  "$schema": "generated",
+  "identifier": "default",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
