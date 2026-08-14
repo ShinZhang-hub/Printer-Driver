@@ -172,6 +172,8 @@ npm run tauri build   # 打包
 
 ### 配置刷新（远端配置更新）
 
+**Rust 侧**（转发函数，一次写好）：
+
 ```rust
 #[tauri::command]
 fn refresh_printer_config(app: tauri::AppHandle) {
@@ -183,7 +185,28 @@ fn refresh_printer_config(app: tauri::AppHandle) {
 }
 ```
 
-前端监听更新事件后可重新 `ui.init()` 刷新界面。
+**前端主动刷新**（推荐：进入打印机步骤时主动拉一次最新配置，
+onboarding 自行触发，不依赖程序启动）：
+
+```js
+import { listen } from "@tauri-apps/api/event";
+
+// 主动拉一次远端配置；有更新时 Rust 发事件 → 重新加载状态重渲染界面
+await invoke("refresh_printer_config");
+await ui.reloadState();          // 立即刷新一次，保证位置列表最新
+
+// 监听配置更新事件，随时同步
+listen("printer-config-updated", () => {
+  ui.reloadState();
+});
+```
+
+`ui.reloadState()` 是 shared-ui 提供的方法：重新 `get_printer_state` 并重渲染
+确认界面（位置下拉、冲突、删除列表同步刷新）。
+
+> 人话：`refresh_printer_config` = "去服务器看看配置有没有变"；
+> 变了就通知界面刷新。onboarding 在进入打印机页面时主动调一次，
+> 确保用户看到的是最新位置列表。
 
 ### 自定义 DOM id
 

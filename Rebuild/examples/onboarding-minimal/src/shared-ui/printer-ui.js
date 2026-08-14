@@ -322,5 +322,13 @@ export function createPrinterUI(opts) {
     return { S, t, tHTML };
   }
 
-  return { init, doConfirm, showResult, t, tHTML };
+  // 重新拉取状态并重渲染界面（供宿主在配置刷新/事件后调用）。
+  async function reloadState() {
+    S = await api.getState();
+    lang = S.lang || lang;
+    renderConfirm();
+    return S;
+  }
+
+  return { init, doConfirm, showResult, t, tHTML, reloadState };
 }
