@@ -27,17 +27,24 @@
       </div>
     </div>
 
-    <div class="group">
-      <div class="step">② 已有打印机冲突处理</div>
-      <p class="muted" id="conflict-label"></p>
-      <select id="conflict"></select>
-    </div>
+    <!--
+      【完整版】若需要「覆盖重装 + 删除打印机」，取消下面两组注释，并在
+      src/main.js 中删除 `simple: true`（shared-ui 会自动启用冲突/删除逻辑）。
 
-    <div class="group">
-      <div class="step">③ 本机已有打印机（可勾选移除，默认打印机除外）</div>
-      <p class="muted" id="existing-label"></p>
-      <div id="delete-list"></div>
-    </div>
+      ② 已有打印机冲突处理（覆盖 / 跳过）
+      <div class="group">
+        <div class="step">② 已有打印机冲突处理</div>
+        <p class="muted" id="conflict-label"></p>
+        <select id="conflict"></select>
+      </div>
+
+      ③ 本机已有打印机（可勾选移除，默认打印机除外）
+      <div class="group">
+        <div class="step">③ 本机已有打印机（可勾选移除，默认打印机除外）</div>
+        <p class="muted" id="existing-label"></p>
+        <div id="delete-list"></div>
+      </div>
+    -->
 
     <div class="group">
       <div id="result-body"></div>

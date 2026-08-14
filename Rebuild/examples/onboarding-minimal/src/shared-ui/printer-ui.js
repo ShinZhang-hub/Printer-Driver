@@ -45,9 +45,12 @@ const LANGS = [
 ];
 
 export function createPrinterUI(opts) {
-  const api = opts; // { getState, runInstall, getStrings, ids?, langBtn? }
+  const api = opts; // { getState, runInstall, getStrings, ids?, langBtn?, simple? }
   const ids = { ...DEFAULT_IDS, ...(opts.ids || {}) };
   const $ = (id) => document.getElementById(id);
+  // simple 模式：只做「选位置 + 安装」，不显示冲突/覆盖/删除列表，
+  // runInstall 固定传 overwrite:false, delete:[]（printer-core 无需改动）。
+  const simple = !!opts.simple;
 
   let S = null;      // 初始状态（含 strings）
   let lang = "en";
@@ -109,27 +112,29 @@ export function createPrinterUI(opts) {
       $(ids.picker).appendChild(opt);
     }
 
-    $(ids.conflictLabel).innerHTML = tHTML("CONFLICT_LABEL");
-    $(ids.conflict).innerHTML = "";
-    for (const v of [t("SKIP_BTN"), t("OVERWRITE_LABEL")]) {
-      const opt = document.createElement("option");
-      opt.value = v;
-      opt.textContent = v;
-      $(ids.conflict).appendChild(opt);
-    }
+    if (!simple) {
+      $(ids.conflictLabel).innerHTML = tHTML("CONFLICT_LABEL");
+      $(ids.conflict).innerHTML = "";
+      for (const v of [t("SKIP_BTN"), t("OVERWRITE_LABEL")]) {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        $(ids.conflict).appendChild(opt);
+      }
 
-    $(ids.existingLabel).innerHTML = tHTML("EXISTING_PRINTERS", S.existing.length);
-    $(ids.deleteList).innerHTML = "";
-    for (const p of S.existing) {
-      const label = document.createElement("label");
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.dataset.name = p.name;
-      cb.dataset.ip = p.ip;
-      const span = document.createElement("span");
-      span.textContent = `${p.name} (${p.ip || "?"})`;
-      label.append(cb, span);
-      $(ids.deleteList).appendChild(label);
+      $(ids.existingLabel).innerHTML = tHTML("EXISTING_PRINTERS", S.existing.length);
+      $(ids.deleteList).innerHTML = "";
+      for (const p of S.existing) {
+        const label = document.createElement("label");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.dataset.name = p.name;
+        cb.dataset.ip = p.ip;
+        const span = document.createElement("span");
+        span.textContent = `${p.name} (${p.ip || "?"})`;
+        label.append(cb, span);
+        $(ids.deleteList).appendChild(label);
+      }
     }
 
     if ($(ids.btnOk)) $(ids.btnOk).textContent = t("OK_LABEL");
@@ -153,6 +158,7 @@ export function createPrinterUI(opts) {
 
   function updateChosenState() {
     chosenLoc = currentLoc();
+    if (simple) return; // simple 模式无冲突/删除联动
     const ips = locIPs(chosenLoc);
     $(ids.conflict).disabled = !(S.conflict[chosenLoc] ?? false);
     for (const label of $(ids.deleteList).querySelectorAll("label")) {
@@ -178,6 +184,9 @@ export function createPrinterUI(opts) {
 
   // ---- 收集选择并执行 ----
   function collectRequest() {
+    if (simple) {
+      return { location: currentLoc(), overwrite: false, delete: [] };
+    }
     const checked = [];
     for (const cb of $(ids.deleteList).querySelectorAll("input")) {
       if (cb.checked) checked.push(cb.dataset.name);

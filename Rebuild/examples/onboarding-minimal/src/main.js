@@ -17,6 +17,9 @@ const ui = createPrinterUI({
   getState,
   runInstall: (req) => invoke("run_printer_install", { req }),
   getStrings: (lang) => invoke("get_printer_strings", { lang }),
+  // simple: true = 只做「选位置 + 安装」，不显示冲突/删除，不覆盖不删除。
+  // 【完整版】恢复：删除此行，并取消 index.html 中「②冲突 / ③删除」注释块。
+  simple: true,
 });
 
 ui.init().then(({ S, t }) => {

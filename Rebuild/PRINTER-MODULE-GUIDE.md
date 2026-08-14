@@ -206,6 +206,30 @@ ui.onConfirm = async (req) => {
 };
 ```
 
+### simple 模式（只需「选位置 + 安装」）
+
+如果入职指引**不需要**覆盖重装、也不需要删除打印机，启用 `simple: true`：
+
+```js
+const ui = createPrinterUI({
+  getState,
+  runInstall: (req) => invoke("run_printer_install", { req }),
+  getStrings: (lang) => invoke("get_printer_strings", { lang }),
+  simple: true,   // 只做「选位置 + 安装」
+});
+```
+
+**效果**：
+- 界面只显示位置选择 + 「好」按钮，隐藏冲突/删除区域
+- 执行时固定传 `overwrite: false, delete: []`
+- printer-core 零改动：位置打印机已存在则自动按「跳过」处理
+
+**完整版（含覆盖/删除）恢复**，仅两处改动，shared-ui 无需动：
+1. `index.html`：取消「②冲突处理 / ③删除列表」注释块
+2. `src/main.js`：删除 `simple: true` 一行
+
+> shared-ui 的完整版逻辑已保留在 `if (!simple)` 分支内，随时可切换。
+
 ---
 
 ## 常见问题
