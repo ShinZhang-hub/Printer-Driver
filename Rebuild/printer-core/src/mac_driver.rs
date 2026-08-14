@@ -7,23 +7,6 @@
 
 use std::path::{Path, PathBuf};
 
-/// System destination for the FF driver pieces the PPD references.
-pub const DRV_DEST: &str = "/Library/Printers/FUJIFILM";
-
-/// Whether the PPD-referenced filter is already present (i.e. driver installed).
-pub fn installed() -> bool {
-    Path::new(DRV_DEST)
-        .join("Filter")
-        .join("FFACMMCFilter")
-        .exists()
-}
-
-/// Extract the embedded FF driver to `DRV_DEST` (must run as root, i.e. inside
-/// the admin install script). Returns the destination on success.
-pub fn unpack() -> Result<PathBuf, String> {
-    unpack_to(Path::new(DRV_DEST))
-}
-
 /// Extract the embedded FF driver to an arbitrary destination, preserving the
 /// relative layout (Filter/..., PDEs/.../*.plugin/Contents/...).
 pub fn unpack_to(dest: &Path) -> Result<PathBuf, String> {

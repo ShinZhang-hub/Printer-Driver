@@ -108,7 +108,7 @@ if [ -d /var/spool/cups ]; then
   echo "  共 $CNT 个文件"
   # 只清文件，保留 cache/ 子目录 —— cupsd 需要它写 job.cache / PID，
   # 删掉会导致作业卡住（之前踩过的坑）。
-  run find /var/spool/cups -mindepth 1 ! -name cache ! -name cache -exec rm -rf {} + 2>/dev/null
+  run find /var/spool/cups -mindepth 1 ! -name cache -exec rm -rf {} + 2>/dev/null
   run find /var/spool/cups/cache -mindepth 1 -exec rm -rf {} + 2>/dev/null
 fi
 
