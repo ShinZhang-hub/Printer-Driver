@@ -232,6 +232,37 @@ const ui = createPrinterUI({
 
 ---
 
+## Printer-core 已覆盖什么（人话版）
+
+一句话：**打印机业务功能，printer-core 全包了，onboarding 不用自己写任何打印机逻辑。**
+Windows 和 macOS 都适用。
+
+| onboarding 想要的能力 | 谁负责 | 人话 |
+|---|---|---|
+| 自动识别用户在哪个位置 | printer-core | 读网络判断网段，告诉你"他在 Osaka" |
+| 列出所有可选位置 | printer-core | 返回位置清单 |
+| 判断目标位置打印机是否已装 | printer-core | 返回冲突信息 |
+| 列出本机已有打印机、可删哪些 | printer-core | 返回删除列表（防误删已内置） |
+| 执行安装 / 覆盖 / 删除 | printer-core | 一键搞定，内部含弹授权、装驱动、建队列、设默认 |
+| 失败自动重试两次 | printer-core | 内置，不用管 |
+| 装驱动（win INF / mac 过滤器） | printer-core | 驱动已内嵌，安装时自动解包 |
+| 极端环境自愈（驱动被删/服务停/打印机禁用） | printer-core | 安装时自动修复，onboarding 无感 |
+| 多语言文案 + 系统语言检测 | printer-core | 文案和自动切换都内置 |
+| 远端配置刷新 | printer-core | 提供函数，onboarding 可调 |
+
+**onboarding 只需要做三件事**（都是"壳"）：
+1. 加一行依赖（Cargo.toml）
+2. 写 4 个转发函数（lib.rs，就是"打电话给 printer-core"）
+3. 放 HTML + 写几行 JS（用 shared-ui 渲染）
+
+**不需要 onboarding 碰的**：CUPS / spooler / pnputil / UAC / osascript / 过滤器权限 /
+缓存目录 / PPD / INF / 驱动匹配 / 两轮重试 / 授权…… 全在 printer-core 内部。
+
+> 唯一要 onboarding 自己做的联动：如果它想"打印机装好后触发后续步骤"，
+> 需要监听结果或自己调用刷新函数——这些是 onboarding 的业务编排，不是打印机逻辑。
+
+---
+
 ## 常见问题
 
 | 问题 | 解决 |
