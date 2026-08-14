@@ -1,6 +1,6 @@
 # 🖨️ PrinterInstaller 模块接入指南
 
-> **一句话**：入职指引程序想用打印机安装功能，只需要「引依赖 + 抄 3 个转发函数 + 放一段 HTML + 写几行 JS」。
+> **一句话**：入职指引程序想用打印机安装功能，只需要「引依赖 + 抄 4 个转发函数（3 必需 + 1 推荐）+ 放一段 HTML + 写几行 JS」。
 > 打印机怎么装、授权、重试、翻译——全在 printer-core 里，宿主不用管。
 >
 > 本指南是**完整接入教程**，从零到跑通。已配套可运行示例：
@@ -33,7 +33,7 @@ printer-core = { path = "../../../printer-core" }   # ← 这一行
 
 > 路径按实际位置调整；同 workspace 可直接相对路径。
 
-### 第 2 步：`src-tauri/src/lib.rs` — 抄这 3 个转发函数（一次性）
+### 第 2 步：`src-tauri/src/lib.rs` — 抄转发函数（3 必需 + 1 推荐，一次性）
 
 ```rust
 use serde::Deserialize;
@@ -88,7 +88,7 @@ pub fn run() {
             get_printer_state,
             run_printer_install,
             get_printer_strings,
-            // refresh_printer_config（可选，见第 6 节扩展）
+            // refresh_printer_config（推荐，见下文「可选扩展 > 配置刷新」）
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -275,7 +275,7 @@ Windows 和 macOS 都适用。
 
 **onboarding 只需要做三件事**（都是"壳"）：
 1. 加一行依赖（Cargo.toml）
-2. 写 4 个转发函数（lib.rs，就是"打电话给 printer-core"）
+2. 写转发函数（lib.rs，就是"打电话给 printer-core"）—— **3 个必需**（状态/安装/文案）+ **1 个推荐**（刷新配置）
 3. 放 HTML + 写几行 JS（用 shared-ui 渲染）
 
 **不需要 onboarding 碰的**：CUPS / spooler / pnputil / UAC / osascript / 过滤器权限 /
