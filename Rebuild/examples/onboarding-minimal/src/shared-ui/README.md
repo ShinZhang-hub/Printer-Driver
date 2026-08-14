@@ -3,6 +3,10 @@
 从独立安装器（`app/`）抽取出的**与窗口壳无关**的可复用 UI 部分，
 位于 onboarding 项目内部（`src/shared-ui/`），直接引用，保持观感与交互一致。
 
+> **唯一真源**：本目录（`src/shared-ui/`）是 shared-ui 的唯一真源。
+> 修改请在此处进行，然后运行 `bash Rebuild/sync-shared-ui.sh`
+> 同步镜像到 `Rebuild/shared-ui/`。镜像目录勿直接修改（会被覆盖）。
+
 ## 组成
 
 | 文件 | 内容 |

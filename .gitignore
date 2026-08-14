@@ -23,3 +23,8 @@ Rebuild/app/node_modules/
 Rebuild/app/dist/
 Rebuild/app/src-tauri/gen/schemas/
 Rebuild/app/src-tauri/gen/android/
+Rebuild/examples/onboarding-minimal/node_modules/
+Rebuild/examples/onboarding-minimal/dist/
+Rebuild/examples/onboarding-minimal/src-tauri/gen/
+# shared-ui 镜像（由 sync-shared-ui.sh 从 src/shared-ui 生成，真源在 examples 内）
+Rebuild/shared-ui/
