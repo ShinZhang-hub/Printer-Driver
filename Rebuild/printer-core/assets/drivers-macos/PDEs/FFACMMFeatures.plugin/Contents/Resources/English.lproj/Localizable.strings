@@ -1,0 +1,226 @@
+/*
+ * $Log$
+ * Revision 1.5  2017/06/12 03:18:14  jeffchen2
+ * AR251011,AR251301,AR251577,AR251578,AR251677
+ * Import
+ *
+ * Revision 1.4  2017/06/07 10:44:56  jeffchen2
+ * AR251002,AR251013,AR251014.AR251300,AR251331
+ * Import update
+ *
+ * Revision 1.3  2017/05/26 06:42:14  jeffchen2
+ * AR249983.AR251018,AR251016,AR251008 import
+ *
+ * Revision 1.2  2017/05/19 09:03:42  jeffchen2
+ * SC37627 Import
+ * pde version update
+ *
+ * Revision 1.9  2008/09/05 07:52:42  jju
+ * Fix AR111348
+ *
+ * Revision 1.8  2008/08/22 05:59:15  jju
+ * Fix SRD 002.
+ *
+ * Revision 1.7  2008/08/19 03:38:45  jju
+ * Update Trimmer UI String.
+ *
+ * Revision 1.6  2008/08/18 08:34:43  jju
+ * Fix AR107697
+ *
+ * Revision 1.5  2008/08/18 07:47:03  jju
+ * Fix UI defect.
+ *
+ * Revision 1.4  2008/08/18 02:31:15  jju
+ * Add Trimmer Feature. Fix AR109672,109673,110206,107909,109789.
+ *
+ * Revision 1.3  2008/07/23 09:49:58  jju
+ * Fix AR109673.
+ *
+ * Revision 1.2  2008/05/13 11:19:45  roger
+ * Add CVS Log.
+ *
+ */
+
+
+/*Title for popup menu*/
+"PDE Title"="Features";
+
+/*Title for GroupUI list control*/
+"GroupUI List Control Title"="Feature Sets:";
+
+/*Text for General Group*/
+"GeneralGroupText"="Set";
+
+/*Text for Advanced Features List Item*/
+"Adavaned Features Title"="Advanced Features";
+
+/*Text for Setup Button*/
+"Setup Button Text"="Setup...";
+
+/*Text for Tab Margin Shift Button*/
+"Shift Button Text"="Setup...";
+
+/*Title for Booklet Margin value*/
+"Tab Margin MM Static Text"="Shift 0.0-15.0mm:";
+"Tab Margin MM Side Static Text"="mm";
+
+"Tab Margin Inch Static Text"="Shift 0.00-0.59 inches:";
+"Tab Margin Inch Side Static Text"="inches";
+
+/*Booklet Margin text*/
+"Tab Margin Text"="Shift";
+
+/*Booklet Margin Window Title*/
+//"Tab Margin Window Title String"="Tab Margin Shift";
+
+/*Booklet Margin CheckBox Title*/
+"Tab Margin Title"="Tab Margin Shift";
+
+/*Title for Radio Button control*/
+"Tab Margin Inches Radio Button Title"="Inches";
+"Tab Margin MM Radio Button Title"="Millimeters";
+
+/*Summary String for Radio Button control*/
+"Tab Margin Summary for Inches Radio Button Title"="Position Type";
+"Tab Margin Summary for MM Radio Button Title"="Position Type"; 
+
+/*Tab Margin Window Title*/
+"Tab Margin Window Title String"="Tab Margin Shift";
+
+/*Text for OK Button*/
+"OK Button Title"="OK";
+
+/*Text for Cancel Button*/
+"Cancel Button Title"="Cancel";
+
+/*Text for Default Button*/
+"Default Button Title"="Defaults";
+
+/*Help Book Name for Separators*/
+"Help Viewer Title for Features"="Features Help";
+
+/*Text for Separator location*/
+"Separator Page Statics Text"="Separator Locations:";
+
+/*Title for Separator location edit text*/
+"Separator Location Title"="Separator Locations";
+
+/*Title for Separator Location side text*/
+"Separator Location Side Title"=" ";
+
+/*Title for Separator window*/
+"Separator Window Title String"="Specify Locations";
+
+/*Title for Covers Separator Panel*/
+"Covers Separator Ttitle String"="Covers/Separators";
+
+/*Title for Toner Saver Panel*/
+"Toner Saver Title String"="Draft Mode";
+
+/*Title for Layout Panel*/
+"Layout Ttitle String"="Layout";
+
+/*Text for Setup Button*/
+"Booklet Margin Setup Button Text"="Setup...";
+
+/*Text for Auto Fit*/
+"Booklet Margin Auto Fit Text"="Auto-Fit";
+
+/*Title for Booklet Margin value*/
+"Booklet Margin MM Static Text"="Margins 0 - 25 mm:";
+"Booklet Margin MM Side Static Text"="mm";
+
+"Booklet Margin Inch Static Text"="Margins 0.0 - 1.0 inches:";
+"Booklet Margin Inch Side Static Text"="inches";
+
+/*Booklet Margin text*/
+"Booklet Margin Text"="Margins";
+
+/*Booklet Margin Window Title*/
+"Booklet Margin Window Title String"="Binding Edge Erase";
+
+/*Booklet Margin CheckBox Title*/
+"Booklet Margin Title"="Binding Edge Erase";
+
+/*Title for Radio Button control*/
+"Booklet Margin Inches Radio Button Title"="Inches";
+"Booklet Margin MM Radio Button Title"="Millimeters";
+
+/*Summary String for Radio Button control*/
+"Booklet Margin Summary for Inches Radio Button Title"="Position Type";
+"Booklet Margin Summary for MM Radio Button Title"="Position Type";
+
+// {Add NumberInSequence and Offset begin
+"Number In Sequence Static Text"="Number in Sequence:";
+
+"Number In Sequence Text"="Sequence Value";
+
+"Num In Sequence Button Text"="Setup...";
+
+"Number In Sequence Window Title String"="Number In Sequence";
+
+"Offset Stacking Button Text"="Setup...";
+
+"Offset Per Page Window Title String"="Offset Per Pages";
+
+"Offset Per Copy Window Title String"="Offset Per Units";
+
+"Offset Stacking Pages Static Text"="Page 2-65000:";
+
+"Offset Stacking Copies Static Text"="Unit 2-9999:";
+
+"Offset Stacking Pages Text"="Page 2-65000";
+
+"Offset Stacking Copies Text"="Unit 2-9999";
+// End}
+
+"Off"="Off";
+"On"="On";
+
+/*Trimmer Window Title*/
+"Trimmer Window Title String"="Booklet Trimming";
+/*Trimmer CheckBox Title*/
+"Trimmer CheckBox Title"="Trimmer";
+/*Title for Trimmer Window Controls*/
+"Trimmer MM Side Static Text"="mm";
+"Trimmer Inches Side Static Text"="inches";
+"Trimmer Inches Radio Button Title"="Inches";
+"Trimmer MM Radio Button Title"="Millimeters";
+"Trimmer MM Static Text"="Trimmer %@ mm:";
+"Trimmer Inch Static Text"="Trimmer %@ inches:";
+"Trimmer Text"="Trimmer Shift";
+//{>> SC37627 start
+//{>> AR251018 17/05/25
+"Trimmer TopLower Title Text"="Trim size";
+"Trimmer Height MM Static Text"="Height %@ mm:";
+"Trimmer Height Inch Static Text"="Height %@ inches:";
+"Trimmer Width MM Static Text"="Width %@ mm:";
+"Trimmer Width Inch Static Text"="Width %@ inches:";
+"Trimmer Adjust MM Static Text"="Adjust Trim Position %@ mm:";
+"Trimmer Adjust Inch Static Text"="Adjust Trim Position %@ inches:";
+//{>> AR251018 end
+//{>> SC37627 end
+
+/*Warining Message*/
+"Message22b"="Invalid value in shift. Specify a value within a range of 0.0 to 15.0.";
+"Message22b2"="Invalid value in shift. Specify a value within a range of 0.00 to 0.59.";
+"Message22c"="Invalid Separator Locations. Enter a number between 2 and 9999. Use commas to separate multiple entries.";
+"Message22d"="Entries for Separator Locations have exceeded the maximum number of 20.";
+"Message22e"="Invalid value in Margins. Specify a value within a range of 0 to 25."; 
+"Message22e2"="Invalid value in Margins. Specify a value within a range of 0.0 to 1.0."; 
+// {Add NumberInSequence and Offset begin
+"Message22k"="Invalid value in Number In Sequence. Specify an integer within a range of 1 to 254.";
+"Message22l"="Invalid value in Page. Specify an integer within a range of 2 to 65000.";
+"Message22m"="Invalid value in Unit. Specify an integer within a range of 2 to 9999.";
+"Message51"="Invalid value in Trimmer. Specify a numerical value within a range of [%s] to [%s].";
+// End}
+//{>> SC37627 start
+"Message66"="A paper that cannot be trimmed has been selected.";
+"Message67"="A setting that does not allow trimming has been set. It could be one of the following. 
+- Finished size is smaller than the minimum size.
+- Trimming width is larger than the maximum.
+- Trimming width is smaller than the minimum.";
+//{>> SC37627 end
+
+"Alert OK Btn"="OK";
+

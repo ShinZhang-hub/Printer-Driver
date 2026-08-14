@@ -7,6 +7,8 @@ pub mod driver;
 pub mod flow;
 pub mod i18n;
 pub mod location;
+#[cfg(target_os = "macos")]
+pub mod mac_driver;
 pub mod printer;
 
 #[cfg(target_os = "windows")]

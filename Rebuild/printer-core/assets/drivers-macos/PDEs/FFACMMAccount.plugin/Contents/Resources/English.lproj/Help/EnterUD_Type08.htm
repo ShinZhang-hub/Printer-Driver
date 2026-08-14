@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<link href="custom_style.css" rel="stylesheet" media="all">
+<title>Enter User Details</title>
+</head>
+
+
+<body>
+
+<h1>[Enter User Details] dialog box</h1>
+
+<p>This window appears during printing when [Prompt User for Entry when Submitting Job] is selected in the [User Details Setup] dialog box.<br>
+You can control the authentication information user can enter in [User Prompt].</p>
+
+<h2>Specify Job Owner Name</h2>
+<p>Select [Specify Job Owner Name] to enter the user details for authentication. This function controls access to print service and keeps track of the usage of printing services by users or user groups. <br>
+When [Specify Job Owner Name] option is selected, the following items are displayed: [User ID], [Passcode] and [Account ID].</p>
+
+<dl class="note">
+<dt>Note</dt>
+<dd>
+<ul>
+  <li>This option is available when [User ID and Account ID] or [All] is selected for [User Prompt].</li>
+  </UL>
+</dd>
+</dl>
+
+<h3>User ID</h3>
+<p>Enter the User ID. The User ID entered cannot exceed 32 characters.<br>
+User ID is used to control access to print service and keeps track of the usage of printing services by users or user groups.<br>
+The entered User ID is registered for the printer icon of each user.</p>
+
+<dl class="important">
+<dt>Important</dt>
+<dd>
+	<ul>
+	<li>If the User ID or Passcode is entered wrongly, the print job will not be processed.</li>
+	<li>Please consult your Administrator regarding User ID and Passcode.</li>
+	</ul>
+</dd>
+</dl>
+
+<dl class="note">
+<dt>Note</dt>
+<dd>	
+  <ul>
+  <li>If you encounter any problem switching from [Enter Owner Name] to [Use Login Name], click the [Defaults] button.</li>
+  </ul>
+</dd>
+</dl>
+
+<h3>Passcode</h3>
+<p>Enter a valid passcode for the User ID. The passcode should be between 4 and 12 characters long. The passcode entered will be displayed as bullet.<br>
+	If the [Passcode] text box is left empty, no passcode will be used with the specified User ID.</p>
+
+<dl class="important">
+<dt>Important</dt>
+<dd>
+	<ul>
+	<li>If the User ID or Passcode is entered wrongly, the print job will not be processed.</li>
+	<li>Please consult your Administrator regarding User ID and Passcode.</li>
+	</ul>
+</dd>
+</dl>
+
+<h3>Account ID</h3>
+<p>Enter the Account ID for Authentication and Accounting function.<br>
+The Account ID entered cannot exceed 32 characters.</p>
+
+
+<dl class="important">
+<dt>Important</dt>
+<dd>
+	<ul>
+	<li>If the User ID or Passcode is entered wrongly, the print job will not be processed.</li>
+	<li>Please consult your Administrator regarding User ID and Passcode.</li>
+	</ul>
+</dd>
+</dl>
+<dl class="note">
+<dt>Note</dt>
+<dd>	
+  <ul>
+  <li>Please make sure to enter User ID or Billing ID.</li>
+  </ul>
+  </dd>
+</dl>
+<hr>
+<h2>Specify Billing ID</h2>
+<p>Select [Specify Billing ID] to enter a Billing ID and Passcode for Charge Print. The print job sent will be temporarily stored on the printer under this ID.<br>
+For details on Charge Print and how to release print job at the printer, please refer to the printer manual.</p>
+
+
+<dl class="note">
+<dt>Note</dt>
+<dd>
+<ul>
+  <li>Please make sure to enter User ID or Billing ID.</li>
+  <li>This option is available when [Billing ID Only] or [All] is selected for [User Prompt].</li>
+  </UL>
+</dd>
+</dl>
+<h3>Billing ID</h3>
+
+<p>Enter a billing ID for Charge Print. The print job sent will be temporarily stored on the printer under this ID.<br>
+	For details on Charge Print and how to release print job at the printer, please refer to the printer manual.<br>
+	The Billing ID entered should not exceed 24 characters.</p>
+
+<h3>Passcode</h3>
+<p>Enter a passcode, not exceeding 12 numbers, for the Billing ID. The passcode entered will be displayed as bullet.<br>
+If the [Passcode] text box is left empty, no passcode will be set for the Billing ID specified.</p>
+</body>
+</html>

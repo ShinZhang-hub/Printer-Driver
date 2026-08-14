@@ -1,0 +1,123 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<link href="custom_style.css" rel="stylesheet" media="all">
+<META NAME="AppleTitle" CONTENT="Job Accounting and Job Type Help">
+<title>Print Type</title>
+</head>
+
+
+<body>
+
+<h1><A NAME = "JobType">Job Type</A></h1>
+
+<h2>Job Type</h2>
+
+<p>Select one of the following job types: [Normal Print], [Secure Print], [Sample Set], and [Delayed Print].</p>
+
+<dl class="note">
+<dt>Note</dt>
+<dd>
+  <ul>
+    <li>[Please refer to the printer manual on how to output the document at the printer.</li>
+  </ul>
+</dd>
+</dl>
+
+<h3><A NAME = "SecurePrint">[Secure Print]</A></h3>
+
+<p>[Secure Print] stores print data temporarily on the printer to be printed at a convenient time when the user is by the printer. You can specify this feature to print confidential documents. A user ID is required in the [User ID] field to process a Secure Print job.<br>
+Click the [Setup...] button to configure the following settings for [Secure Print]: 
+  <ul>
+    <li><A HREF = #UserID>User ID</A>
+    <li><A HREF = #SecurePasscode>Secure Print Passcode</A>
+    <li><A HREF = #DocName>Job Name</A>
+    <li><A HREF = #NewDocName>New Job Name</A>
+  </ul>
+</p>
+<p>	Please refer to the printer manual on how to output the document at the printer.</p>
+
+<dl class="note">
+<dt>Note</dt>
+<dd>
+  <ul>
+    <li>Please make sure to enter the passcode.</li>
+  </ul>
+</dd>
+</dl>
+
+<h3>[Sample Set]</h3>
+<p>If you are printing multiple copies in one print job, [Sample Set] allows you to print only the first copy for checking before proceeding with the remaining copies. A user ID is required in the [User ID] field to process the Sample Set job.
+<br>
+Click the [Setup...] button to configure the following settings for [Sample Set]: 
+  <ul>
+    <li><A HREF = #UserID>User ID</A>
+    <li><A HREF = #DocName>Job Name</A>
+    <li><A HREF = #NewDocName>New Job Name</A>
+  </ul>
+</p>
+<dl class="note">
+<dt>Note</dt>
+<dd>
+  <ul>
+    <li>This feature will not be available if you are printing one copy or if you have not set the job to be collated.</li>
+  </ul>
+</dd>
+</dl>
+
+<h3><A NAME = "DelayedPrint">[Delayed Print]</A></h3>
+<p>Delayed Print enables you to store print data temporarily in the printer to be output at a specified time.
+<br>
+  Click the [Setup...] button to configure the following settings for [Delayed Print]: 
+  <ul>
+    <li><A HREF = #StartTime>Time to Print</A>
+    <li><A HREF = #DocName>Job Name</A>
+    <li><A HREF = #NewDocName>New Job Name</A>
+  </ul>
+</p>
+<br>
+<hr>
+<br><h1>[Secure Print] / [Sample Set] / [Delayed Print] dialog box settings</h1>
+<h2><A NAME = "UserID">User ID</A></h2>
+
+<p>Enter a user ID for Secure Print and Sample Set jobs.<br>
+	The user ID should not exceed 24 characters.<br>
+<!-- 070824        You cannot use the following characters:<br>
+        \ ' ,  --></p>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<h2><A NAME = "SecurePasscode">Secure Print Passcode</a></h2>
+<p>Enter the passcode for the [User ID] for Secure Print.<br>
+	The passcode should not exceed 12 numbers. The numbers entered will be displayed as bullet.</p>
+<dl class="note">
+<dt>Note</dt>
+<dd>
+  <ul>
+    <li>Please make sure to enter the passcode.</li>
+  </ul>
+</dd>
+</dl>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<h2><A NAME = "DocName">Job Name</A></h2>
+<h3>[Secure Print] / [Sample Set] / [Delayed Print]</h3>
+<p>Select the method to specify the job name for Secure Print, Sample Set, and Delayed Print.<br>
+	If you have selected [Use Existing Name], the job name set in the application will be used as the job name. If this job name is longer than 64 characters, only the first 64 characters will be displayed. No user input is allowed.<br>
+	If you have selected [Enter Job Name], enter a name for the document in the [New Job Name].</p>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<h2><A NAME = "NewDocName">New Job Name</A></h2>
+<h3>[Secure Print] / [Sample Set] / [Delayed Print]</h3>
+<p>This item is used when [Enter Job Name] is selected in [Job Name].<br>
+	Enter a job name not exceeding 64 characters.</p>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<h2><A NAME = "StartTime">Time to Print</A></h2>
+<p>When Delayed Print is selected, enter the time for printing to begin.<br>
+	You can specify any time from 12:00(AM) to 11:59(PM).</p>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<br>
+</body>
+
+</html>

@@ -249,6 +249,11 @@ mod imp {
         let ppd_path = format!("/tmp/printer-installer-{}.ppd", std::process::id());
         std::fs::write(&ppd_path, PPD).map_err(|e| e.to_string())?;
 
+        // Unpack the embedded FF driver (filter + PDEs) to a temp dir; the
+        // admin script copies it into /Library/Printers/FUJIFILM as root.
+        let drv_tmp = format!("/tmp/printer-installer-drv-{}", std::process::id());
+        let drv_src = crate::mac_driver::unpack_to(std::path::Path::new(&drv_tmp))?;
+
         let pid = std::process::id();
         let retry_i = format!("/tmp/printer-installer-retry-i-{pid}");
         let retry_d = format!("/tmp/printer-installer-retry-d-{pid}");
@@ -258,10 +263,19 @@ mod imp {
             "#!/bin/bash".into(),
             "set -u".into(),
             format!("PPD={}", shell_escape(&ppd_path)),
+            format!("DRV_SRC={}", shell_escape(drv_src.to_str().unwrap_or(""))),
             format!("RETRY_I='{retry_i}'"),
             format!("RETRY_D='{retry_d}'"),
             ": > \"$RETRY_I\"".into(),
             ": > \"$RETRY_D\"".into(),
+            // Install the embedded FF driver (filter + PDEs) so the PPD's
+            // cupsFilter / APDialogExtension paths resolve on fresh machines.
+            "mkdir -p /Library/Printers/FUJIFILM".into(),
+            "ditto \"$DRV_SRC\" /Library/Printers/FUJIFILM".into(),
+            // CUPS (runs as _lp) refuses filters not owned by root:wheel.
+            "chown -R root:wheel /Library/Printers/FUJIFILM".into(),
+            "chmod -R go-w /Library/Printers/FUJIFILM".into(),
+            "chmod 555 /Library/Printers/FUJIFILM/Filter/FFACMMCFilter 2>/dev/null".into(),
             // Records which step failed; the final attempt's reason wins.
             "LAST_REASON=".into(),
             "install_one() {".into(),
@@ -327,6 +341,7 @@ mod imp {
         let out = run_admin_script(&script_path, &crate::i18n::t(lang, "ADMIN_PROMPT", &[]))?;
         let _ = std::fs::remove_file(&script_path);
         let _ = std::fs::remove_file(&ppd_path);
+        let _ = std::fs::remove_dir_all(&drv_tmp);
         Ok(super::parse_batch_output(&out))
     }
 

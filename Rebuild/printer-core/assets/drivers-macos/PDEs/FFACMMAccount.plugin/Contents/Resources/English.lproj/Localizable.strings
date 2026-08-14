@@ -1,0 +1,273 @@
+﻿/*
+ * $Log$
+ * Revision 1.4  2011/01/31 03:21:07  jeffchen2
+ * no message
+ *
+ * Revision 1.3  2010/03/31 02:28:42  shaolei
+ * Fix AR130215 and AR130216
+ *
+ * Revision 1.2  2010/03/25 01:49:33  shaolei
+ * Fix AR130213, AR130215, AR130216
+ *
+ * Revision 1.4  2008/07/29 01:34:45  roger
+ * Update UI term for Kobe-1's SC
+ *
+ * Revision 1.3  2008/05/26 06:35:46  roger
+ * Merger all from PF14 to PF14c
+ *
+ * Revision 1.3  2008/05/13 11:22:55  roger
+ * Add CVS Log.
+ *
+ */
+
+
+/*Title for popup menu*/
+"PDE Title"="Job Type";
+
+/*the text of the popup menu*/
+"PDE Menu"="Job Type";
+
+/*Summary Title*/
+"PDE Menu Summary"="Job Type";
+
+/*Text for Job Owner Type menu: Use Login Name*/
+"Job Owner Type Login Name"="Use Login Name";
+
+/*Text for Job Owner Type menu: Enter User Name(user)*/
+"Job Owner Type User Name"="Enter User Name (User)";
+
+/*Text for Job Owner Type menu: Enter User Name(Administrator)*/
+"Job Owner Type Admin Name"="Enter User Name (Administrtor)";
+  
+ 
+ // ---------------- Add by roger begin---------------
+ /*Static Text for User ID*/
+"Print Type User Name Text"="User ID:";
+
+ /*Static Text for Password*/
+"Password Text"="Secure Print Passcode:";
+
+ /*Static Text for Document Name*/
+"Document Name Text"="New Job Name:";
+
+ /*Static Text for Star Print Time*/
+"Start Print Time Text"="Time to Print:";
+
+/*Static Text for Print type title*/
+"Print Type"="Job Type";
+
+/*Static Text for Print type list title*/
+"Print Type List"="Job Type:";
+
+/*Static Text for Retrieve Document Name list title*/
+"Retrieve Document Name List"="Job Name:";
+
+/*Static Text for Help Button Control title*/
+"Help Button Title"="Help";
+
+/*Static Text for Restore Button Control title*/
+"Restore Button Title" = "Defaults";
+
+/*Setup User window title string*/ 
+"Job Type Setup Window Title"="Setup";
+
+/*Static Text for Setup Button Control title*/
+"Setup Button Title" = "Setup...";
+
+/*Text for Job Type Group Box control title*/
+"Print Type Group Control Title" = "Job Type";
+
+/*Static Text for Retrieve Document Name list title*/
+"MailBox Document Name List"="File Name:";
+"MailBox Retrieve Document Name"="File Name";
+
+ /*Static Text for Document Name*/
+"MailBox Document Name Text"="New File Name:";
+"MailBox Document Name"="New File Name";
+
+/*Text for Document Name Type menu: Auto Retrieve*/
+"MailBox Document Name Type Auto"="Use Existing Name";
+
+/*Text for Document Name Type menu: Enter*/
+"MailBox Document Name Type Enter Name"="Enter File Name";
+// ---------------- Add by roger end---------------
+
+
+/*Text for Job Type menu: None*/
+"Job Type None"="Normal Print";
+
+/*Text for Job Type menu: Secure Print*/
+"Job Type Secure"="Secure Print";
+
+/*Text for Job Type menu: Sample Print*/
+"Job Type Sample"="Sample Set";
+
+/*Text for Job Type menu: Delay Print*/
+"Job Type Time"="Delayed Print";
+
+/*Text for Job Type menu: Delay Print*/
+"Job Type MBN"="Store in Remote Folder";
+
+/*Text for Document Name Type menu: Auto Retrieve*/
+"Document Name Type Auto"="Use Existing Name";
+
+/*Text for Document Name Type menu: Enter*/
+"Document Name Type Enter Name"="Enter Job Name";
+
+"PT Message OK Btn"="OK";
+"PT Message CANCEL Btn"="Cancel";
+
+//"User ID"="User ID";
+"Password"="Secure Print Passcode";
+"Retrieve Document Name"="Job Name";
+"Document Name"="New Job Name";
+"Start Print Time"="Time to Print";
+ /*Static Text for User ID*/
+"MailBox Number Text"="Folder Number:";
+"MailBox Number ID" = "Folder Number";
+
+/*Static Text for Mail Box Number Password*/
+"MBN Password Text"="Folder Passcode:";
+"MNB Password"="Folder Passcode";
+
+"Message43"="Invalid User ID.\nSpecify within a range of 1 to 24 characters.";
+"Message43b"="Invalid User ID.\nSpecify within a range of 1 to 8 characters.";
+"Message43c"="Invalid value in User ID.\nSpecify within a range of 1 to 8 characters.";
+"Message42"="Secure Print/Sample Set is unavailable as User ID in the Job Type PDE is not specified. \nSpecify within a range of 1 to 24 characters.";
+"Message42b"="Secure Print/Sample Set is unavailable as User ID in the Job Type PDE is not specified. \nSpecify within a range of 1 to 8 characters.";
+"Message41"="Invalid New Job Name. \nSpecify within a range of 0 to 24 characters.";
+"Message41b"="Invalid New Job Name. \nSpecify within a range of 0 to 12 characters.";
+"Message41b_o"="Invalid New Job Name. \nSpecify within a range of 0 to 12 characters.";
+"Message41c"="Invalid New Job Name. \nSpecify within a range of 0 to 64 characters.";
+"Message41_m"="Invalid New File Name. \nSpecify within a range of 0 to 24 characters.";
+"Message41b_m"="Invalid New File Name. \nSpecify within a range of 0 to 12 characters.";
+"Message41c_m"="Invalid New File Name. \nSpecify within a range of 0 to 64 characters.";
+"Message39"="Invalid Passcode.\nSpecify within a range of 0 to 12 characters.";
+"Message60"="Invalid value in Passcode. Specify within a range of [n] to 12 digits.";
+"Message61"="Passcode is fewer than the minimum digit number and cannot Secure Print. Job Type is changed to Normal Print.";
+"Message39b"="Invalid Passcode.\nSpecify within a range of 0 to 20 characters.";
+
+//Added by Annie
+"Warning22"="Invalid value in Folder Number. Specify an integer within a range of 1 to [n].";
+// DMP-XI-1c UTF8
+//"Message60"="Invalid User ID.\nSpecify within a range of 1 to 24 characters.";
+"Message62"="Invalid User ID.\nSpecify within a range of 1 to 24 characters.";//fixed AR194738 and AR194742 by Penny
+"Message57"="Invalid New Job Name. \nSpecify within a range of 0 to 64 characters.";
+"Message58"="Invalid New File Name. \nSpecify within a range of 0 to 64 characters.";
+"Message59"="Secure Print/Sample Set is unavailable as User ID in the Job Type PDE is not specified. \nSpecify within a range of 1 to 24 characters.";
+"Message63"="Secure Print/Sample Set is unavailable as User ID in the Job Type PDE is not specified. \nSpecify within a range of 1 to 32 characters.";
+"Message64"="Invalid User ID.\nSpecify within a range of 1 to 32 characters.";
+
+/*Title for popup menu*/
+"Job Authentication Title" ="Job Accounting";
+/*Help Viewer Title for Job Accounting*/
+"Help Viewer Title for Job Accounting"="Job Accounting and Job Type Help";
+/*the text of the popup menu*/
+"Job Authentication Menu" ="Job Accounting";
+/*Summary Title*/
+"Job Authentication Summary"="Job Accounting";
+
+/*************************************JBA Panel*************************************/
+// Account Mode(Listbox)
+"Job Authentication Type User Mode"="Administrator";
+"Job Authentication Type Administration Mode"="User";
+"JBA Account Mode"="Account Mode";
+"JBA Account Mode Text"="Account Mode:";
+"JBA Account Info Setting"="User Prompt";
+"JBA Account Info Setting Text"="User Prompt:";
+/*********************************JBA Setting Panel*********************************/
+// ID name setting(Listbox)
+"JBA Login Name"="Use Login Name";
+"JBA Input Name"="Enter Owner Name";
+"JBA Specify Name"="Specify Job Owner Name";
+"JBA Specify Name text"="Specify Job Owner Name:";
+
+// JBA Info Setting Popup List Text
+"User ID Fixed Text"="User ID and Account ID";
+"Billing ID Fixed Text"="Billing ID Only";
+"Switch Enabled Text"="All";
+
+// JBA Info(Radiobutton)
+"JBA Common User Info Type"="Always Use Default User Details";
+// JBA Input(Radiobutton)
+"JBA Job User Type"="Prompt User for Entry when Submitting Job";
+// JBA detailed setting summary
+"Detailed User Settings"="User Details Setup";
+
+// previous setting display(Checkbox)
+"JBA Last Info Setting"="Display Last Entered User Details";
+// Hide User/Storage ID(Checkbox)
+"JBA User ID Format"="Mask User ID and Domain Name";
+// Hide User/Storage ID(Checkbox)
+"JBA User ID Format No Domain"="Mask User ID";
+// Hide Account ID(Checkbox)
+"JBA Account ID Format"="Mask Account ID";
+
+/**********************************JBA Input Panel**********************************/
+// Authentication(Radiobutton)
+"JBA Auth Radio"="Specify Job Owner Name";
+// Storage(Radiobutton)
+"JBA Strg Radio"="Specify Billing ID";
+// JBA enter user details summary
+"Enter User Details"="Enter User Details";
+
+// -------- Add by roger 2004-10-08
+// JBA User window title string 
+"User Window Title String"="User Details Setup";
+
+// JBA Admin window title string 
+"Admin Window Title String"="User Details Setup";
+
+// JBA Input window title string
+"Input Window Title String"="Enter User Details";
+// --------------------------------
+
+/**************************************Warning**************************************/
+"Warning32"="Invalid User ID. Specify within a range of 1 to 32 characters.";
+"Warning33"="Invalid Passcode. Specify within a range of 4 to 12 characters.";
+"Warning34"="Invalid Account ID. Specify within a range of 0 to 32 characters.";
+"Warning35"="Invalid Domain Name. Specify within a range of 0 to 64 characters.";
+"Warning36"="Invalid Passcode. Specify within a range of 1 to 128 characters.";
+"Warning38"="Invalid Billing ID. Specify within a range of 0 to 24 characters.";
+"Warning38b"="Invalid Billing ID. Specify within a range of 0 to 8 characters.";
+"Warning39"="Invalid Passcode. Specify within a range of 0 to 12 characters.";
+"Warning38A"="Invalid Billing ID. Specify within a range of 1 to 24 characters.";
+"Warning38c"="Invalid Billing ID. Specify within a range of 1 to 8 characters.";
+// DMP-XI-1c----UTF8
+"Warning52"="Invalid User ID. Specify within a range of 1 to 32 characters.";
+"Warning53"="Invalid Billing ID. Specify within a range of 0 to 24 characters.";
+"Warning54"="Invalid Billing ID. Specify within a range of 1 to 24 characters."; //Fixed AR194998 by Penny
+/**************************************Status***************************************/
+"Off"="Off";
+"On"="On";
+
+//Add static text ID Here
+"User ID"="User ID";
+"User ID text"="User ID:";
+"User ID Password"="Passcode";
+"User ID Password text"="Passcode:";
+"Account ID"="Account ID";
+"Account ID text"="Account ID:";
+"Domain Name"="Domain Name";
+"Domain Name text"="Domain Name:";
+"Billing ID"="Billing ID";
+"Billing ID text"="Billing ID:";
+"Billing ID Password"="Passcode";
+"Billing ID Password text"="Passcode:";
+
+"Alert OK Btn"="OK";
+
+"PT Setup Window OK Buttons"="OK";
+"PT Setup Window Cancel Buttons"="Cancel";
+"PT Setup Window Rstr Buttons"="Defaults";
+
+//Add button text ID here
+"Detailed User Settings Btn"="User Details Setup...";
+"JBA Wnd HELP Btn"="Help";
+"JBA Info OK Btn"="OK";
+"JBA Info CANCEL Btn"="Cancel";
+"JBA Info RESTORE Btn"="Defaults";
+"JBA Info HELP Btn"="Help";
+"JBA Input OK Btn"="OK";
+"JBA Input CANCEL Btn"="Cancel";
+"JBA Input HELP Btn"="Help";

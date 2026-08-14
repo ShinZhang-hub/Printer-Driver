@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=Shift_JIS">
+<link href="custom_style.css" rel="stylesheet" media="all">
+<META NAME="AppleTitle" CONTENT="認証情報／プリント種類 ヘルプ">
+<title>Print Type</title>
+</head>
+
+
+<body>
+
+<h1><A NAME = "JobType">プリント種類</A></h1>
+
+<h2>プリント種類</h2>
+
+<p>［通常プリント］、［セキュリティープリント］、［サンプルプリント］、［時刻指定プリント］から選択します。</p>
+
+<dl class="note">
+<dt>補足</dt>
+<dd>
+    <ul>
+    <li>機器側での出力操作方法は、機器のマニュアルを参照してください。</li>
+    </ul>
+</dd>
+</dl>
+
+<h3><A NAME = "SecurePrint">［セキュリティープリント］</A></h3>
+
+<p>印刷を指示したデータを一時的に機器内に蓄積させ、印刷したいときに、機器側の指示で、出力させることができます。機密文書などを印刷する場合に利用できます。<br>
+［設定...］ボタンをクリックすると、［セキュリティープリント］の次の項目を設定できます。
+  <ul>
+    <li><A HREF = #UserID>ユーザーID</A>
+    <li><A HREF = #SecurePasscode>暗証番号</A>
+    <li><A HREF = #DocName>蓄積する文書名</A>
+    <li><A HREF = #NewDocName>文書名</A>
+  </ul></p>
+
+<dl class="note">
+<dt>補足</dt>
+<dd>
+    <ul>
+    <li>暗証番号は、必ず入力してください。</li>
+    </ul>
+</dd>
+</dl>
+
+<h3><A NAME = "SamplePrint">［サンプルプリント］</A></h3>
+<p>複数部数を出力するときに、まず1部だけ出力し、出力されたプリントを確認してから、残りの部数を機器側の指示で出力させることができます。<br>
+［設定...］ボタンをクリックすると、［サンプルプリント］の次の項目を設定できます。
+  <ul>
+    <li><A HREF = #UserID>ユーザーID</A>
+    <li><A HREF = #DocName>蓄積する文書名</A>
+    <li><A HREF = #NewDocName>文書名</A>
+  </ul></p>
+
+<dl class="note">
+<dt>補足</dt>
+<dd>
+    <ul>
+    <li>この機能は、印刷部数を2部以上に設定し、部単位の印刷を設定した場合に使用できます。</li>
+    </ul>
+</dd>
+</dl>
+
+<h3><A NAME = "DelayedPrint">［時刻指定プリント］</A></h3>
+<p>印刷を指示したデータを一時的に機器内に蓄積させて、指定した時刻に出力させる機能です。<br>
+［設定...］ボタンをクリックすると、［時刻指定プリント］の次の項目を設定できます。
+  <ul>
+    <li><A HREF = #StartTime>印刷開始時刻</A>
+    <li><A HREF = #DocName>蓄積する文書名</A>
+    <li><A HREF = #NewDocName>文書名</A>
+  </ul></p>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<hr>
+<h2><A NAME = "UserID">ユーザーID</A></h2>
+<p>セキュリティープリントとサンプルプリントで使用される、ユーザーIDを入力します。<br>
+ユーザーIDの最大文字数は、24バイト（半角で24文字、全角で12文字）です。<br>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<h2><A NAME = "SecurePasscode">暗証番号</A></h2>
+<p>セキュリティープリントの［ユーザーID］に対応する、暗証番号を入力します。<br>
+半角数字で12文字以内で入力します。番号は、ドット（・）で表示されます。</p>
+
+<dl class="note">
+<dt>補足</dt>
+<dd>
+    <ul>
+    <li>暗証番号は、必ず入力してください。</li>
+    </ul>
+</dd>
+</dl>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<h2><A NAME = "DocName">蓄積する文書名</A></h2>
+<p>セキュリティープリント、サンプルプリント、時刻指定プリントで、機器に保存される文書の名前を指定する方法を選択します。［自動取得］または［文書名を入力する］から選択します。<br>
+  ［自動取得］を選択すると、文書名は、印刷を指示したアプリケーションから取得され、入力はできません。また、64バイト（半角で64文字、全角で32文字）を超える部分は無効になります。<br>
+［文書名を入力する］を選択した場合は、［文書名］に文書の名前を入力します。</p>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<h2><A NAME = "NewDocName">文書名</A></h2>
+<p>［蓄積する文書名］で［文書名］を入力した場合に、使用する項目です。<br>
+機器に保存される文書の名前を入力します。入力できる文字数は、64バイト（半角で64文字、全角で32文字）までです。</p>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+<h2><A NAME = "StartTime">印刷開始時刻</A></h2>
+<p>時刻指定プリントを選択した場合に、印刷を開始する時刻を指定します。<br>
+指定できる時刻の範囲は、00:00～23:59です。</p>
+<p align=right><a href=#JobType>&lt;Top&gt;</a></p>
+
+</body>
+</html>
