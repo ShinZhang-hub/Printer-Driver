@@ -276,6 +276,22 @@ mod imp {
             "chown -R root:wheel /Library/Printers/FUJIFILM".into(),
             "chmod -R go-w /Library/Printers/FUJIFILM".into(),
             "chmod 555 /Library/Printers/FUJIFILM/Filter/FFACMMCFilter 2>/dev/null".into(),
+            // Self-heal CUPS environment: a reset/cleanup that wiped
+            // /var/spool/cups/* also removes the cache/ subdir cupsd needs
+            // (job.cache / PID file). Recreate it so jobs actually run.
+            "mkdir -p /private/var/spool/cups/cache".into(),
+            "chown _lp:_lp /private/var/spool/cups/cache 2>/dev/null".into(),
+            "chmod 755 /private/var/spool/cups/cache 2>/dev/null".into(),
+            "chmod 700 /private/var/spool/cups 2>/dev/null".into(),
+            // Self-heal stale printer state: a prior filter failure (e.g.
+            // after a cleanup wiped the driver) leaves the queue "paused /
+            // Filter failed" and CUPS reuses that stale state even after the
+            // driver is restored. Restart cupsd + drop stuck jobs so the
+            // fresh install below starts from a clean slate.
+            "launchctl kickstart -k system/org.cups.cupsd 2>/dev/null || launchctl restart org.cups.cupsd 2>/dev/null".into(),
+            "sleep 2".into(),
+            "cancel -a -x 2>/dev/null".into(),
+            "cancel -a 2>/dev/null".into(),
             // Records which step failed; the final attempt's reason wins.
             "LAST_REASON=".into(),
             "install_one() {".into(),

@@ -48,20 +48,11 @@ echo " 重置 macOS 打印环境（模拟全新 Mac）"
 echo "  dry-run = $DRY  清理驱动 = $DRIVERS"
 echo "=================================================="
 
-# ---------------- 1. 停打印服务 ----------------
+# ---------------- 1. 删除所有打印机队列 ----------------
 echo ""
-echo "=== [1/10] 停止打印服务（${CUPSSVC}）==="
-if [ "$DRY" -eq 0 ]; then
-  launchctl stop "system/$CUPSSVC" 2>/dev/null
-  launchctl stop "$CUPSSVC" 2>/dev/null
-  killall cupsd 2>/dev/null
-  sleep 1
-fi
-echo "  已停止 cupsd"
-
-# ---------------- 2. 删除所有打印机队列 ----------------
-echo ""
-echo "=== [2/10] 删除所有打印机队列 ==="
+echo "=== [1/10] 删除所有打印机队列 ==="
+# 必须在 cupsd 运行时删除（lpadmin 依赖 CUPS daemon）；
+# 若先停服务，lpadmin -x 会失败导致队列残留（PPD 仍被引用 → 后续打印失败）。
 QUEUES=$(lpstat -a 2>/dev/null | awk '{print $1}')
 if [ -z "$QUEUES" ]; then
   echo "  无打印机队列"
@@ -71,6 +62,17 @@ else
     run lpadmin -x "$q" 2>/dev/null
   done
 fi
+
+# ---------------- 2. 停打印服务 ----------------
+echo ""
+echo "=== [2/10] 停止打印服务（${CUPSSVC}）==="
+if [ "$DRY" -eq 0 ]; then
+  launchctl stop "system/$CUPSSVC" 2>/dev/null
+  launchctl stop "$CUPSSVC" 2>/dev/null
+  killall cupsd 2>/dev/null
+  sleep 1
+fi
+echo "  已停止 cupsd"
 
 # ---------------- 3. 清理 CUPS 持久化配置 ----------------
 echo ""
@@ -104,7 +106,10 @@ echo "=== [5/10] 清理 /var/spool/cups（作业与临时文件）==="
 if [ -d /var/spool/cups ]; then
   CNT=$(ls -A /var/spool/cups 2>/dev/null | wc -l | tr -d ' ')
   echo "  共 $CNT 个文件"
-  run rm -rf /var/spool/cups/* 2>/dev/null
+  # 只清文件，保留 cache/ 子目录 —— cupsd 需要它写 job.cache / PID，
+  # 删掉会导致作业卡住（之前踩过的坑）。
+  run find /var/spool/cups -mindepth 1 ! -name cache ! -name cache -exec rm -rf {} + 2>/dev/null
+  run find /var/spool/cups/cache -mindepth 1 -exec rm -rf {} + 2>/dev/null
 fi
 
 # ---------------- 6. 清理 CUPS 日志 ----------------
