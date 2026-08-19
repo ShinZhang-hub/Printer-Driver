@@ -270,6 +270,13 @@ mod imp {
             ": > \"$RETRY_D\"".into(),
             // Install the embedded FF driver (filter + PDEs) so the PPD's
             // cupsFilter / APDialogExtension paths resolve on fresh machines.
+            // Ensure Rosetta is present first: the FF filter is an x86_64
+            // binary, and a fresh Apple Silicon Mac has no Rosetta by default
+            // (CUPS runs the filter as _lp so no "install Rosetta" prompt can
+            // appear). Only meaningful on arm64; no-op on Intel.
+            "if [ \"$(uname -m)\" = arm64 ] && ! arch -x86_64 /bin/echo ok >/dev/null 2>&1; then".into(),
+            "  /usr/sbin/softwareupdate --install-rosetta --agree-to-license 2>/dev/null || true".into(),
+            "fi".into(),
             "mkdir -p /Library/Printers/FUJIFILM".into(),
             "ditto \"$DRV_SRC\" /Library/Printers/FUJIFILM".into(),
             // CUPS (runs as _lp) refuses filters not owned by root:wheel.
