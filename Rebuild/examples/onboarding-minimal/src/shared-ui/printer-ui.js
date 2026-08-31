@@ -25,6 +25,7 @@ const DEFAULT_IDS = {
   pickerWrap: "picker-wrap",
   pickerLabel: "picker-label",
   picker: "picker",
+  conflictWrap: "conflict-wrap",
   conflictLabel: "conflict-label",
   conflict: "conflict",
   existingLabel: "existing-label",
@@ -54,7 +55,6 @@ export function createPrinterUI(opts) {
 
   let S = null;      // 初始状态（含 strings）
   let lang = "en";
-  let chosenLoc = "";
 
   // ---- 多语言 ----
   function t(key, ...args) {
@@ -141,7 +141,6 @@ export function createPrinterUI(opts) {
     if ($(ids.btnCancel)) $(ids.btnCancel).textContent = t("CANCEL_LABEL");
     if ($(ids.btnClose)) $(ids.btnClose).textContent = t("OK_LABEL");
 
-    chosenLoc = S.detected_location ?? $(ids.picker).options[0]?.value ?? "";
     updateChosenState();
   }
 
@@ -157,10 +156,12 @@ export function createPrinterUI(opts) {
   }
 
   function updateChosenState() {
-    chosenLoc = currentLoc();
+    const loc = currentLoc();
     if (simple) return; // simple 模式无冲突/删除联动
-    const ips = locIPs(chosenLoc);
-    $(ids.conflict).disabled = !(S.conflict[chosenLoc] ?? false);
+    const ips = locIPs(loc);
+    const hasConflict = !!(S.conflict[loc] ?? false);
+    const wrap = $(ids.conflictWrap);
+    if (wrap) wrap.hidden = !hasConflict;
     for (const label of $(ids.deleteList).querySelectorAll("label")) {
       const cb = label.querySelector("input");
       const disabled = ips.includes(cb.dataset.ip);
@@ -191,9 +192,10 @@ export function createPrinterUI(opts) {
     for (const cb of $(ids.deleteList).querySelectorAll("input")) {
       if (cb.checked) checked.push(cb.dataset.name);
     }
+    const hasConflict = !!(S.conflict[currentLoc()] ?? false);
     return {
       location: currentLoc(),
-      overwrite: $(ids.conflict).value === t("OVERWRITE_LABEL"),
+      overwrite: hasConflict && $(ids.conflict).value === t("OVERWRITE_LABEL"),
       delete: checked,
     };
   }

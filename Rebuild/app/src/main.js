@@ -68,7 +68,6 @@ function scheduleFit() {
 }
 
 let S = null; // initial state
-let chosenLoc = "";
 let lang = "en";
 
 function buildLangMenu() {
@@ -102,7 +101,6 @@ async function switchLang(code) {
     /* keep current strings on failure */
   }
   renderConfirm();
-  requestAnimationFrame(scheduleFit);
 }
 
 function t(key, ...args) {
@@ -192,9 +190,7 @@ function renderConfirm() {
   $("btn-cancel").textContent = t("CANCEL_LABEL");
   $("btn-close").textContent = t("OK_LABEL");
 
-  chosenLoc = S.detected_location ?? $("picker").options[0]?.value ?? "";
   updateChosenState();
-  requestAnimationFrame(scheduleFit);
 }
 
 function currentLoc() {
@@ -209,11 +205,13 @@ function updatePickerVisibility() {
 }
 
 function updateChosenState() {
-  chosenLoc = currentLoc();
-  const ips = locIPs(chosenLoc);
+  const loc = currentLoc();
+  const ips = locIPs(loc);
 
-  // conflict enabled only when a printer exists at the chosen location IPs
-  $("conflict").disabled = !(S.conflict[chosenLoc] ?? false);
+  // 无冲突时隐藏中间的 跳过/覆盖 块（原为置灰），有冲突才显示
+  const hasConflict = !!(S.conflict[loc] ?? false);
+  const wrap = $("conflict-wrap");
+  if (wrap) wrap.hidden = !hasConflict;
 
   // disable delete checkboxes whose IP belongs to the chosen location
   for (const label of $("delete-list").querySelectorAll("label")) {
@@ -222,6 +220,8 @@ function updateChosenState() {
     cb.disabled = disabled;
     if (disabled) cb.checked = false;
   }
+  // 高度随隐藏/显示变化，需重算窗口
+  requestAnimationFrame(scheduleFit);
 }
 
 function updateSummary() {
@@ -242,9 +242,12 @@ async function doConfirm() {
   for (const cb of $("delete-list").querySelectorAll("input")) {
     if (cb.checked) checked.push(cb.dataset.name);
   }
+  const hasConflict = !!(
+    S.conflict[currentLoc()] ?? false
+  );
   const req = {
     location: currentLoc(),
-    overwrite: $("conflict").value === t("OVERWRITE_LABEL"),
+    overwrite: hasConflict && $("conflict").value === t("OVERWRITE_LABEL"),
     delete: checked,
     lang,
   };
@@ -316,7 +319,6 @@ function wire() {
     updatePickerVisibility();
     updateChosenState();
     updateSummary();
-    requestAnimationFrame(scheduleFit);
   });
   $("picker").addEventListener("change", () => {
     updateChosenState();
@@ -367,7 +369,6 @@ function wire() {
     lang = S.lang || keep;
     refreshLangMenu();
     renderConfirm();
-    requestAnimationFrame(scheduleFit);
   });
   refreshConfig().catch(() => {});
 })();
