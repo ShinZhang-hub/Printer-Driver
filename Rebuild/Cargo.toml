@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["printer-core", "app/src-tauri", "examples/onboarding-minimal/src-tauri"]
+members = ["printer-core", "app/src-tauri", "app-new/src-tauri", "examples/onboarding-minimal/src-tauri"]
 
 [workspace.package]
 version = "0.1.0"

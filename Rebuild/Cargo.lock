@@ -2326,6 +2326,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "printer-installer-app-new"
+version = "0.1.0"
+dependencies = [
+ "printer-core",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+]
+
+[[package]]
 name = "proc-macro-crate"
 version = "1.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

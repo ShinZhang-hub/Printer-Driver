@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="WRHed8l0W2beHyBVdLPp3k">
+<head data-page-node-id="Z3KGOGuCLBf4SdqzGz7TVj">
+<meta charset="UTF-8" data-page-node-id="XsAKcJ7lKWr3fHVtDA4Cv3">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="XFcgCJArMxNUCGNG7xq9QQ">
+<title>打印机服务中心 - 紧凑版</title>
+<style>
+:root{--ink:#1d2939;--sub:#667085;--line:#e4e7ec;--blue:#1570ef;--blue-bg:#eff6ff;--green:#067647;--green-bg:#ecfdf3;--red:#d92d20;--red-bg:#fef3f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+*{box-sizing:border-box}body{margin:0;padding:28px;background:#f3f5f8;color:var(--ink);font-size:13px}.window{width:440px;margin:auto;overflow:hidden;background:#fff;border:1px solid #dce1e8;border-radius:12px;box-shadow:0 18px 45px rgba(29,41,57,.16)}button,input,select{font:inherit}button{cursor:pointer}.titlebar{height:52px;padding:0 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}.app-icon{width:28px;height:28px;display:grid;place-items:center;background:var(--blue);border-radius:8px;color:#fff}.title{font-size:15px;font-weight:720}.health{width:8px;height:8px;border-radius:50%;background:#a7f3d0;box-shadow:0 0 0 3px #ecfdf3;display:inline-block;animation:breathe 1.6s ease-in-out infinite}
+.lang-btn{background:transparent;border:1px solid var(--line);border-radius:6px;font-size:13px;padding:4px 8px;cursor:pointer;margin-left:8px}
+.lang-btn:hover{background:#f2f2f6}
+.lang-drop{position:absolute;top:100%;right:0;min-width:110px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);padding:4px;display:none;z-index:10}
+.lang-drop.show{display:flex;flex-direction:column}
+.lang-drop button{background:transparent;border:none;border-radius:6px;padding:6px 10px;text-align:left;cursor:pointer;font-size:13px;color:var(--ink)}
+.lang-drop button:hover{background:#f2f2f6}
+.lang-drop button.active{font-weight:600}.tabs{display:flex;padding:0 18px;border-bottom:1px solid var(--line);gap:20px}.tab{position:relative;padding:13px 2px 11px;border:0;background:transparent;color:var(--sub);font-weight:650}.tab.active{color:var(--blue)}.tab.active:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--blue)}.badge{display:inline-grid;place-items:center;margin-left:4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#f1f3f6;color:#667085;font-size:10px}.anywhere-dot{width:8px;height:8px;border-radius:50%;background:#fbbf24;box-shadow:0 0 0 3px #ffedd5;display:inline-block;margin-left:6px;vertical-align:middle;animation:breathe-warm 1.6s ease-in-out infinite}.tab.highlight{color:#b54708 !important}.tab.highlight .anywhere-dot{opacity:1}.tab.jump{animation:tabJump 1.0s ease-in-out infinite}@keyframes tabJump{0%,100%{transform:translateY(0)}25%{transform:translateY(-4px)}50%{transform:translateY(0)}75%{transform:translateY(-2px)}}@keyframes breathe{0%,100%{background:#a7f3d0;box-shadow:0 0 0 3px var(--green-bg);transform:scale(1);opacity:1}50%{background:#067647;box-shadow:0 0 0 5px var(--green-bg);transform:scale(1.06);opacity:1}}@keyframes breathe-err{0%,100%{background:#fecaca;box-shadow:0 0 0 3px var(--red-bg);transform:scale(1);opacity:1}50%{background:#b42318;box-shadow:0 0 0 5px var(--red-bg);transform:scale(1.06);opacity:1}}@keyframes breathe-warm{0%,100%{background:#fbbf24;box-shadow:0 0 0 3px #ffedd5;transform:scale(1);opacity:1}50%{background:#d97706;box-shadow:0 0 0 5px #ffedd5;transform:scale(1.06);opacity:1}}.anywhere-banner{display:flex;gap:12px;padding:14px 14px;border:1px solid #fed7aa;background:#fff7ed;border-radius:10px;align-items:flex-start}.anywhere-banner .icon{width:36px;height:36px;border-radius:9px;background:#fff;border:1px solid #fed7aa;display:grid;place-items:center;color:#f59e0b;flex:none}.anywhere-banner h4{margin:0 0 4px;font-size:13px;font-weight:720}.anywhere-banner p{margin:0;color:var(--sub);font-size:12px;line-height:1.5}.anywhere-card{padding:14px;background:#f9fafb;border:1px solid var(--line);border-radius:10px;margin-top:12px}.anywhere-card h4{margin:0 0 6px;font-size:13px}.anywhere-card p{margin:0;color:var(--sub);font-size:12px;line-height:1.6}.anywhere-form{margin-top:12px;display:flex;flex-direction:column;gap:8px}.anywhere-form label{font-size:12px;font-weight:650;color:var(--ink)}.anywhere-form select,.anywhere-form textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff}.anywhere-form textarea{resize:none;height:64px}.anywhere-status{padding:10px 12px;border-radius:8px;background:var(--blue-bg);border:1px solid #d8e8ff;color:#1849a9;font-size:12px;line-height:1.5;margin-top:12px;display:none}.anywhere-status.show{display:block}.content{padding:16px 18px 0}.tab-panel{display:none}.tab-panel.active{display:block}.office{position:relative;padding:10px 11px;border:1px solid #d8e8ff;background:var(--blue-bg);border-radius:9px;display:flex;align-items:center;gap:9px}.office svg{color:var(--blue);flex:none}.office-info{min-width:0;flex:1}.office-heading{display:flex;align-items:center;gap:5px;margin-bottom:1px}.office-label{color:#55769e;font-size:10px;font-weight:720;letter-spacing:.04em}.office-name{font-weight:700;line-height:1.25}.office-detail{font-size:11px;color:#55769e;margin-top:2px}.office-status{display:inline-flex;align-items:center;height:16px;padding:0 5px;border-radius:4px;font-size:10px;font-weight:720;line-height:1}.office-status.auto{color:var(--green);background:var(--green-bg)}.office-status.manual{color:#b54708;background:#fff4e5}.link-btn{border:0;background:none;color:var(--blue);font-weight:650;padding:3px 0;white-space:nowrap}.office-menu{display:none;position:absolute;z-index:6;right:8px;top:42px;width:190px;padding:5px;background:#fff;border:1px solid #d5dce6;border-radius:8px;box-shadow:0 10px 22px rgba(16,24,40,.16)}.office-menu.open{display:block}.office-menu button{display:block;width:100%;padding:8px 9px;border:0;border-radius:5px;background:transparent;text-align:left;color:var(--ink);font-size:12px}.office-menu button:hover{background:#eff6ff;color:var(--blue)}.office-menu button:first-child{color:var(--blue);font-weight:650}.quiet{padding:6px 10px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#475467;font-weight:650}.caption{display:flex;align-items:center;justify-content:space-between;margin:16px 1px 7px}.caption b{font-size:13px}.caption span{font-size:11px;color:var(--sub)}.list{border:1px solid var(--line);border-radius:9px;overflow:hidden;max-height:calc(3 * 58px);overflow-y:auto}.printer{display:grid;grid-template-columns:18px 30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px}.printer+.printer{border-top:1px solid #eef1f4}.printer input{width:16px;height:16px;margin:0;accent-color:var(--blue)}.printer input:disabled{opacity:.55}.printer-icon{width:29px;height:29px;display:grid;place-items:center;color:#526b8a;background:#f1f5f9;border-radius:7px}.printer-name{font-weight:690;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.printer-detail{display:block;font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.printer-action{display:flex;flex-direction:column;gap:5px;align-items:flex-end}.tag{padding:3px 6px;border-radius:10px;font-size:10px;white-space:nowrap}.tag.installed{color:var(--green);background:var(--green-bg)}.tag.available{color:#175cd3;background:#eff8ff}.default-choice{display:flex;align-items:center;gap:4px;color:#475467;font-size:11px;white-space:nowrap}.default-choice input{width:13px;height:13px}.default-choice.disabled{opacity:.38;pointer-events:none}.default-current{font-size:10px;color:#986a13;background:#fffaeb;padding:3px 6px;border-radius:10px}.hint{margin:8px 1px 0;color:var(--sub);font-size:11px;line-height:1.45}.footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:12px 18px;border-top:1px solid var(--line);background:#fbfcfe}.selection{color:var(--sub);font-size:12px}.selection b{color:var(--ink)}.primary,.danger{border:0;border-radius:7px;padding:8px 13px;color:#fff;font-weight:680}.primary{background:var(--blue)}.danger{background:var(--red)}.primary:disabled,.danger:disabled{background:#b8c9df;cursor:not-allowed}.remove-note{margin:9px 1px 0;font-size:11px;line-height:1.45;color:var(--sub)}.toast{position:fixed;left:50%;bottom:25px;transform:translate(-50%,12px);opacity:0;pointer-events:none;transition:.2s;background:#1f2937;color:#fff;padding:10px 13px;border-radius:8px;font-size:12px;box-shadow:0 8px 18px rgba(0,0,0,.18)}.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body data-page-node-id="8NERHctTWrKnrCLMjRZ5fH">
+<main class="window" data-page-node-id="rbO1vYOZGKUrtXbMznCzp6">
+  <header class="titlebar"><div class="app-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4v-8h16v8h-2M6 14h12v7H6z"/></svg></div><div class="title">打印机管理</div><i class="health" title="设备服务正常"></i><div style="margin-left:auto;position:relative"><button class="lang-btn" id="lang-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"/><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"/><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"/><circle cx="12" cy="12" r="10"/></svg></button><div class="lang-drop" id="lang-drop"><button data-lang="zh">简体中文</button><button data-lang="zh-Hant">繁體中文</button><button data-lang="en">English</button><button data-lang="ja">日本語</button><button data-lang="ko">한국어</button></div></div></header>
+  <nav class="tabs"><button class="tab active" data-tab="install">安装</button><button class="tab" data-tab="remove">移除 <span class="badge" id="installed-count">0</span></button><button class="tab" data-tab="anywhere" id="tab-anywhere">异地打印 <span class="anywhere-dot" id="anywhere-dot" style="display:none"></span></button><button class="tab" data-tab="repair" disabled style="opacity:.4;cursor:default">修复</button></nav>  <section class="content tab-panel active" id="install-panel">
+    <div class="office"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V5l7-3 7 3v16M9 9h.01M9 13h.01M15 9h.01M15 13h.01"/></svg><div class="office-info"><div class="office-heading"><span class="office-label" id="office-label">办公室</span><span class="office-status auto" id="office-status">自动检测</span></div><div class="office-name" id="office-name">Osaka - JP Tower</div><div class="office-detail" id="office-detail">本机 IP：30.61.40.40</div></div><button class="link-btn" id="change-office">更换</button><div class="office-menu" id="office-menu" role="menu"><button data-office="auto">自动检测（推荐）</button><button data-office="osaka">Osaka - JP Tower</button><button data-office="tokyo-business">Tokyo - Business Tower</button><button data-office="tokyo-mori">Tokyo - Mori Tower</button></div></div>
+    <div class="caption"><b id="caption-install-b">可用打印机</b><span id="caption-install-hint">勾选安装；右侧可设为默认</span></div>
+    <div class="list" id="install-list"></div>
+    <p class="hint"><span id="current-default-label">当前默认打印机：</span><b id="current-default">Canon-Office-5F</b></p>
+    <footer class="footer"><div class="selection" id="install-summary">已选择 <b>0</b> 台</div><div style="display:flex;gap:8px"><button class="quiet" id="exit-button">取消</button><button class="primary" id="install-button" disabled>安装</button></div></footer>
+  </section>
+  <section class="content tab-panel" id="remove-panel">
+    <div class="caption"><b id="caption-remove-b">已安装的打印机</b><button class="link-btn" id="select-all">全选</button></div>
+    <div class="list" id="remove-list"></div>
+    <p class="remove-note" id="remove-note">移除当前默认设备后，系统将自动选择其他可用打印机。</p>
+    <footer class="footer"><div class="selection" id="remove-summary">已选择 <b>0</b> 台</div><button class="danger" id="remove-button" disabled>移除</button></footer>
+  </section>
+  <section class="content tab-panel" id="anywhere-panel">
+    <div class="anywhere-banner" id="anywhere-banner" style="display:none">
+      <div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M12 7v5l3 3"/><path d="M16 8l-2 2"/><path d="M8 8l2 2"/></svg></div>
+      <div style="flex:1;min-width:0">
+        <h4 id="anywhere-banner-title">检测到异地网络</h4>
+        <p id="anywhere-banner-desc">当前 IP 与您默认打印机不在同一位置，如需打印，可以申请异地打印权限。</p>
+      </div>
+      <button id="anywhere-banner-dismiss" style="margin-left:auto;flex:none;background:#fff;border:1px solid #fed7aa;color:#b54708;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:650;cursor:pointer;white-space:nowrap">知道了</button>
+    </div>
+    <div class="anywhere-card">
+      <h4 id="anywhere-desc-title">出差也能轻松打印</h4>
+      <p id="anywhere-desc">提交申请，审批通过后将通过邮件发送临时打印密码（有效期24小时）。审批一般在30分钟内完成，请留意邮箱。</p>
+    </div>
+    
+    <div class="anywhere-card" style="background:#fff8f0;border-color:#ffe0b3;display:flex;gap:10px;align-items:flex-start">
+      <div style="color:#b54708;flex:none;margin-top:1px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+      <div>
+        <h4 id="anywhere-tip-title" style="color:#b54708">温馨提示</h4>
+                <p id="anywhere-tip-body">若您携带了原属地办公室工牌，审批通过后亦可直接在异地打印机上尝试刷卡。</p>
+      </div>
+    </div>
+    <div class="anywhere-form">
+      <label id="anywhere-form-office-label">目标办公室</label>
+      <select id="anywhere-office"></select>
+      <label id="anywhere-form-email-label">您的邮箱</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="anywhere-email-user" value="zhxsdxin" placeholder="zhxsdxin" style="flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff">
+        <span style="color:var(--sub);font-weight:650">@</span>
+        <select id="anywhere-email-domain" style="flex:1;min-width:140px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff">
+          <option value="global.xx.com">global.xx.com</option>
+          <option value="xx.com">xx.com</option>
+        </select>
+      </div>
+      <span id="anywhere-email-preview" style="font-size:11px;color:var(--sub);margin-top:-4px"></span>
+      <label id="anywhere-form-reason-label">申请理由 <span style="color:var(--red)">*</span></label>
+      <textarea id="anywhere-reason" required placeholder="例如：本周在东京出差，需打印合同..." style="border:1px solid var(--line)"></textarea>
+      <span id="anywhere-reason-error" style="display:none;color:var(--red);font-size:11px;margin-top:-4px"></span>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+        <button class="quiet" id="anywhere-cancel" style="background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:7px">取消</button>
+        <button class="primary" id="anywhere-submit" style="background:var(--blue);color:#fff;border:0;padding:6px 16px;border-radius:7px;font-weight:650">提交申请</button>
+      </div>
+      <div class="anywhere-status" id="anywhere-status"></div>
+    </div>
+    <footer class="footer" style="margin:16px -18px 0"><div class="selection" id="anywhere-footer">提交后请留意邮件通知</div></footer>
+  </section>
+  <section class="content tab-panel" id="repair-panel">
+    <div class="caption"><b id="repair-title">打印机修复</b><span id="repair-hint">诊断并修复打印问题</span></div>
+    <div class="list" id="repair-list">
+      <div class="printer"><span class="printer-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span><span><span class="printer-name" id="repair-item1">驱动状态检查</span><span class="printer-detail" id="repair-item1-detail">检查 FUJIFILM 驱动是否完整安装</span></span><span class="printer-action"><span class="tag available" id="repair-status">待诊断</span></span></div>
+      <div class="printer"><span class="printer-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span><span><span class="printer-name" id="repair-item2">过滤器权限</span><span class="printer-detail" id="repair-item2-detail">检查 FFACMMCFilter owner 和权限</span></span><span class="printer-action"><span class="tag available">待诊断</span></span></div>
+      <div class="printer"><span class="printer-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span><span><span class="printer-name" id="repair-item3">CUPS 服务</span><span class="printer-detail" id="repair-item3-detail">检查打印服务运行状态和缓存</span></span><span class="printer-action"><span class="tag available">待诊断</span></span></div>
+    </div>
+    <footer class="footer"><div class="selection" id="repair-footer">点击下方开始自动诊断</div>      <button class="primary" id="repair-btn">开始诊断</button></footer>
+  </section>
+</main><div class="toast" id="toast" role="status"></div>
+<script>
+const STRINGS={
+  zh:{TITLE:"打印机管理",TAB_INSTALL:"安装",TAB_REMOVE:"移除",TAB_REPAIR:"修复",TAB_ANYWHERE:"异地打印",OFFICE:"办公室",AUTO_DETECT:"自动检测",MANUAL_SELECT:"手动选择",CHANGE:"更换",AUTO_DETECT_MENU:"自动检测（推荐）",LOCAL_IP:"本机 IP：",CAPTION_INSTALL:"可用打印机",CAPTION_INSTALL_HINT:"勾选安装；右侧可设为默认",CURRENT_DEFAULT:"当前默认打印机：",NONE:"未设置",INSTALLED_TAG:"已安装",AVAILABLE_TAG:"可安装",SET_DEFAULT:"设为默认",CURRENT_DEFAULT_TAG:"当前默认",SELECTION:"已选择",UNIT:"台",CANCEL:"取消",INSTALL_BTN:"安装",INSTALLED_PRINTERS:"已安装的打印机",SELECT_ALL:"全选",CANCEL_SELECT_ALL:"取消全选",REMOVE_NOTE:"移除当前默认设备后，系统将自动选择其他可用打印机。",REMOVE_BTN:"移除",REPAIR_TITLE:"打印机修复",REPAIR_HINT:"诊断并修复打印问题",REPAIR_ITEM1:"驱动状态检查",REPAIR_ITEM1_DETAIL:"检查 FUJIFILM 驱动是否完整安装",REPAIR_ITEM2:"过滤器权限",REPAIR_ITEM2_DETAIL:"检查 FFACMMCFilter owner 和权限",REPAIR_ITEM3:"CUPS 服务",REPAIR_ITEM3_DETAIL:"检查打印服务运行状态和缓存",REPAIR_STATUS:"待诊断",REPAIR_FOOTER:"点击下方开始自动诊断",REPAIR_BTN:"开始诊断",REPAIR_DEV:"诊断功能开发中...",ANYWHERE_BANNER_TITLE:"检测到异地网络",ANYWHERE_BANNER_DESC:"当前 IP 与您默认打印机不在同一位置，如需打印，可以申请异地打印权限。",ANYWHERE_BANNER_DISMISS:"知道了",ANYWHERE_DESC_TITLE:"出差也能轻松打印",ANYWHERE_DESC:"提交申请，审批通过后将通过邮件发送临时打印密码（有效期24小时）。审批一般在30分钟内完成，请留意邮箱。",ANYWHERE_TIP_TITLE:"温馨提示",ANYWHERE_TIP_BODY:"若您携带了原属地办公室工牌，审批通过后亦可直接在异地打印机上尝试刷卡。",ANYWHERE_FORM_OFFICE_LABEL:"目标办公室",ANYWHERE_FORM_EMAIL_LABEL:"您的邮箱",ANYWHERE_FORM_REASON_LABEL:"申请理由",ANYWHERE_FORM_REASON_PLACEHOLDER:"例如：本周在东京出差，需打印合同…",ANYWHERE_SUBMIT:"提交申请",ANYWHERE_CANCEL:"取消",ANYWHERE_FOOTER:"提交后请留意邮件通知",ANYWHERE_STATUS:"已提交申请",ANYWHERE_STATUS_DETAIL:"审批中，预计30分钟内通过邮件收到临时密码。",ANYWHERE_ADVANCE_LABEL:"提前申请模式（模拟未检测到异地）",ANYWHERE_ADVANCE_HINT:" — 隐藏提示横幅，仍可申请",ANYWHERE_REASON_REQUIRED:"请填写申请理由",ANYWHERE_FORM_REASON_LABEL:"申请理由",TOAST_INSTALL:"已安装 %d 台打印机",TOAST_REMOVE:"已移除 %d 台打印机",TOAST_CANCEL:"已取消本次操作",TOAST_SWITCH:"已切换到 %s",TOAST_AUTO:"已自动识别为 %s",SERVER_OK:"远端连接正常",SERVER_ERR:"远端连接异常"},
+  en:{TITLE:"Printer Manager",TAB_INSTALL:"Install",TAB_REMOVE:"Remove",TAB_REPAIR:"Repair",TAB_ANYWHERE:"Print Anywhere",OFFICE:"Office",AUTO_DETECT:"Auto-detect",MANUAL_SELECT:"Manual",CHANGE:"Change",AUTO_DETECT_MENU:"Auto-detect (Recommended)",LOCAL_IP:"Local IP: ",CAPTION_INSTALL:"Available Printers",CAPTION_INSTALL_HINT:"Check to install; toggle default on right",CURRENT_DEFAULT:"Current default: ",NONE:"None set",INSTALLED_TAG:"Installed",AVAILABLE_TAG:"Available",SET_DEFAULT:"Set default",CURRENT_DEFAULT_TAG:"Current default",SELECTION:"Selected",UNIT:"",CANCEL:"Cancel",INSTALL_BTN:"Install",INSTALLED_PRINTERS:"Installed Printers",SELECT_ALL:"Select all",CANCEL_SELECT_ALL:"Deselect all",REMOVE_NOTE:"After removing the current default, the system will auto-select another printer.",REMOVE_BTN:"Remove",REPAIR_TITLE:"Printer Repair",REPAIR_HINT:"Diagnose and fix print issues",REPAIR_ITEM1:"Driver check",REPAIR_ITEM1_DETAIL:"Check if FUJIFILM driver is fully installed",REPAIR_ITEM2:"Filter permissions",REPAIR_ITEM2_DETAIL:"Check FFACMMCFilter owner and permissions",REPAIR_ITEM3:"CUPS service",REPAIR_ITEM3_DETAIL:"Check print service status and cache",REPAIR_STATUS:"Pending",REPAIR_FOOTER:"Click below to start diagnosis",REPAIR_BTN:"Start diagnosis",REPAIR_DEV:"Diagnosis feature in development...",ANYWHERE_BANNER_TITLE:"Remote network detected",ANYWHERE_BANNER_DESC:"Your current IP and default printer are not in the same location. If you need to print, you can apply for remote printing access.",ANYWHERE_BANNER_DISMISS:"Got it",ANYWHERE_DESC_TITLE:"Print with ease while traveling",ANYWHERE_DESC:"Submit a request. After approval, a temporary password (valid for 24 hours) will be sent via email. Most requests are approved within 30 minutes. Please check your email.",ANYWHERE_TIP_TITLE:"Tip",ANYWHERE_TIP_BODY:"If you have your original home office badge, you can also try tapping it directly on the remote printer after approval.",ANYWHERE_FORM_OFFICE_LABEL:"Target office",ANYWHERE_FORM_EMAIL_LABEL:"Your email",ANYWHERE_FORM_REASON_LABEL:"Reason",ANYWHERE_FORM_REASON_PLACEHOLDER:"e.g., On business in Tokyo this week, need to print contracts...",ANYWHERE_SUBMIT:"Submit request",ANYWHERE_CANCEL:"Cancel",ANYWHERE_FOOTER:"Please check your email after submission",ANYWHERE_STATUS:"Request submitted",ANYWHERE_STATUS_DETAIL:"Under review — you will receive a temporary password via email within 30 minutes.",ANYWHERE_ADVANCE_LABEL:"Advance request (simulate no detection)",ANYWHERE_ADVANCE_HINT:" — hide banner, still applicable",ANYWHERE_REASON_REQUIRED:"Please enter a reason",ANYWHERE_FORM_REASON_LABEL:"Reason",TOAST_INSTALL:"Installed %d printer(s)",TOAST_REMOVE:"Removed %d printer(s)",TOAST_CANCEL:"Operation cancelled",TOAST_SWITCH:"Switched to %s",TOAST_AUTO:"Auto-detected: %s",SERVER_OK:"Remote connection normal",SERVER_ERR:"Remote connection failed"},
+  ja:{TITLE:"プリンタ管理",TAB_INSTALL:"インストール",TAB_REMOVE:"削除",TAB_REPAIR:"修復",TAB_ANYWHERE:"どこでも印刷",OFFICE:"オフィス",AUTO_DETECT:"自動検出",MANUAL_SELECT:"手動",CHANGE:"変更",AUTO_DETECT_MENU:"自動検出（推奨）",LOCAL_IP:"ローカル IP：",CAPTION_INSTALL:"利用可能なプリンター",CAPTION_INSTALL_HINT:"チェックでインストール；右で既定に設定",CURRENT_DEFAULT:"現在の既定：",NONE:"未設定",INSTALLED_TAG:"インストール済",AVAILABLE_TAG:"利用可能",SET_DEFAULT:"既定に設定",CURRENT_DEFAULT_TAG:"現在の既定",SELECTION:"選択",UNIT:"台",CANCEL:"キャンセル",INSTALL_BTN:"インストール",INSTALLED_PRINTERS:"インストール済プリンター",SELECT_ALL:"すべて選択",CANCEL_SELECT_ALL:"選択解除",REMOVE_NOTE:"現在の既定デバイスを削除すると、システムが他の利用可能なプリンターを自動選択します。",REMOVE_BTN:"削除",REPAIR_TITLE:"プリンタ修復",REPAIR_HINT:"印刷問題を診断・修復",REPAIR_ITEM1:"ドライバーチェック",REPAIR_ITEM1_DETAIL:"FUJIFILMドライバーのインストール状態を確認",REPAIR_ITEM2:"フィルター権限",REPAIR_ITEM2_DETAIL:"FFACMMCFilterのオーナーと権限を確認",REPAIR_ITEM3:"CUPSサービス",REPAIR_ITEM3_DETAIL:"印刷サービスの状態とキャッシュを確認",REPAIR_STATUS:"診断待ち",REPAIR_FOOTER:"下記をクリックして診断開始",REPAIR_BTN:"診断開始",REPAIR_DEV:"診断機能は開発中です...",ANYWHERE_BANNER_TITLE:"異なるネットワークを検出",ANYWHERE_BANNER_DESC:"現在のIPと既定のプリンターは同じ場所にありません。印刷が必要な場合は、異地印刷の権限を申請できます。",ANYWHERE_BANNER_DISMISS:"了解",ANYWHERE_DESC_TITLE:"出張先でもかんたん印刷",ANYWHERE_DESC:"申請を送信すると、承認後に一時的な印刷パスワード（24時間有効）がメールで届きます。通常30分以内に承認されます。メールをご確認ください。",ANYWHERE_TIP_TITLE:"ヒント",ANYWHERE_TIP_BODY:"元の所属オフィスの社員証をお持ちの場合は、承認後も異地プリンターに直接タッチして試せます。",ANYWHERE_FORM_OFFICE_LABEL:"対象オフィス",ANYWHERE_FORM_EMAIL_LABEL:"あなたのメール",ANYWHERE_FORM_REASON_LABEL:"申請理由",ANYWHERE_FORM_REASON_PLACEHOLDER:"例：今週東京出張で契約書を印刷したい…",ANYWHERE_SUBMIT:"申請を送信",ANYWHERE_CANCEL:"キャンセル",ANYWHERE_FOOTER:"送信後はメールをご確認ください",ANYWHERE_STATUS:"申請を送信しました",ANYWHERE_STATUS_DETAIL:"審査中 — 30分以内に一時パスワードをメールでお届けします。",ANYWHERE_ADVANCE_LABEL:"事前申請モード（未検出をシミュレート）",ANYWHERE_ADVANCE_HINT:" — バナーを非表示でも申請可",ANYWHERE_REASON_REQUIRED:"申請理由を入力してください",ANYWHERE_FORM_REASON_LABEL:"申請理由",TOAST_INSTALL:"%d台のプリンターをインストールしました",TOAST_REMOVE:"%d台のプリンターを削除しました",TOAST_CANCEL:"操作をキャンセルしました",TOAST_SWITCH:"%sに切り替えました",TOAST_AUTO:"自動検出：%s",SERVER_OK:"リモート接続正常",SERVER_ERR:"リモート接続異常"},
+  ko:{TITLE:"프린터 관리",TAB_INSTALL:"설치",TAB_REMOVE:"제거",TAB_REPAIR:"수리",TAB_ANYWHERE:"어디서나 인쇄",OFFICE:"사무실",AUTO_DETECT:"자동 감지",MANUAL_SELECT:"수동",CHANGE:"변경",AUTO_DETECT_MENU:"자동 감지 (권장)",LOCAL_IP:"로컬 IP: ",CAPTION_INSTALL:"사용 가능한 프린터",CAPTION_INSTALL_HINT:"체크하여 설치; 오른쪽에서 기본으로 설정",CURRENT_DEFAULT:"현재 기본값: ",NONE:"미설정",INSTALLED_TAG:"설치됨",AVAILABLE_TAG:"설치 가능",SET_DEFAULT:"기본으로 설정",CURRENT_DEFAULT_TAG:"현재 기본값",SELECTION:"선택",UNIT:"대",CANCEL:"취소",INSTALL_BTN:"설치",INSTALLED_PRINTERS:"설치된 프린터",SELECT_ALL:"전체 선택",CANCEL_SELECT_ALL:"선택 해제",REMOVE_NOTE:"기본 프린터를 제거하면 시스템이 다른 사용 가능한 프린터를 자동 선택합니다.",REMOVE_BTN:"제거",REPAIR_TITLE:"프린터 수리",REPAIR_HINT:"인쇄 문제 진단 및 수정",REPAIR_ITEM1:"드라이버 확인",REPAIR_ITEM1_DETAIL:"FUJIFILM 드라이버 설치 상태 확인",REPAIR_ITEM2:"필터 권한",REPAIR_ITEM2_DETAIL:"FFACMMCFilter 소유자 및 권한 확인",REPAIR_ITEM3:"CUPS 서비스",REPAIR_ITEM3_DETAIL:"인쇄 서비스 상태 및 캐시 확인",REPAIR_STATUS:"진단 대기",REPAIR_FOOTER:"아래를 클릭하여 진단 시작",REPAIR_BTN:"진단 시작",REPAIR_DEV:"진단 기능 개발 중...",TOAST_INSTALL:"%d대의 프린터를 설치했습니다",TOAST_REMOVE:"%d대의 프린터를 제거했습니다",TOAST_CANCEL:"작업이 취소되었습니다",TOAST_SWITCH:"%s(으)로 전환했습니다",TOAST_AUTO:"자동 감지: %s",SERVER_OK:"원격 연결 정상",SERVER_ERR:"원격 연결 실패",ANYWHERE_BANNER_TITLE:"원격 네트워크 감지됨",ANYWHERE_BANNER_DESC:"현재 IP와 기본 프린터가 같은 위치에 있지 않습니다. 인쇄가 필요한 경우 원격 인쇄 권한을 신청할 수 있습니다.",ANYWHERE_BANNER_DISMISS:"알겠습니다",ANYWHERE_DESC_TITLE:"출장 중에도 간편하게 인쇄",ANYWHERE_DESC:"신청서를 제출하면 승인 후 임시 인쇄 비밀번호(24시간 유효)가 이메일로 발송됩니다. 대부분 30분 이내에 승인됩니다. 이메일을 확인해 주세요.",ANYWHERE_TIP_TITLE:"팁",ANYWHERE_TIP_BODY:"원래 소속 사무실 배지를 소지한 경우 승인 후에도 원격 프린터에 직접 태그해 볼 수 있습니다.",ANYWHERE_FORM_OFFICE_LABEL:"대상 사무실",ANYWHERE_FORM_EMAIL_LABEL:"이메일",ANYWHERE_FORM_REASON_LABEL:"신청 사유",ANYWHERE_FORM_REASON_PLACEHOLDER:"예: 이번 주 도쿄 출장 중 계약서 인쇄 필요…",ANYWHERE_SUBMIT:"신청 제출",ANYWHERE_CANCEL:"취소",ANYWHERE_FOOTER:"제출 후 이메일을 확인해 주세요",ANYWHERE_STATUS:"신청이 제출되었습니다",ANYWHERE_STATUS_DETAIL:"심사 중 — 30분 이내에 임시 비밀번호를 이메일로 받게 됩니다.",ANYWHERE_ADVANCE_LABEL:"사전 신청 모드 (미감지 시뮬레이션)",ANYWHERE_ADVANCE_HINT:" — 배너 숨김, 신청 가능",ANYWHERE_REASON_REQUIRED:"신청 사유를 입력해 주세요",ANYWHERE_FORM_REASON_LABEL:"신청 사유"},
+  "zh-Hant":{TITLE:"印表機管理",TAB_INSTALL:"安裝",TAB_REMOVE:"移除",TAB_REPAIR:"修復",TAB_ANYWHERE:"跨點列印",OFFICE:"辦公室",AUTO_DETECT:"自動偵測",MANUAL_SELECT:"手動",CHANGE:"更換",AUTO_DETECT_MENU:"自動偵測（推薦）",LOCAL_IP:"本機 IP：",CAPTION_INSTALL:"可用印表機",CAPTION_INSTALL_HINT:"勾選安裝；右側可設為預設",CURRENT_DEFAULT:"當前預設：",NONE:"未設定",INSTALLED_TAG:"已安裝",AVAILABLE_TAG:"可安裝",SET_DEFAULT:"設為預設",CURRENT_DEFAULT_TAG:"當前預設",SELECTION:"已選擇",UNIT:"台",CANCEL:"取消",INSTALL_BTN:"安裝",INSTALLED_PRINTERS:"已安裝的印表機",SELECT_ALL:"全選",CANCEL_SELECT_ALL:"取消全選",REMOVE_NOTE:"移除當前預設裝置後，系統將自動選擇其他可用印表機。",REMOVE_BTN:"移除",REPAIR_TITLE:"印表機修復",REPAIR_HINT:"診斷並修復列印問題",REPAIR_ITEM1:"驅動狀態檢查",REPAIR_ITEM1_DETAIL:"檢查 FUJIFILM 驅動是否完整安裝",REPAIR_ITEM2:"過濾器權限",REPAIR_ITEM2_DETAIL:"檢查 FFACMMCFilter 所有者和權限",REPAIR_ITEM3:"CUPS 服務",REPAIR_ITEM3_DETAIL:"檢查列印服務運行狀態和快取",REPAIR_STATUS:"待診斷",REPAIR_FOOTER:"點擊下方開始自動診斷",REPAIR_BTN:"開始診斷",REPAIR_DEV:"診斷功能開發中...",TOAST_INSTALL:"已安裝 %d 台印表機",TOAST_REMOVE:"已移除 %d 台印表機",TOAST_CANCEL:"已取消本次操作",TOAST_SWITCH:"已切換到 %s",TOAST_AUTO:"已自動偵測為 %s",SERVER_OK:"遠端連線正常",SERVER_ERR:"遠端連線異常",ANYWHERE_BANNER_TITLE:"偵測到異地網路",ANYWHERE_BANNER_DESC:"目前 IP 與您的預設印表機不在同一位置，如需列印，可申請異地列印權限。",ANYWHERE_BANNER_DISMISS:"知道了",ANYWHERE_DESC_TITLE:"出差也能輕鬆列印",ANYWHERE_DESC:"提交申請，審批通過後將透過郵件發送臨時列印密碼（有效期24小時）。審批一般在30分鐘內完成，請留意郵箱。",ANYWHERE_TIP_TITLE:"溫馨提示",ANYWHERE_TIP_BODY:"若您攜帶了原屬地辦公室工牌，審批通過後亦可直接在異地印表機上嘗試刷卡。",ANYWHERE_FORM_OFFICE_LABEL:"目標辦公室",ANYWHERE_FORM_EMAIL_LABEL:"您的郵箱",ANYWHERE_FORM_REASON_LABEL:"申請理由",ANYWHERE_FORM_REASON_PLACEHOLDER:"例如：本週在東京出差，需列印合約…",ANYWHERE_SUBMIT:"提交申請",ANYWHERE_CANCEL:"取消",ANYWHERE_FOOTER:"提交後請留意郵件通知",ANYWHERE_STATUS:"已提交申請",ANYWHERE_STATUS_DETAIL:"審批中，預計30分鐘內透過郵件收到臨時密碼。",ANYWHERE_ADVANCE_LABEL:"提前申請模式（模擬未偵測到異地）",ANYWHERE_ADVANCE_HINT:" — 隱藏提示橫幅，仍可申請",ANYWHERE_REASON_REQUIRED:"請填寫申請理由",ANYWHERE_FORM_REASON_LABEL:"申請理由"}
+};
+var lang="zh";
+function t(k){const v=STRINGS[lang]?.[k];return v!==undefined?v:(STRINGS.en[k]!==undefined?STRINGS.en[k]:k)}
+function toast(text){const el=$('#toast');el.textContent=text;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2500)}
+
+const offices={
+  "osaka":{name:"Osaka - JP Tower",name_ja:"大阪 - JP Tower",name_ko:"오사카 - JP Tower",name_zhHant:"大阪 - JP Tower",ip:"30.61.40.40",printers:[{id:"osaka",name:"Printer-Osaka",detail:"14F · OO",model:"FF Apeos C2571",ip:"30.61.40.40",installed:true}]},
+  "tokyo-business":{name:"Tokyo - Business Tower",name_ja:"東京 - ビジネスタワー",name_ko:"도쿄 - 비즈니스 타워",name_zhHant:"東京 - Business Tower",ip:"30.61.30.30",printers:[{id:"tencent",name:"Printer-Tencent",detail:"14F · TT",model:"FF Apeos C3070",ip:"30.61.30.30",installed:false}]},
+  "tokyo-mori":{name:"Tokyo - Mori Tower",name_ja:"東京 - 森タワー",name_ko:"도쿄 - 모리타워",name_zhHant:"東京 - Mori Tower",ip:"30.61.34.29",printers:[{id:"bg",name:"Printer-BG",detail:"29F · MO",model:"FF Apeos C3070",ip:"30.61.34.29",installed:false},{id:"game",name:"Printer-Game",detail:"29F · RI",model:"FF Apeos C3070",ip:"30.61.34.30",installed:false}]}
+};
+const LOCAL_IP="30.61.39.173";
+const DETECTED_OFFICE_KEY="osaka";
+let officeKey=DETECTED_OFFICE_KEY,defaultPrinter="osaka",pendingDefault=null,selectedInstall=new Set(),removeSelected=new Set(),installClickCount=0,serverHealthy=true;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const printerIcon='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5M6 18H4v-8h16v8h-2M6 14h12v6H6z"/></svg>';
+
+function current(){return offices[officeKey]}
+function installed(){return Object.values(offices).flatMap(o=>o.printers.filter(p=>p.installed))}
+function officeName(o){return o[`name_${lang.replace("-","_")}`]||o.name}
+function printerDetail(p){return p.detail}
+
+function updateHealth(){
+  const el=document.querySelector('.health');
+  if(!el)return;
+  el.style.cursor='pointer';
+  el.onclick=()=>toast(t(serverHealthy?'SERVER_OK':'SERVER_ERR'));
+  if(serverHealthy){
+    el.style.background='var(--green)';
+    el.style.boxShadow='0 0 0 3px var(--green-bg)';
+    el.title=t('SERVER_OK');
+  }else{
+    el.style.background='var(--red)';
+    el.style.boxShadow='0 0 0 3px var(--red-bg)';
+    el.title=t('SERVER_ERR');
+  }
+}
+
+async function checkHealth(){
+  try{
+    const ctrl=new AbortController();
+    const id=setTimeout(()=>ctrl.abort(),3000);
+    // Simulate server check: try fetching config endpoint
+    await fetch('https://httpbin.org/get',{signal:ctrl.signal,mode:'no-cors'});
+    clearTimeout(id);
+    serverHealthy=true;
+  }catch(e){
+    serverHealthy=false;
+  }
+  updateHealth();
+}
+
+function refreshData(){
+  renderInstall();
+  renderRemove();
+  updateUI();
+  updateHealth();
+  updateAnywhereHighlight();
+}
+
+function installRow(p){const disabled=p.installed;const canDefault=!disabled&&selectedInstall.has(p.id);return `<div class="printer"><input class="install-choice" type="checkbox" data-id="${p.id}" ${selectedInstall.has(p.id)?'checked':''} ${disabled?'disabled':''}><span class="printer-icon">${printerIcon}</span><span><span class="printer-name" title="${p.model||''}">${p.name}</span><span class="printer-detail">${printerDetail(p)} · IP ${p.ip}</span></span><span class="printer-action"><span class="tag ${disabled?'installed':'available'}">${disabled?t('INSTALLED_TAG'):t('AVAILABLE_TAG')}</span>${disabled?(p.id===defaultPrinter?`<span class="default-current">${t('CURRENT_DEFAULT_TAG')}</span>`:''):`<label class="default-choice ${canDefault?'':'disabled'}"><input type="checkbox" data-default value="${p.id}" ${pendingDefault===p.id?'checked':''}> ${t('SET_DEFAULT')}</label>`}</span></div>`}
+function renderInstall(){const list=current().printers;$('#install-list').innerHTML=list.map(installRow).join('');const now=list.find(p=>p.id===defaultPrinter)||installed().find(p=>p.id===defaultPrinter);$('#current-default').textContent=now?.name||t('NONE');$('#current-default-label').textContent=t('CURRENT_DEFAULT');updateInstall();bindInstallEvents()}
+function bindInstallEvents(){$('#install-list').onclick=e=>{if(e.target.classList.contains('install-choice')){e.target.checked?selectedInstall.add(e.target.dataset.id):selectedInstall.delete(e.target.dataset.id)}if(e.target.dataset.default!==undefined){if(e.target.checked){$$('#install-list input[data-default]').forEach(choice=>{if(choice!==e.target)choice.checked=false});pendingDefault=e.target.value}else{pendingDefault=null}}updateInstall()}}
+function updateInstall(){const picked=[...selectedInstall];if(pendingDefault&&!picked.includes(pendingDefault))pendingDefault=null;const unit=t('UNIT');$('#install-summary').innerHTML=`${t('SELECTION')} <b>${picked.length}</b>${unit?' '+unit:''}`;$('#install-button').disabled=!picked.length;$('#install-button').textContent=t('INSTALL_BTN');$('#exit-button').textContent=t('CANCEL');renderDefaultToggles(picked)}
+function renderDefaultToggles(picked){$$('.default-choice').forEach(label=>{const choice=label.querySelector('input');const enabled=picked.includes(choice.value);label.classList.toggle('disabled',!enabled);choice.disabled=!enabled;if(!enabled)choice.checked=false})}
+function renderRemove(){const ps=installed();$('#remove-list').innerHTML=ps.map(p=>`<label class="printer"><input type="checkbox" data-id="${p.id}" ${removeSelected.has(p.id)?'checked':''}><span class="printer-icon">${printerIcon}</span><span><span class="printer-name" title="${p.model||''}">${p.name}</span><span class="printer-detail">${printerDetail(p)} · IP ${p.ip}</span></span>${p.id===defaultPrinter?`<span class="default-current">${t('CURRENT_DEFAULT_TAG')}</span>`:'<span></span>'}</label>`).join('');$('#installed-count').textContent=ps.length;$('#caption-remove-b').textContent=t('INSTALLED_PRINTERS');$('#remove-note').textContent=t('REMOVE_NOTE');updateRemove();bindRemoveEvents()}
+function bindRemoveEvents(){$('#remove-list').onclick=e=>{if(e.target.type!=='checkbox')return;e.target.checked?removeSelected.add(e.target.dataset.id):removeSelected.delete(e.target.dataset.id);updateRemove()}}
+function updateRemove(){const n=removeSelected.size;const unit=t('UNIT');$('#remove-summary').innerHTML=`${t('SELECTION')} <b>${n}</b>${unit?' '+unit:''}`;$('#remove-button').disabled=!n;$('#remove-button').textContent=t('REMOVE_BTN');$('#select-all').textContent=n===installed().length&&n?t('CANCEL_SELECT_ALL'):t('SELECT_ALL')}
+function getTodayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function isBannerDismissedToday(){try{return localStorage.getItem('anywhere_banner_dismissed')===getTodayStr();}catch(e){return false;}}
+function isJumpDismissedToday(){try{return localStorage.getItem('anywhere_jump_dismissed')===getTodayStr();}catch(e){return false;}}
+function isRemoteScenario(){const ip=LOCAL_IP;const def=Object.values(offices).flatMap(o=>o.printers).find(pr=>pr.id===defaultPrinter);if(!def) return false;return ip.split('.').slice(0,3).join('.')!==def.ip.split('.').slice(0,3).join('.')}
+function shouldShowBanner(){return isRemoteScenario() && !isBannerDismissedToday();}
+function shouldShowHighlight(){return isRemoteScenario() && !isBannerDismissedToday();}
+function shouldShowJump(){return isRemoteScenario() && !isJumpDismissedToday() && !isBannerDismissedToday();}
+function updateAnywhereHighlight(){const tab=document.querySelector('[data-tab="anywhere"]');const dot=document.getElementById('anywhere-dot');const banner=document.getElementById('anywhere-banner');const rem=isRemoteScenario();const showBanner=shouldShowBanner();const showHighlight=shouldShowHighlight();const showJump=shouldShowJump();if(tab){tab.classList.toggle('highlight',showHighlight);tab.classList.toggle('jump',showJump);}if(dot)dot.style.display=showHighlight?'inline-block':'none';if(banner)banner.style.display=showBanner?'flex':'none'}
+function renderAnywhere(){const sel=document.getElementById('anywhere-office');if(!sel) return;const opts=Object.values(offices);sel.innerHTML=opts.map(o=>`<option value="${o.name}">${officeName(o)} — ${o.printers.map(pr=>pr.name).join(', ')}</option>`).join('');}
+function updateUI(){$('.title').textContent=t('TITLE');$$('.tab').forEach(tab=>{const key=tab.dataset.tab;const isAnywhere=key==='anywhere';const labelEl=tab.childNodes[0] && tab.childNodes[0].nodeType===3 ? tab : tab; // fallback
+if(key==='install'&&tab.childNodes[0])tab.childNodes[0].textContent=t('TAB_INSTALL');else if(key==='remove'&&tab.childNodes[0])tab.childNodes[0].textContent=t('TAB_REMOVE');else if(key==='anywhere'){const txt=t('TAB_ANYWHERE');const dot=tab.querySelector('.anywhere-dot');tab.childNodes[0].textContent=txt+' ';if(dot) tab.appendChild(dot);}else if(key==='repair')tab.textContent=t('TAB_REPAIR')});$('#office-label').textContent=t('OFFICE');$('#change-office').textContent=t('CHANGE');$$('#office-menu button').forEach(btn=>{if(btn.dataset.office==='auto')btn.textContent=t('AUTO_DETECT_MENU')});const o=current();$('#office-name').textContent=officeName(o);$('#office-detail').textContent=t('LOCAL_IP')+LOCAL_IP;const status=$('#office-status');status.textContent=officeKey===DETECTED_OFFICE_KEY?t('AUTO_DETECT'):t('MANUAL_SELECT');$('#caption-install-b').textContent=t('CAPTION_INSTALL');$('#current-default-label').textContent=t('CURRENT_DEFAULT');if($('#repair-title'))$('#repair-title').textContent=t('REPAIR_TITLE');if($('#repair-hint'))$('#repair-hint').textContent=t('REPAIR_HINT');if($('#repair-item1'))$('#repair-item1').textContent=t('REPAIR_ITEM1');if($('#repair-item1-detail'))$('#repair-item1-detail').textContent=t('REPAIR_ITEM1_DETAIL');if($('#repair-item2'))$('#repair-item2').textContent=t('REPAIR_ITEM2');if($('#repair-item2-detail'))$('#repair-item2-detail').textContent=t('REPAIR_ITEM2_DETAIL');if($('#repair-item3'))$('#repair-item3').textContent=t('REPAIR_ITEM3');if($('#repair-item3-detail'))$('#repair-item3-detail').textContent=t('REPAIR_ITEM3_DETAIL');$$('#repair-panel .tag.available').forEach(el=>el.textContent=t('REPAIR_STATUS'));if($('#repair-footer'))$('#repair-footer').textContent=t('REPAIR_FOOTER');if($('#repair-btn'))$('#repair-btn').textContent=t('REPAIR_BTN');if(document.getElementById('anywhere-banner-title'))document.getElementById('anywhere-banner-title').textContent=t('ANYWHERE_BANNER_TITLE');if(document.getElementById('anywhere-banner-desc'))document.getElementById('anywhere-banner-desc').textContent=t('ANYWHERE_BANNER_DESC');if(document.getElementById('anywhere-desc-title'))document.getElementById('anywhere-desc-title').textContent=t('ANYWHERE_DESC_TITLE');if(document.getElementById('anywhere-desc'))document.getElementById('anywhere-desc').textContent=t('ANYWHERE_DESC');if(document.getElementById('anywhere-tip-title'))document.getElementById('anywhere-tip-title').textContent=t('ANYWHERE_TIP_TITLE');if(document.getElementById('anywhere-tip-body'))document.getElementById('anywhere-tip-body').textContent=t('ANYWHERE_TIP_BODY');if(document.getElementById('anywhere-form-office-label'))document.getElementById('anywhere-form-office-label').textContent=t('ANYWHERE_FORM_OFFICE_LABEL');if(document.getElementById('anywhere-form-email-label'))document.getElementById('anywhere-form-email-label').textContent=t('ANYWHERE_FORM_EMAIL_LABEL');if(document.getElementById('anywhere-form-reason-label')){const el=document.getElementById('anywhere-form-reason-label');el.innerHTML=t('ANYWHERE_FORM_REASON_LABEL')+' <span style="color:var(--red)">*</span>';}if(document.getElementById('anywhere-reason'))document.getElementById('anywhere-reason').placeholder=t('ANYWHERE_FORM_REASON_PLACEHOLDER');if(document.getElementById('anywhere-submit'))document.getElementById('anywhere-submit').textContent=t('ANYWHERE_SUBMIT');if(document.getElementById('anywhere-cancel'))document.getElementById('anywhere-cancel').textContent=t('ANYWHERE_CANCEL');if(document.getElementById('anywhere-footer'))document.getElementById('anywhere-footer').textContent=t('ANYWHERE_FOOTER');if(document.getElementById('anywhere-banner-dismiss'))document.getElementById('anywhere-banner-dismiss').textContent=t('ANYWHERE_BANNER_DISMISS');if(document.getElementById('anywhere-reason-error'))document.getElementById('anywhere-reason-error').textContent=t('ANYWHERE_REASON_REQUIRED');renderAnywhere();updateAnywhereHighlight();renderInstall();renderRemove()}
+function selectOffice(value){const automatic=value==='auto';officeKey=automatic?DETECTED_OFFICE_KEY:value;const o=current();$('#office-name').textContent=officeName(o);$('#office-detail').textContent=t('LOCAL_IP')+LOCAL_IP;const status=$('#office-status');status.textContent=automatic?t('AUTO_DETECT'):t('MANUAL_SELECT');status.className=`office-status ${automatic?'auto':'manual'}`;$('#office-menu').classList.remove('open');renderInstall();toast(automatic?t('TOAST_AUTO').replace('%s',officeName(o)):t('TOAST_SWITCH').replace('%s',officeName(o)))}
+$('#change-office').onclick=()=>$('#office-menu').classList.toggle('open');
+$('#office-menu').onclick=e=>{const button=e.target.closest('button[data-office]');if(button)selectOffice(button.dataset.office)};
+document.addEventListener('click',e=>{if(!e.target.closest('.office'))$('#office-menu').classList.remove('open')});
+$('#exit-button').onclick=()=>{pendingDefault=null;selectedInstall.clear();$('#office-menu').classList.remove('open');renderInstall();toast(t('TOAST_CANCEL'))};
+$('#install-button').parentElement.addEventListener('click',e=>{if(e.target.id!=='install-button')return;installClickCount++;if(installClickCount>=3){$('#repair-tab').style.display=''};const ids=[...selectedInstall];if(!ids.length)return;Object.values(offices).forEach(o=>o.printers.forEach(p=>{if(ids.includes(p.id))p.installed=true}));if(pendingDefault)defaultPrinter=pendingDefault;pendingDefault=null;selectedInstall.clear();refreshData();toast(t('TOAST_INSTALL').replace('%d',ids.length))});
+$('#select-all').onclick=()=>{const ps=installed();removeSelected=removeSelected.size===ps.length?new Set():new Set(ps.map(p=>p.id));renderRemove()};
+$('#remove-button').onclick=()=>{const n=removeSelected.size;Object.values(offices).forEach(o=>o.printers.forEach(p=>{if(removeSelected.has(p.id))p.installed=false}));if(removeSelected.has(defaultPrinter))defaultPrinter=installed()[0]?.id||null;removeSelected.clear();refreshData();toast(t('TOAST_REMOVE').replace('%d',n))};
+$$('.tab').forEach(tab=>tab.onclick=()=>{const prevKey=tab.dataset.tab;if(prevKey==='anywhere' && shouldShowJump()){try{localStorage.setItem('anywhere_jump_dismissed',getTodayStr());}catch(e){} tab.classList.remove('jump');}$$('.tab').forEach(t=>t.classList.toggle('active',t===tab));const key=tab.dataset.tab;$('#install-panel').classList.toggle('active',key==='install');$('#remove-panel').classList.toggle('active',key==='remove');$('#anywhere-panel').classList.toggle('active',key==='anywhere');$('#repair-panel').classList.toggle('active',key==='repair');if(key==='remove')renderRemove();if(key==='anywhere'){renderAnywhere();updateAnywhereHighlight();}});
+// 语言切换
+setTimeout(function(){
+  renderInstall();renderRemove();updateUI();checkHealth();
+  setInterval(checkHealth,30000);
+  var lb=document.querySelector('#lang-btn');
+  var ld=document.querySelector('#lang-drop');
+  var lbtns=document.querySelectorAll('.lang-drop button');
+  if(lb)lb.onclick=function(e){e.stopPropagation();ld.classList.toggle('show')};
+  lbtns.forEach(function(btn){btn.onclick=function(){lang=btn.dataset.lang;lbtns.forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang)});ld.classList.remove('show');updateUI();updateHealth()}});
+  var rb=document.querySelector('#repair-btn');
+  if(rb)rb.onclick=function(){toast(t('REPAIR_DEV'))};
+  var awSubmit=document.querySelector('#anywhere-submit');
+  var awCancel=document.querySelector('#anywhere-cancel');
+  var awReason=document.querySelector('#anywhere-reason');
+  var awStatus=document.querySelector('#anywhere-status');
+  var awEmailUser=document.querySelector('#anywhere-email-user');
+  var awEmailDomain=document.querySelector('#anywhere-email-domain');
+  var awEmailPreview=document.querySelector('#anywhere-email-preview');
+  // 自动检测账户名：优先 localStorage，其次默认 zhxsdxin（可对接 Tauri os.username）
+  try{
+    const savedUser=localStorage.getItem('anywhere_email_user');
+    const savedDomain=localStorage.getItem('anywhere_email_domain');
+    if(savedUser && awEmailUser) awEmailUser.value=savedUser;
+    else if(awEmailUser && !awEmailUser.value) awEmailUser.value='zhxsdxin';
+    if(savedDomain && awEmailDomain) awEmailDomain.value=savedDomain;
+  }catch(e){}
+  function refreshEmailPreview(){if(awEmailUser && awEmailDomain && awEmailPreview){const u=(awEmailUser.value||'zhxsdxin').trim()||'zhxsdxin';const d=awEmailDomain.value||'global.xx.com';awEmailPreview.textContent=u+'@'+d;}}
+  if(awEmailUser) awEmailUser.addEventListener('input', ()=>{refreshEmailPreview();try{localStorage.setItem('anywhere_email_user',awEmailUser.value.trim());}catch(e){}});
+  if(awEmailDomain) awEmailDomain.addEventListener('change', ()=>{refreshEmailPreview();try{localStorage.setItem('anywhere_email_domain',awEmailDomain.value);}catch(e){}});
+  refreshEmailPreview();
+  var awErr=document.querySelector('#anywhere-reason-error');
+  var awBannerDismiss=document.querySelector('#anywhere-banner-dismiss');
+  if(awBannerDismiss)awBannerDismiss.onclick=function(){
+    try{localStorage.setItem('anywhere_banner_dismissed',getTodayStr());localStorage.setItem('anywhere_jump_dismissed',getTodayStr());}catch(e){}
+    updateAnywhereHighlight();
+    toast(t('TOAST_CANCEL'));
+  };
+  if(awReason)awReason.addEventListener('input',function(){this.style.borderColor='var(--line)';if(awErr)awErr.style.display='none';});
+  if(awSubmit)awSubmit.onclick=function(){
+    const office=document.querySelector('#anywhere-office')?.value||'';
+    const reason=(awReason?.value||'').trim();
+    const errEl=document.getElementById('anywhere-reason-error');
+    const emailUser=(awEmailUser?.value||'zhxsdxin').trim()||'zhxsdxin';
+    const emailDomain=awEmailDomain?.value||'global.xx.com';
+    const email=emailUser+'@'+emailDomain;
+    if(!reason){
+      if(awReason){awReason.style.borderColor='var(--red)';awReason.focus();}
+      if(errEl){errEl.textContent=t('ANYWHERE_REASON_REQUIRED');errEl.style.display='block';}
+      toast(t('ANYWHERE_REASON_REQUIRED'));
+      return;
+    }
+    if(!emailUser){
+      if(awEmailUser){awEmailUser.style.borderColor='var(--red)';awEmailUser.focus();}
+      toast(t('ANYWHERE_REASON_REQUIRED'));
+      return;
+    }
+    if(awReason)awReason.style.borderColor='var(--line)';
+    if(errEl)errEl.style.display='none';
+    if(awEmailUser)awEmailUser.style.borderColor='var(--line)';
+    const name=office||Object.values(offices)[0]?.name||'';
+    if(!name) return;
+    try{localStorage.setItem('anywhere_email_user',emailUser);localStorage.setItem('anywhere_email_domain',emailDomain);}catch(e){}
+    awStatus.innerHTML=`<b>${t('ANYWHERE_STATUS')}</b><br>${t('ANYWHERE_STATUS_DETAIL')}<br><span style="color:var(--sub)">`+name+' — '+reason+` — `+email+`</span>`;
+    awStatus.classList.add('show');
+    toast(name+' — '+t('ANYWHERE_STATUS')+' — '+email);
+    if(awReason) awReason.value='';
+  };
+  if(awCancel)awCancel.onclick=function(){if(awReason){awReason.value='';awReason.style.borderColor='var(--line)';}const st=document.querySelector('#anywhere-status');if(st)st.classList.remove('show');const err=document.getElementById('anywhere-reason-error');if(err)err.style.display='none';toast(t('TOAST_CANCEL'));};
+},100);
+</script>
+</body></html>

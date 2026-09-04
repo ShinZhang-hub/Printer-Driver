@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Printer Installer</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app" class="card">
+      <header id="titlebar" data-tauri-drag-region></header>
+      <div id="lang-menu">
+        <button id="lang-btn" type="button" title="Language">🌐</button>
+        <div id="lang-drop" hidden></div>
+      </div>
+
+      <!-- loading -->
+      <section id="loading" class="screen">
+        <p id="loading-text" class="muted">Detecting...</p>
+      </section>
+
+      <!-- confirm dialog -->
+      <section id="confirm" class="screen" hidden>
+        <p id="summary" class="summary"></p>
+        <hr />
+
+        <label class="row" id="confirm-row">
+          <input type="checkbox" id="chk-confirm" checked />
+          <span id="confirm-label"></span>
+        </label>
+        <div id="picker-wrap" hidden>
+          <label class="row muted" id="picker-label"></label>
+          <select id="picker"></select>
+        </div>
+
+        <div id="conflict-wrap">
+          <hr />
+          <p class="muted" id="conflict-label"></p>
+          <select id="conflict"></select>
+        </div>
+
+        <hr />
+        <p class="muted" id="existing-label"></p>
+        <div id="delete-list"></div>
+
+        <div class="btns">
+          <button id="btn-cancel" class="secondary"></button>
+          <button id="btn-ok"></button>
+        </div>
+      </section>
+
+      <!-- progress -->
+      <section id="progress" class="screen" hidden>
+        <p id="progress-text" class="muted"></p>
+      </section>
+
+      <!-- result -->
+      <section id="result" class="screen" hidden>
+        <div id="result-body"></div>
+        <div class="btns">
+          <button id="btn-close"></button>
+        </div>
+      </section>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

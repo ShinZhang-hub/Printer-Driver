@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打印机管理</title>
+<link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+<main class="window" id="app">
+  <header class="titlebar" data-tauri-drag-region>
+    <div class="app-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4v-8h16v8h-2M6 14h12v7H6z"/></svg></div>
+    <div class="title" id="title-text">打印机管理</div>
+    <i class="health" id="health-dot" title="检测中..."></i>
+    <div style="margin-left:auto;position:relative" id="lang-menu">
+      <button class="lang-btn" id="lang-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"/><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"/><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"/><circle cx="12" cy="12" r="10"/></svg></button>
+      <div class="lang-drop" id="lang-drop" hidden></div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="install" id="tab-install">安装</button>
+    <button class="tab" data-tab="remove" id="tab-remove">移除 <span class="badge" id="installed-count">0</span></button>
+    <button class="tab" data-tab="repair" id="tab-repair" disabled style="opacity:.4;cursor:default">修复</button>
+  </nav>
+
+  <!-- install tab -->
+  <section class="content tab-panel active" id="install-panel">
+    <div class="office" id="office-card">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V5l7-3 7 3v16M9 9h.01M9 13h.01M15 9h.01M15 13h.01"/></svg>
+      <div class="office-info">
+        <div class="office-heading">
+          <span class="office-label" id="office-label">办公室</span>
+          <span class="office-status auto" id="office-status">自动检测</span>
+        </div>
+        <div class="office-name" id="office-name">--</div>
+        <div class="office-detail" id="office-detail">本机 IP：--</div>
+      </div>
+      <button class="link-btn" id="change-office">更换</button>
+      <div class="office-menu" id="office-menu" role="menu" hidden></div>
+    </div>
+    <div class="caption"><b id="caption-install-b">可用打印机</b><button class="link-btn" id="install-select-all">全选</button></div>
+    <div class="list" id="install-list"></div>
+    <p class="hint"><span id="current-default-label">当前默认打印机：</span><b id="current-default">--</b></p>
+    <footer class="footer">
+      <div class="selection" id="install-summary">已选择 <b>0</b> 台</div>
+      <div style="display:flex;gap:8px">
+        <button class="quiet" id="exit-button">取消</button>
+        <button class="primary" id="install-button" disabled>安装</button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- remove tab -->
+  <section class="content tab-panel" id="remove-panel">
+    <div class="caption"><b id="caption-remove-b">已安装的打印机</b><button class="link-btn" id="select-all">全选</button></div>
+    <div class="list" id="remove-list"></div>
+    <p class="remove-note" id="remove-note">移除当前默认设备后，系统将自动选择其他可用打印机。</p>
+    <footer class="footer">
+      <div class="selection" id="remove-summary">已选择 <b>0</b> 台</div>
+      <button class="danger" id="remove-button" disabled>移除</button>
+    </footer>
+  </section>
+
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

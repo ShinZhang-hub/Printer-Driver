@@ -22,6 +22,8 @@ pub struct InitialState {
     pub detected_location: Option<String>,
     pub detected_name: String,
     pub detected_ip: String,
+    pub local_ip: String,
+    pub default_printer: String,
     pub locations: Vec<String>,
     pub loc_ips: HashMap<String, Vec<String>>,
     pub loc_names: HashMap<String, Vec<String>>,
@@ -41,6 +43,10 @@ pub fn initial_state() -> InitialState {
     let cfg = load_config();
     let lang = i18n::detect();
     let strings = i18n::strings(&lang);
+
+    let local_ip_str = location::local_ip()
+        .map(|ip| ip.to_string())
+        .unwrap_or_default();
 
     let detected_ip = location::detected_local_ip(&cfg)
         .map(|ip| ip.to_string())
@@ -105,12 +111,16 @@ pub fn initial_state() -> InitialState {
     });
     let (detected_name, detected_ip2) = detected.unwrap_or_default();
 
+    let default_printer = printer::default_printer();
+
     InitialState {
         lang,
         strings,
         detected_location,
         detected_name,
         detected_ip: detected_ip2,
+        local_ip: local_ip_str,
+        default_printer,
         locations,
         loc_ips,
         loc_names,

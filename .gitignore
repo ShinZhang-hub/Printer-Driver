@@ -21,6 +21,15 @@ PrinterInstaller.zip
 Rebuild/target/
 Rebuild/app/node_modules/
 Rebuild/app/dist/
+Rebuild/app-new/node_modules/
+Rebuild/app-new/dist-new/
+Rebuild/app-new/src-tauri/gen/schemas/
+Rebuild/app-new/src-tauri/gen/android/
+Rebuild/ui-preview/node_modules/
+Rebuild/ui-preview/dist/
+Rebuild/test-app/node_modules/
+Rebuild/test-app/dist/
+Rebuild/test-app/src-tauri/gen/
 Rebuild/app/src-tauri/gen/schemas/
 Rebuild/app/src-tauri/gen/android/
 Rebuild/examples/onboarding-minimal/node_modules/

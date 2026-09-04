@@ -75,6 +75,18 @@ pub fn detected_local_ip(cfg: &Config) -> Option<Ipv4Addr> {
     addrs.first().copied()
 }
 
+/// Return the first non-loopback local IPv4 address (no config matching).
+/// Used by the UI to display "本机 IP：xxx".
+pub fn local_ip() -> Option<Ipv4Addr> {
+    let addrs = local_v4_all();
+    for a in &addrs {
+        if !is_link_local(*a) {
+            return Some(*a);
+        }
+    }
+    addrs.first().copied()
+}
+
 pub fn is_link_local(ip: Ipv4Addr) -> bool {
     let o = ip.octets();
     o[0] == 169 && o[1] == 254

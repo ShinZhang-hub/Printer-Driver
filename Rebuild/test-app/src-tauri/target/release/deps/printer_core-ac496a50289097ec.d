@@ -1,0 +1,19 @@
+/Users/v_shinzhang/Printer-Driver/Rebuild/test-app/src-tauri/target/release/deps/printer_core-ac496a50289097ec.d: /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/lib.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/config.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/driver.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/flow.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/i18n.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/location.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/mac_driver.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/printer.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/../assets/config.json /Users/v_shinzhang/Printer-Driver/Rebuild/test-app/src-tauri/target/release/build/printer-core-4a89d4f8a7bbb8f7/out/drv_embedded.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/../assets/ff-mac-driver.ppd
+
+/Users/v_shinzhang/Printer-Driver/Rebuild/test-app/src-tauri/target/release/deps/libprinter_core-ac496a50289097ec.rlib: /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/lib.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/config.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/driver.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/flow.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/i18n.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/location.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/mac_driver.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/printer.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/../assets/config.json /Users/v_shinzhang/Printer-Driver/Rebuild/test-app/src-tauri/target/release/build/printer-core-4a89d4f8a7bbb8f7/out/drv_embedded.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/../assets/ff-mac-driver.ppd
+
+/Users/v_shinzhang/Printer-Driver/Rebuild/test-app/src-tauri/target/release/deps/libprinter_core-ac496a50289097ec.rmeta: /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/lib.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/config.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/driver.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/flow.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/i18n.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/location.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/mac_driver.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/printer.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/../assets/config.json /Users/v_shinzhang/Printer-Driver/Rebuild/test-app/src-tauri/target/release/build/printer-core-4a89d4f8a7bbb8f7/out/drv_embedded.rs /Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/../assets/ff-mac-driver.ppd
+
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/lib.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/config.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/driver.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/flow.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/i18n.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/location.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/mac_driver.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/printer.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/../assets/config.json:
+/Users/v_shinzhang/Printer-Driver/Rebuild/test-app/src-tauri/target/release/build/printer-core-4a89d4f8a7bbb8f7/out/drv_embedded.rs:
+/Users/v_shinzhang/Printer-Driver/Rebuild/printer-core/src/../assets/ff-mac-driver.ppd:
+
+# env-dep:OUT_DIR=/Users/v_shinzhang/Printer-Driver/Rebuild/test-app/src-tauri/target/release/build/printer-core-4a89d4f8a7bbb8f7/out

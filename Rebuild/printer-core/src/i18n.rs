@@ -134,11 +134,11 @@ const STRINGS: &[(&str, Table)] = &[
     (
         "CONFIRM_FMT",
         [
-            ("en", "Detected at %s — uncheck to choose another office"),
-            ("ja", "%s を検出 — チェックを外すと他オフィスを選択"),
-            ("ko", "%s 감지 — 해제하면 다른 오피스 선택"),
-            ("zh", "检测到您在 %s — 取消勾选可选其他办公室"),
-            ("zh-Hant", "偵測到您位於 %s — 取消勾選可選其他辦公室"),
+            ("en", "Detected at %s, click to choose another office"),
+            ("ja", "%s を検出、クリックで他オフィスを選択"),
+            ("ko", "%s 감지, 클릭하여 다른 오피스 선택"),
+            ("zh", "检测到您在 %s，点击可选其他办公室"),
+            ("zh-Hant", "偵測到您位於 %s，點擊可選其他辦公室"),
         ],
     ),
     (
@@ -182,13 +182,33 @@ const STRINGS: &[(&str, Table)] = &[
         ],
     ),
     (
+        "SET_DEFAULT_LABEL",
+        [
+            ("en", "Set as default printer"),
+            ("ja", "既定のプリンターに設定"),
+            ("ko", "기본 프린터로 설정"),
+            ("zh", "设为默认打印机"),
+            ("zh-Hant", "設為預設印表機"),
+        ],
+    ),
+    (
+        "DEFAULT_CHOICE_LABEL",
+        [
+            ("en", "Default printer:"),
+            ("ja", "既定のプリンター："),
+            ("ko", "기본 프린터:"),
+            ("zh", "选择默认打印机："),
+            ("zh-Hant", "選擇預設印表機："),
+        ],
+    ),
+    (
         "EXISTING_PRINTERS",
         [
-            ("en", "**%d** printers found — check to remove (selected office default kept)"),
-            ("ja", "既存プリンター **%d** 台 — 削除は選択（選択オフィス既定は不可）："),
-            ("ko", "기존 프린터 **%d** 대 — 제거는 선택（선택 사무실 기본은 불가）："),
-            ("zh", "本机已存在 **%d** 台打印机，勾选可移除（所选办公室默认打印机除外）："),
-            ("zh-Hant", "本機已存在 **%d** 台印表機，勾選可移除（所選辦公室預設印表機除外）："),
+            ("en", "**%d** printers found, check to remove:"),
+            ("ja", "既存プリンター **%d** 台、削除するにはチェック："),
+            ("ko", "기존 프린터 **%d** 대, 제거하려면 선택："),
+            ("zh", "本机已存在 **%d** 台打印机，勾选可移除："),
+            ("zh-Hant", "本機已存在 **%d** 台印表機，勾選可移除："),
         ],
     ),
     (
@@ -369,6 +389,467 @@ const STRINGS: &[(&str, Table)] = &[
             ("ko", "알 수 없는 오류가 발생했습니다"),
             ("zh", "发生未知错误"),
             ("zh-Hant", "發生未知錯誤"),
+        ],
+    ),
+    (
+        "REVIEW_TITLE",
+        [
+            ("en", "Confirm"),
+            ("ja", "確認"),
+            ("ko", "확인"),
+            ("zh", "确认操作"),
+            ("zh-Hant", "確認操作"),
+        ],
+    ),
+    (
+        "REVIEW_INSTALL",
+        [
+            ("en", "Install: "),
+            ("ja", "インストール："),
+            ("ko", "설치："),
+            ("zh", "安装："),
+            ("zh-Hant", "安裝："),
+        ],
+    ),
+    (
+        "REVIEW_ADD_INSTALL",
+        [
+            ("en", "Additional install: "),
+            ("ja", "追加インストール："),
+            ("ko", "추가 설치："),
+            ("zh", "追加安装："),
+            ("zh-Hant", "追加安裝："),
+        ],
+    ),
+    (
+        "REVIEW_CONFLICT",
+        [
+            ("en", "Conflict: "),
+            ("ja", "競合："),
+            ("ko", "충돌："),
+            ("zh", "冲突处理："),
+            ("zh-Hant", "衝突處理："),
+        ],
+    ),
+    (
+        "REVIEW_DEFAULT_PRINTER",
+        [
+            ("en", "Default printer: "),
+            ("ja", "既定プリンター："),
+            ("ko", "기본 프린터: "),
+            ("zh", "默认打印机："),
+            ("zh-Hant", "預設印表機："),
+        ],
+    ),
+    (
+        "REVIEW_REMOVE",
+        [
+            ("en", "Remove: "),
+            ("ja", "削除："),
+            ("ko", "제거："),
+            ("zh", "移除："),
+            ("zh-Hant", "移除："),
+        ],
+    ),
+    (
+        "REVIEW_NONE",
+        [
+            ("en", "None"),
+            ("ja", "なし"),
+            ("ko", "없음"),
+            ("zh", "无"),
+            ("zh-Hant", "無"),
+        ],
+    ),
+    (
+        "REVIEW_SKIPPED_ADDED",
+        [
+            ("en", "Skipped (duplicate): "),
+            ("ja", "スキップ（重複）："),
+            ("ko", "건너뜀 (중복): "),
+            ("zh", "跳过（重复）："),
+            ("zh-Hant", "跳過（重複）："),
+        ],
+    ),
+    (
+        "REVIEW_FILTERED_REMOVE",
+        [
+            ("en", "Filtered (to install): "),
+            ("ja", "フィルター済（インストール対象）："),
+            ("ko", "필터됨 (설치 대상): "),
+            ("zh", "过滤（待安装）："),
+            ("zh-Hant", "過濾（待安裝）："),
+        ],
+    ),
+    (
+        "BTN_ADD_MORE",
+        [
+            ("en", "＋ Add more"),
+            ("ja", "＋ 追加"),
+            ("ko", "＋ 추가"),
+            ("zh", "＋ 继续添加"),
+            ("zh-Hant", "＋ 繼續新增"),
+        ],
+    ),
+    (
+        "BTN_ADD",
+        [
+            ("en", "Add"),
+            ("ja", "追加"),
+            ("ko", "추가"),
+            ("zh", "添加"),
+            ("zh-Hant", "新增"),
+        ],
+    ),
+    (
+        "BTN_CANCEL",
+        [
+            ("en", "Cancel"),
+            ("ja", "キャンセル"),
+            ("ko", "취소"),
+            ("zh", "取消"),
+            ("zh-Hant", "取消"),
+        ],
+    ),
+    (
+        "SELECT_ALL",
+        [
+            ("en", "Select all"),
+            ("ja", "すべて選択"),
+            ("ko", "전체 선택"),
+            ("zh", "全选"),
+            ("zh-Hant", "全選"),
+        ],
+    ),
+    (
+        "NO_MORE_TO_ADD",
+        [
+            ("en", "No more to add"),
+            ("ja", "追加なし"),
+            ("ko", "추가 없음"),
+            ("zh", "无更多可添加"),
+            ("zh-Hant", "無更多可新增"),
+        ],
+    ),
+    (
+        "TAB_INSTALL",
+        [
+            ("en", "Install"),
+            ("ja", "インストール"),
+            ("ko", "설치"),
+            ("zh", "安装"),
+            ("zh-Hant", "安裝"),
+        ],
+    ),
+    (
+        "TAB_REMOVE",
+        [
+            ("en", "Remove"),
+            ("ja", "削除"),
+            ("ko", "제거"),
+            ("zh", "移除"),
+            ("zh-Hant", "移除"),
+        ],
+    ),
+    (
+        "TAB_REPAIR",
+        [
+            ("en", "Repair"),
+            ("ja", "修復"),
+            ("ko", "복구"),
+            ("zh", "修复"),
+            ("zh-Hant", "修復"),
+        ],
+    ),
+    // --- app-new 新增：确保所有非配置文案随语言切换翻译 ---
+    (
+        "OFFICE",
+        [
+            ("en", "Office"),
+            ("ja", "オフィス"),
+            ("ko", "오피스"),
+            ("zh", "办公室"),
+            ("zh-Hant", "辦公室"),
+        ],
+    ),
+    (
+        "AUTO_DETECT",
+        [
+            ("en", "Auto-detected"),
+            ("ja", "自動検出"),
+            ("ko", "자동 감지"),
+            ("zh", "自动检测"),
+            ("zh-Hant", "自動偵測"),
+        ],
+    ),
+    (
+        "MANUAL_SELECT",
+        [
+            ("en", "Manual selection"),
+            ("ja", "手動選択"),
+            ("ko", "수동 선택"),
+            ("zh", "手动选择"),
+            ("zh-Hant", "手動選擇"),
+        ],
+    ),
+    (
+        "CHANGE",
+        [
+            ("en", "Change"),
+            ("ja", "変更"),
+            ("ko", "변경"),
+            ("zh", "更换"),
+            ("zh-Hant", "更換"),
+        ],
+    ),
+    (
+        "AUTO_DETECT_MENU",
+        [
+            ("en", "Auto-detect (Recommended)"),
+            ("ja", "自動検出（推奨）"),
+            ("ko", "자동 감지 (권장)"),
+            ("zh", "自动检测（推荐）"),
+            ("zh-Hant", "自動偵測（推薦）"),
+        ],
+    ),
+    (
+        "LOCAL_IP",
+        [
+            ("en", "Local IP: "),
+            ("ja", "ローカルIP："),
+            ("ko", "로컬 IP: "),
+            ("zh", "本机 IP："),
+            ("zh-Hant", "本機 IP："),
+        ],
+    ),
+    (
+        "CAPTION_INSTALL",
+        [
+            ("en", "Available printers"),
+            ("ja", "利用可能なプリンター"),
+            ("ko", "사용 가능한 프린터"),
+            ("zh", "可用打印机"),
+            ("zh-Hant", "可用印表機"),
+        ],
+    ),
+    (
+        "CAPTION_INSTALL_HINT",
+        [
+            ("en", "Check to install; set as default on the right"),
+            ("ja", "チェックしてインストール；右側で既定に設定"),
+            ("ko", "선택하여 설치; 오른쪽에서 기본값으로 설정"),
+            ("zh", "勾选安装；右侧可设为默认"),
+            ("zh-Hant", "勾選安裝；右側可設為預設"),
+        ],
+    ),
+    (
+        "CURRENT_DEFAULT",
+        [
+            ("en", "Current default printer: "),
+            ("ja", "現在の既定プリンター："),
+            ("ko", "현재 기본 프린터: "),
+            ("zh", "当前默认打印机："),
+            ("zh-Hant", "目前預設印表機："),
+        ],
+    ),
+    (
+        "NONE",
+        [
+            ("en", "None"),
+            ("ja", "未設定"),
+            ("ko", "없음"),
+            ("zh", "未设置"),
+            ("zh-Hant", "未設定"),
+        ],
+    ),
+    (
+        "INSTALLED_TAG",
+        [
+            ("en", "Installed"),
+            ("ja", "インストール済み"),
+            ("ko", "설치됨"),
+            ("zh", "已安装"),
+            ("zh-Hant", "已安裝"),
+        ],
+    ),
+    (
+        "AVAILABLE_TAG",
+        [
+            ("en", "Available"),
+            ("ja", "利用可能"),
+            ("ko", "사용 가능"),
+            ("zh", "可安装"),
+            ("zh-Hant", "可安裝"),
+        ],
+    ),
+    (
+        "SET_DEFAULT",
+        [
+            ("en", "Set as default"),
+            ("ja", "既定に設定"),
+            ("ko", "기본값으로 설정"),
+            ("zh", "设为默认"),
+            ("zh-Hant", "設為預設"),
+        ],
+    ),
+    (
+        "CURRENT_DEFAULT_TAG",
+        [
+            ("en", "Current default"),
+            ("ja", "現在の既定"),
+            ("ko", "현재 기본"),
+            ("zh", "当前默认"),
+            ("zh-Hant", "目前預設"),
+        ],
+    ),
+    (
+        "SELECTION",
+        [
+            ("en", "Selected"),
+            ("ja", "選択済み"),
+            ("ko", "선택됨"),
+            ("zh", "已选择"),
+            ("zh-Hant", "已選擇"),
+        ],
+    ),
+    (
+        "UNIT",
+        [
+            ("en", ""),
+            ("ja", "台"),
+            ("ko", "대"),
+            ("zh", "台"),
+            ("zh-Hant", "台"),
+        ],
+    ),
+    (
+        "CANCEL",
+        [
+            ("en", "Cancel"),
+            ("ja", "キャンセル"),
+            ("ko", "취소"),
+            ("zh", "取消"),
+            ("zh-Hant", "取消"),
+        ],
+    ),
+    (
+        "INSTALL_BTN",
+        [
+            ("en", "Install"),
+            ("ja", "インストール"),
+            ("ko", "설치"),
+            ("zh", "安装"),
+            ("zh-Hant", "安裝"),
+        ],
+    ),
+    (
+        "INSTALLED_PRINTERS",
+        [
+            ("en", "Installed printers"),
+            ("ja", "インストール済みプリンター"),
+            ("ko", "설치된 프린터"),
+            ("zh", "已安装的打印机"),
+            ("zh-Hant", "已安裝的印表機"),
+        ],
+    ),
+    (
+        "CANCEL_SELECT_ALL",
+        [
+            ("en", "Deselect all"),
+            ("ja", "選択を解除"),
+            ("ko", "전체 선택 해제"),
+            ("zh", "取消全选"),
+            ("zh-Hant", "取消全選"),
+        ],
+    ),
+    (
+        "REMOVE_NOTE",
+        [
+            ("en", "If the current default is removed, the system will automatically select another available printer."),
+            ("ja", "現在の既定を削除すると、システムが自動的に別のプリンターを選択します。"),
+            ("ko", "현재 기본을 제거하면 시스템이 자동으로 다른 프린터를 선택합니다."),
+            ("zh", "移除当前默认设备后，系统将自动选择其他可用打印机。"),
+            ("zh-Hant", "移除目前預設裝置後，系統將自動選擇其他可用印表機。"),
+        ],
+    ),
+    (
+        "REMOVE_BTN",
+        [
+            ("en", "Remove"),
+            ("ja", "削除"),
+            ("ko", "제거"),
+            ("zh", "移除"),
+            ("zh-Hant", "移除"),
+        ],
+    ),
+    (
+        "SERVER_OK",
+        [
+            ("en", "Remote connection normal"),
+            ("ja", "リモート接続正常"),
+            ("ko", "원격 연결 정상"),
+            ("zh", "远端连接正常"),
+            ("zh-Hant", "遠端連線正常"),
+        ],
+    ),
+    (
+        "SERVER_ERR",
+        [
+            ("en", "Remote connection failed"),
+            ("ja", "リモート接続異常"),
+            ("ko", "원격 연결 실패"),
+            ("zh", "远端连接异常"),
+            ("zh-Hant", "遠端連線異常"),
+        ],
+    ),
+    (
+        "TOAST_INSTALL",
+        [
+            ("en", "Installed %d printers"),
+            ("ja", "%d 台のプリンターをインストールしました"),
+            ("ko", "%d대의 프린터를 설치했습니다"),
+            ("zh", "已安装 %d 台打印机"),
+            ("zh-Hant", "已安裝 %d 台印表機"),
+        ],
+    ),
+    (
+        "TOAST_REMOVE",
+        [
+            ("en", "Removed %d printers"),
+            ("ja", "%d 台のプリンターを削除しました"),
+            ("ko", "%d대의 프린터를 제거했습니다"),
+            ("zh", "已移除 %d 台打印机"),
+            ("zh-Hant", "已移除 %d 台印表機"),
+        ],
+    ),
+    (
+        "TOAST_CANCEL",
+        [
+            ("en", "Cancelled"),
+            ("ja", "キャンセルしました"),
+            ("ko", "취소되었습니다"),
+            ("zh", "已取消本次操作"),
+            ("zh-Hant", "已取消本次操作"),
+        ],
+    ),
+    (
+        "TOAST_SWITCH",
+        [
+            ("en", "Switched to %s"),
+            ("ja", "%s に切り替えました"),
+            ("ko", "%s(으)로 전환했습니다"),
+            ("zh", "已切换到 %s"),
+            ("zh-Hant", "已切換到 %s"),
+        ],
+    ),
+    (
+        "TOAST_AUTO",
+        [
+            ("en", "Auto-detected as %s"),
+            ("ja", "自動的に %s として認識されました"),
+            ("ko", "자동으로 %s(으)로 인식되었습니다"),
+            ("zh", "已自动识别为 %s"),
+            ("zh-Hant", "已自動識別為 %s"),
         ],
     ),
 ];

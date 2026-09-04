@@ -1,0 +1,2 @@
+cargo:rerun-if-changed=assets/drivers-windows
+cargo:rerun-if-changed=assets/drivers-macos

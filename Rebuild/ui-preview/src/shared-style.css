@@ -1,0 +1,156 @@
+/* PrinterInstaller 可复用 UI 资产（shared-ui）
+ * 说明：这是从独立安装器 app/src/style.css 抽取出的通用样式，
+ * 不包含窗口壳（titlebar / fitWindow / 静默启动）相关。
+ * onboarding 程序直接 link 此文件即可获得一致观感。
+ */
+
+:root {
+  --bg: #e8e8ed;
+  --card: #ffffff;
+  --border: #e0e0e5;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --accent: #007aff;
+  --danger: #d70015;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans CJK KR", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* 通用分组/卡片容器 */
+.group {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  background: var(--card);
+}
+
+/* 摘要行 */
+.summary {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 4px;
+}
+
+.muted { color: var(--muted); }
+
+/* 勾选行 */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.row input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+}
+
+/* 下拉框 */
+select {
+  width: 100%;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  margin: 4px 0;
+}
+
+select:disabled {
+  color: var(--muted);
+  background: #fafafa;
+}
+
+/* 分隔线 */
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+/* 删除列表 */
+#delete-list {
+  overflow: visible;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+#delete-list label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 2px;
+  min-width: 0;
+}
+
+#delete-list label span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#delete-list input:disabled + span {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+/* 关键词高亮（覆盖/跳过、数量数字） */
+.hl {
+  color: #1d1d1f;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* 按钮 */
+.btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+button {
+  padding: 6px 16px;
+  border-radius: 7px;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+}
+
+button.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+button:disabled { opacity: 0.5; cursor: default; }
+
+/* 结果区 */
+#result-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6px 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+#result-body .fail { color: var(--danger); }
+#result-body .result-group p { margin: 0 0 6px; }
+#result-body .result-group p:last-child { margin-bottom: 0; }
+
+#result-body .result-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
