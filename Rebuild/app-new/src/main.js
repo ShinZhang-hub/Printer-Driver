@@ -622,6 +622,7 @@ function bindGlobal() {
       if (tab.disabled) return;
       const key = tab.dataset.tab;
       activeTab = key;
+      try { localStorage.setItem("activeTab", key); } catch (_) {}
       if(key==='anywhere' && shouldShowJump()){
         try{localStorage.setItem('anywhere_jump_dismissed',String(Date.now()));}catch(e){}
         tab.classList.remove('jump');
@@ -987,6 +988,11 @@ function renderAll() {
   lang = S.lang || "zh";
   defaultPrinterName = S.default_printer || "";
   try { installedPrintersCache = await getInstalledPrinters(); } catch (_) {}
+  // 重启/重载后恢复上次标签页（隐藏/禁用标签回落到安装页，由 restoreTab 处理）
+  try {
+    const saved = localStorage.getItem("activeTab");
+    if (saved && document.querySelector(`.tab[data-tab="${saved}"]`)) activeTab = saved;
+  } catch (_) {}
 
   renderAll();
   buildLangMenu?.();
