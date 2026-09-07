@@ -313,6 +313,19 @@ function bumpSubmitCount(record){
 function clearSubmitMeta(){
   try{ localStorage.removeItem('anywhere_submit_meta'); }catch(e){}
 }
+function bindAnywhereIcons(){
+  const pairs=[['anywhere-info-wrap','anywhere-info-pop'],['anywhere-tip-wrap','anywhere-tip-pop']];
+  const hideAll=()=>{pairs.forEach(([,pid])=>{const el=document.getElementById(pid);if(el)el.classList.remove('show');});};
+  pairs.forEach(([wid,pid])=>{
+    const wrap=document.getElementById(wid),pop=document.getElementById(pid);
+    if(!wrap||!pop) return;
+    wrap.addEventListener('mouseenter',()=>{hideAll();pop.classList.add('show');});
+    wrap.addEventListener('mouseleave',()=>{pop.classList.remove('show');});
+    const btn=wrap.querySelector('button');
+    if(btn) btn.addEventListener('click',(e)=>{e.stopPropagation();const was=pop.classList.contains('show');hideAll();if(!was)pop.classList.add('show');});
+  });
+  document.addEventListener('click',(e)=>{if(!e.target.closest('.anywhere-icons'))hideAll();});
+}
 function updateAnywhereSelectAllText(){
   const selAll=document.getElementById('anywhere-select-all');
   if(!selAll) return;
@@ -561,6 +574,8 @@ function bindGlobal() {
       if(!e.target.closest('#anywhere-office-card')) awMenu.hidden=true;
     });
   }
+  // anywhere 说明/提示图标：悬浮显示，离开隐藏（点按可切换，点空白关闭）
+  bindAnywhereIcons();
   const awSelAll=document.getElementById('anywhere-select-all');
   if(awSelAll){
     awSelAll.addEventListener('click', ()=>{

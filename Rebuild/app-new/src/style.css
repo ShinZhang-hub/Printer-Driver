@@ -38,6 +38,7 @@ button{cursor:pointer}
 .anywhere-banner .icon{width:36px;height:36px;border-radius:9px;background:#fff;border:1px solid #fed7aa;display:grid;place-items:center;color:#f59e0b;flex:none}
 .anywhere-banner h4{margin:0 0 4px;font-size:13px;font-weight:720}
 .anywhere-banner p{margin:0;color:var(--sub);font-size:12px;line-height:1.5}
+#anywhere-banner{margin-bottom:12px}
 .anywhere-card{padding:14px;background:#f9fafb;border:1px solid var(--line);border-radius:10px;margin-top:12px}
 .anywhere-card h4{margin:0 0 6px;font-size:13px}
 .anywhere-card p{margin:0;color:var(--sub);font-size:12px;line-height:1.6}
@@ -47,6 +48,16 @@ button{cursor:pointer}
 .anywhere-form textarea{resize:none;height:64px}
 .anywhere-status{padding:10px 12px;border-radius:8px;background:var(--blue-bg);border:1px solid #d8e8ff;color:#1849a9;font-size:12px;line-height:1.5;margin-top:12px;display:none}
 .anywhere-status.show{display:block}
+.anywhere-icons{position:relative;display:flex;gap:12px;margin-top:0}
+.anywhere-icon-wrap{position:relative}
+.anywhere-icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid #d8e8ff;background:var(--blue-bg);color:var(--blue);display:grid;place-items:center;cursor:pointer;padding:0}
+.anywhere-icon-btn.tip{border-color:#fed7aa;background:#fff7ed;color:#b54708}
+.anywhere-icon-btn:hover{filter:brightness(.96)}
+.anywhere-pop{position:absolute;top:calc(100% + 8px);left:0;width:300px;max-width:78vw;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 22px rgba(16,24,40,.16);padding:12px 14px;display:none;z-index:20}
+.anywhere-pop.show{display:block}
+.anywhere-pop.warm{border-color:#fed7aa;background:#fff7ed}
+.anywhere-pop h4{margin:0 0 4px;font-size:13px}
+.anywhere-pop p{margin:0;color:var(--sub);font-size:12px;line-height:1.6}
 
 /* content */
 .content{padding:16px 18px 0}
@@ -76,6 +87,7 @@ button{cursor:pointer}
 
 /* printer list */
 .caption{display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px;font-size:12px}
+#remove-panel .caption{margin-top:0}
 .caption b{font-size:13px}
 .list{max-height:200px;overflow-y:auto}
 .printer{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #eef1f6;border-radius:8px;margin-bottom:6px;font-size:12px}
