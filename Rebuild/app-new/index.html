@@ -21,6 +21,7 @@
   <nav class="tabs">
     <button class="tab active" data-tab="install" id="tab-install">安装</button>
     <button class="tab" data-tab="remove" id="tab-remove">移除 <span class="badge" id="installed-count">0</span></button>
+    <button class="tab" data-tab="anywhere" id="tab-anywhere">异地打印</button>
     <button class="tab" data-tab="repair" id="tab-repair" disabled style="opacity:.4;cursor:default">修复</button>
   </nav>
 
@@ -60,6 +61,77 @@
       <div class="selection" id="remove-summary">已选择 <b>0</b> 台</div>
       <button class="danger" id="remove-button" disabled>移除</button>
     </footer>
+  </section>
+
+  <!-- anywhere tab -->
+  <section class="content tab-panel" id="anywhere-panel">
+    <div class="anywhere-banner" id="anywhere-banner" style="display:none">
+      <div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M12 7v5l3 3"/><path d="M16 8l-2 2"/><path d="M8 8l2 2"/></svg></div>
+      <div style="flex:1;min-width:0">
+        <h4 id="anywhere-banner-title">检测到异地网络</h4>
+        <p id="anywhere-banner-desc">当前 IP 与您默认打印机不在同一位置，如需打印，可以申请异地打印权限。</p>
+      </div>
+      <button id="anywhere-banner-dismiss" style="margin-left:auto;flex:none;background:#fff;border:1px solid #fed7aa;color:#b54708;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:650;cursor:pointer;white-space:nowrap">知道了</button>
+    </div>
+    <div class="anywhere-card">
+      <h4 id="anywhere-desc-title">出差也能轻松打印</h4>
+      <p id="anywhere-desc">提交申请，审批通过后将通过邮件发送临时打印密码（有效期24小时）。审批一般在30分钟内完成，请留意邮箱。</p>
+    </div>
+    <div class="anywhere-card" style="background:#fff8f0;border-color:#ffe0b3;display:flex;gap:10px;align-items:flex-start">
+      <div style="color:#b54708;flex:none;margin-top:1px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+      <div>
+        <h4 id="anywhere-tip-title" style="color:#b54708">温馨提示</h4>
+        <p id="anywhere-tip-body">若您携带了原属地办公室工牌，审批通过后亦可直接在异地打印机上尝试刷卡。</p>
+      </div>
+    </div>
+    <div id="anywhere-apply">
+      <div class="office" id="anywhere-office-card" style="margin-top:12px">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V5l7-3 7 3v16M9 9h.01M9 13h.01M15 9h.01M15 13h.01"/></svg>
+        <div class="office-info">
+          <div class="office-heading"><span class="office-label" id="anywhere-office-label">办公室</span><span class="office-status auto" id="anywhere-office-status">自动检测</span></div>
+          <div class="office-name" id="anywhere-office-name">--</div>
+          <div class="office-detail" id="anywhere-office-detail">本机 IP：--</div>
+        </div>
+        <button class="link-btn" id="anywhere-change-office">更换</button>
+        <div class="office-menu" id="anywhere-office-menu" role="menu" hidden></div>
+      </div>
+      <div class="caption"><b id="anywhere-caption">目标打印机</b><button class="link-btn" id="anywhere-select-all">全选</button></div>
+      <div class="list" id="anywhere-printer-list"></div>
+      <p class="hint" id="anywhere-printer-hint">可多选部分打印机</p>
+      <div class="anywhere-form" style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+        <label id="anywhere-form-email-label" style="font-size:12px;font-weight:650">您的邮箱</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="anywhere-email-user" value="zhxsdxin" placeholder="zhxsdxin" style="flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff">
+          <span style="color:var(--sub);font-weight:650">@</span>
+          <select id="anywhere-email-domain" style="flex:1;min-width:140px;padding:8px 10px;border:1px solid var(--line);border-radius:8px">
+            <option value="global.tencent.com">global.tencent.com</option>
+            <option value="tencent.com">tencent.com</option>
+          </select>
+        </div>
+        <span id="anywhere-email-preview" style="font-size:11px;color:var(--sub)"></span>
+        <label id="anywhere-form-reason-label" style="font-size:12px;font-weight:650">申请理由 <span style="color:var(--red)">*</span></label>
+        <textarea id="anywhere-reason" required placeholder="例如：本周在东京出差，需打印合同..." style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;resize:none;height:64px"></textarea>
+        <span id="anywhere-reason-error" style="display:none;color:var(--red);font-size:11px"></span>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+          <button class="quiet" id="anywhere-cancel" style="background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:7px">取消</button>
+          <button class="primary" id="anywhere-submit" style="padding:6px 16px">提交申请</button>
+        </div>
+      </div>
+    </div>
+    <div class="anywhere-status" id="anywhere-success" style="display:none"></div>
+    <div class="anywhere-status" id="anywhere-status" style="display:none"></div>
+    <footer class="footer" style="margin:16px -18px 0"><div class="selection" id="anywhere-footer">提交后请留意邮件通知</div><div style="font-size:11px;color:var(--sub)"> </div></footer>
+  </section>
+
+  <!-- repair tab -->
+  <section class="content tab-panel" id="repair-panel">
+    <div class="caption"><b id="repair-title">打印机修复</b><span id="repair-hint" style="font-size:11px;color:var(--sub)">诊断并修复打印问题</span></div>
+    <div class="list" id="repair-list">
+      <div class="printer"><span class="printer-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span><span><span class="printer-name" id="repair-item1">驱动状态检查</span><span class="printer-detail" id="repair-item1-detail">检查 FUJIFILM 驱动是否完整安装</span></span><span class="printer-action"><span class="tag available" id="repair-status">待诊断</span></span></div>
+      <div class="printer"><span class="printer-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span><span><span class="printer-name" id="repair-item2">过滤器权限</span><span class="printer-detail" id="repair-item2-detail">检查 FFACMMCFilter owner 和权限</span></span><span class="printer-action"><span class="tag available">待诊断</span></span></div>
+      <div class="printer"><span class="printer-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span><span><span class="printer-name" id="repair-item3">CUPS 服务</span><span class="printer-detail" id="repair-item3-detail">检查打印服务运行状态和缓存</span></span><span class="printer-action"><span class="tag available">待诊断</span></span></div>
+    </div>
+    <footer class="footer" style="margin:16px -18px 0"><div class="selection" id="repair-footer">点击下方开始自动诊断</div><button class="primary" id="repair-btn">开始诊断</button></footer>
   </section>
 
 </main>

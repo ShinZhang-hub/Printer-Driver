@@ -24,18 +24,37 @@ button{cursor:pointer}
 .lang-drop button:hover{background:#f2f2f6}
 .lang-drop button.active{font-weight:600}
 
-/* tabs */
-.tabs{display:flex;padding:0 18px;border-bottom:1px solid var(--line);gap:20px}
-.tab{position:relative;padding:13px 2px 11px;border:0;background:transparent;color:var(--sub);font-weight:650;cursor:pointer}
+/* tabs - 修复移除标签因 badge 导致文字偏高：所有标签文字共基线 */
+.tabs{display:flex;padding:0 18px;border-bottom:1px solid var(--line);gap:20px;align-items:baseline}
+.tab{position:relative;display:inline-flex;align-items:baseline;gap:4px;padding:13px 2px 11px;border:0;background:transparent;color:var(--sub);font-weight:650;cursor:pointer;line-height:1}
 .tab.active{color:var(--blue)}
 .tab.active:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--blue)}
 .tab:disabled{opacity:.4;cursor:default}
-.badge{display:inline-grid;place-items:center;margin-left:4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#f1f3f6;color:#667085;font-size:10px}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#f1f3f6;color:#667085;font-size:10px;line-height:1;vertical-align:bottom}
+.tab.highlight{color:#b54708 !important}
+.tab.jump{animation:tabJump 1.0s ease-in-out infinite}
+@keyframes tabJump{0%,100%{transform:translateY(0)}25%{transform:translateY(-4px)}50%{transform:translateY(0)}75%{transform:translateY(-2px)}}
+.anywhere-banner{display:flex;gap:12px;padding:14px 14px;border:1px solid #fed7aa;background:#fff7ed;border-radius:10px;align-items:flex-start}
+.anywhere-banner .icon{width:36px;height:36px;border-radius:9px;background:#fff;border:1px solid #fed7aa;display:grid;place-items:center;color:#f59e0b;flex:none}
+.anywhere-banner h4{margin:0 0 4px;font-size:13px;font-weight:720}
+.anywhere-banner p{margin:0;color:var(--sub);font-size:12px;line-height:1.5}
+.anywhere-card{padding:14px;background:#f9fafb;border:1px solid var(--line);border-radius:10px;margin-top:12px}
+.anywhere-card h4{margin:0 0 6px;font-size:13px}
+.anywhere-card p{margin:0;color:var(--sub);font-size:12px;line-height:1.6}
+.anywhere-form{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.anywhere-form label{font-size:12px;font-weight:650;color:var(--ink)}
+.anywhere-form select,.anywhere-form textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff}
+.anywhere-form textarea{resize:none;height:64px}
+.anywhere-status{padding:10px 12px;border-radius:8px;background:var(--blue-bg);border:1px solid #d8e8ff;color:#1849a9;font-size:12px;line-height:1.5;margin-top:12px;display:none}
+.anywhere-status.show{display:block}
 
 /* content */
 .content{padding:16px 18px 0}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
+.content.tab-panel.active{min-height:120px}
+/* 说明：异地面板不设 max-height，避免以 100vh 为基准形成“窗口↔max-height”正反馈收缩 */
+#anywhere-panel.tab-panel.active{min-height:0}
 
 /* office card */
 .office{position:relative;padding:10px 11px;border:1px solid #d8e8ff;background:var(--blue-bg);border-radius:9px;display:flex;align-items:center;gap:9px}

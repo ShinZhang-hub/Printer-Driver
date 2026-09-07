@@ -27,3 +27,11 @@ export async function getInstalledPrinters() {
 export async function checkServerHealth() {
   return invoke("check_server_health");
 }
+
+export async function getUsername() {
+  try {
+    return await invoke("get_username");
+  } catch (_) {
+    return "zhxsdxin";
+  }
+}

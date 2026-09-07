@@ -561,6 +561,386 @@ const STRINGS: &[(&str, Table)] = &[
             ("zh-Hant", "修復"),
         ],
     ),
+    (
+        "TAB_ANYWHERE",
+        [
+            ("en", "Print Anywhere"),
+            ("ja", "どこでも印刷"),
+            ("ko", "어디서나 인쇄"),
+            ("zh", "异地打印"),
+            ("zh-Hant", "跨點列印"),
+        ],
+    ),
+    (
+        "ANYWHERE_BANNER_TITLE",
+        [
+            ("en", "Remote network detected"),
+            ("ja", "異なるネットワークを検出"),
+            ("ko", "원격 네트워크 감지됨"),
+            ("zh", "检测到异地网络"),
+            ("zh-Hant", "偵測到異地網路"),
+        ],
+    ),
+    (
+        "ANYWHERE_BANNER_DESC",
+        [
+            ("en", "Your current IP and default printer are not in the same location. If you need to print, you can apply for remote printing access."),
+            ("ja", "現在のIPと既定のプリンターは同じ場所にありません。印刷が必要な場合は、異地印刷の権限を申請できます。"),
+            ("ko", "현재 IP와 기본 프린터가 같은 위치에 있지 않습니다. 인쇄가 필요한 경우 원격 인쇄 권한을 신청할 수 있습니다."),
+            ("zh", "当前 IP 与您默认打印机不在同一位置，如需打印，可以申请异地打印权限。"),
+            ("zh-Hant", "目前 IP 與您的預設印表機不在同一位置，如需列印，可申請異地列印權限。"),
+        ],
+    ),
+    (
+        "ANYWHERE_BANNER_DISMISS",
+        [
+            ("en", "Got it"),
+            ("ja", "了解"),
+            ("ko", "알겠습니다"),
+            ("zh", "知道了"),
+            ("zh-Hant", "知道了"),
+        ],
+    ),
+    (
+        "ANYWHERE_DESC_TITLE",
+        [
+            ("en", "Print with ease while traveling"),
+            ("ja", "出張先でもかんたん印刷"),
+            ("ko", "출장 중에도 간편하게 인쇄"),
+            ("zh", "出差也能轻松打印"),
+            ("zh-Hant", "出差也能輕鬆列印"),
+        ],
+    ),
+    (
+        "ANYWHERE_DESC",
+        [
+            ("en", "Submit a request. After approval, a temporary password (valid for 24 hours) will be sent via email. Most requests are approved within 30 minutes. Please check your email."),
+            ("ja", "申請を送信すると、承認後に一時的な印刷パスワード（24時間有効）がメールで届きます。通常30分以内に承認されます。メールをご確認ください。"),
+            ("ko", "신청서를 제출하면 승인 후 임시 인쇄 비밀번호(24시간 유효)가 이메일로 발송됩니다. 대부분 30분 이내에 승인됩니다. 이메일을 확인해 주세요."),
+            ("zh", "提交申请，审批通过后将通过邮件发送临时打印密码（有效期24小时）。审批一般在30分钟内完成，请留意邮箱。"),
+            ("zh-Hant", "提交申請，審批通過後將透過郵件發送臨時列印密碼（有效期24小時）。審批一般在30分鐘內完成，請留意郵箱。"),
+        ],
+    ),
+    (
+        "ANYWHERE_TIP_TITLE",
+        [
+            ("en", "Tip"),
+            ("ja", "ヒント"),
+            ("ko", "팁"),
+            ("zh", "温馨提示"),
+            ("zh-Hant", "溫馨提示"),
+        ],
+    ),
+    (
+        "ANYWHERE_TIP_BODY",
+        [
+            ("en", "If you have your original home office badge, you can also try tapping it directly on the remote printer after approval."),
+            ("ja", "元の所属オフィスの社員証をお持ちの場合は、承認後も異地プリンターに直接タッチして試せます。"),
+            ("ko", "원래 소속 사무실 배지를 소지한 경우 승인 후에도 원격 프린터에 직접 태그해 볼 수 있습니다."),
+            ("zh", "若您携带了原属地办公室工牌，审批通过后亦可直接在异地打印机上尝试刷卡。"),
+            ("zh-Hant", "若您攜帶了原屬地辦公室工牌，審批通過後亦可直接在異地印表機上嘗試刷卡。"),
+        ],
+    ),
+    (
+        "ANYWHERE_FORM_OFFICE_LABEL",
+        [
+            ("en", "Target office"),
+            ("ja", "対象オフィス"),
+            ("ko", "대상 사무실"),
+            ("zh", "目标办公室"),
+            ("zh-Hant", "目標辦公室"),
+        ],
+    ),
+    (
+        "ANYWHERE_FORM_EMAIL_LABEL",
+        [
+            ("en", "Your email"),
+            ("ja", "あなたのメール"),
+            ("ko", "이메일"),
+            ("zh", "您的邮箱"),
+            ("zh-Hant", "您的郵箱"),
+        ],
+    ),
+    (
+        "ANYWHERE_FORM_REASON_LABEL",
+        [
+            ("en", "Reason"),
+            ("ja", "申請理由"),
+            ("ko", "신청 사유"),
+            ("zh", "申请理由"),
+            ("zh-Hant", "申請理由"),
+        ],
+    ),
+    (
+        "ANYWHERE_FORM_REASON_PLACEHOLDER",
+        [
+            ("en", "e.g., On business in Tokyo this week, need to print contracts..."),
+            ("ja", "例：今週東京出張で契約書を印刷したい…"),
+            ("ko", "예: 이번 주 도쿄 출장 중 계약서 인쇄 필요…"),
+            ("zh", "例如：本周在东京出差，需打印合同…"),
+            ("zh-Hant", "例如：本週在東京出差，需列印合約…"),
+        ],
+    ),
+    (
+        "ANYWHERE_SUBMIT",
+        [
+            ("en", "Submit request"),
+            ("ja", "申請を送信"),
+            ("ko", "신청 제출"),
+            ("zh", "提交申请"),
+            ("zh-Hant", "提交申請"),
+        ],
+    ),
+    (
+        "ANYWHERE_CANCEL",
+        [
+            ("en", "Cancel"),
+            ("ja", "キャンセル"),
+            ("ko", "취소"),
+            ("zh", "取消"),
+            ("zh-Hant", "取消"),
+        ],
+    ),
+    (
+        "ANYWHERE_FOOTER",
+        [
+            ("en", "Please check your email after submission"),
+            ("ja", "送信後はメールをご確認ください"),
+            ("ko", "제출 후 이메일을 확인해 주세요"),
+            ("zh", "提交后请留意邮件通知"),
+            ("zh-Hant", "提交後請留意郵件通知"),
+        ],
+    ),
+    (
+        "ANYWHERE_STATUS",
+        [
+            ("en", "Request submitted"),
+            ("ja", "申請を送信しました"),
+            ("ko", "신청이 제출되었습니다"),
+            ("zh", "已提交申请"),
+            ("zh-Hant", "已提交申請"),
+        ],
+    ),
+    (
+        "ANYWHERE_STATUS_DETAIL",
+        [
+            ("en", "Under review — you will receive a temporary password via email within 30 minutes."),
+            ("ja", "審査中 — 30分以内に一時パスワードをメールでお届けします。"),
+            ("ko", "심사 중 — 30분 이내에 임시 비밀번호를 이메일로 받게 됩니다."),
+            ("zh", "审批中，预计30分钟内通过邮件收到临时密码。"),
+            ("zh-Hant", "審批中，預計30分鐘內透過郵件收到臨時密碼。"),
+        ],
+    ),
+    (
+        "ANYWHERE_REASON_REQUIRED",
+        [
+            ("en", "Please enter a reason"),
+            ("ja", "申請理由を入力してください"),
+            ("ko", "신청 사유를 입력해 주세요"),
+            ("zh", "请填写申请理由"),
+            ("zh-Hant", "請填寫申請理由"),
+        ],
+    ),
+    (
+        "REQUIRED",
+        [
+            ("en", "Required"),
+            ("ja", "必須"),
+            ("ko", "필수"),
+            ("zh", "必选"),
+            ("zh-Hant", "必選"),
+        ],
+    ),
+    (
+        "MAX_TWO",
+        [
+            ("en", "Select at most 2"),
+            ("ja", "最大2台まで選択"),
+            ("ko", "최대 2대까지 선택"),
+            ("zh", "最多选择2台"),
+            ("zh-Hant", "最多選擇2台"),
+        ],
+    ),
+    (
+        "ANYWHERE_REQ",
+        [
+            ("en", "Request No."),
+            ("ja", "申請番号"),
+            ("ko", "신청 번호"),
+            ("zh", "申请单号"),
+            ("zh-Hant", "申請單號"),
+        ],
+    ),
+    (
+        "ANYWHERE_DETAIL_PRINTERS",
+        [
+            ("en", "Printer"),
+            ("ja", "プリンター"),
+            ("ko", "프린터"),
+            ("zh", "打印机"),
+            ("zh-Hant", "印表機"),
+        ],
+    ),
+    (
+        "ANYWHERE_SUCCESS_QUOTA",
+        [
+            ("en", "Today requests: %d/2"),
+            ("ja", "本日の申請回数：%d/2"),
+            ("ko", "오늘 신청 횟수: %d/2"),
+            ("zh", "今日申请次数：%d/2"),
+            ("zh-Hant", "今日申請次數：%d/2"),
+        ],
+    ),
+    (
+        "ANYWHERE_SUCCESS_HINT",
+        [
+            ("en", "The request window will reopen tomorrow."),
+            ("ja", "申請窓口は明日再開します。"),
+            ("ko", "신청 창구는 내일 다시 열립니다."),
+            ("zh", "明天将重新开放申请"),
+            ("zh-Hant", "明天將重新開放申請"),
+        ],
+    ),
+    (
+        "ANYWHERE_ADVANCE_LABEL",
+        [
+            ("en", "Advance request (simulate no detection)"),
+            ("ja", "事前申請モード（未検出をシミュレート）"),
+            ("ko", "사전 신청 모드 (미감지 시뮬레이션)"),
+            ("zh", "提前申请模式（模拟未检测到异地）"),
+            ("zh-Hant", "提前申請模式（模擬未偵測到異地）"),
+        ],
+    ),
+    (
+        "ANYWHERE_ADVANCE_HINT",
+        [
+            ("en", " — hide banner, still applicable"),
+            ("ja", " — バナーを非表示でも申請可"),
+            ("ko", " — 배너 숨김, 신청 가능"),
+            ("zh", " — 隐藏提示横幅，仍可申请"),
+            ("zh-Hant", " — 隱藏提示橫幅，仍可申請"),
+        ],
+    ),
+    (
+        "REPAIR_TITLE",
+        [
+            ("en", "Printer Repair"),
+            ("ja", "プリンタ修復"),
+            ("ko", "프린터 복구"),
+            ("zh", "打印机修复"),
+            ("zh-Hant", "印表機修復"),
+        ],
+    ),
+    (
+        "REPAIR_HINT",
+        [
+            ("en", "Diagnose and fix printing issues"),
+            ("ja", "印刷問題を診断・修復"),
+            ("ko", "인쇄 문제 진단 및 수정"),
+            ("zh", "诊断并修复打印问题"),
+            ("zh-Hant", "診斷並修復列印問題"),
+        ],
+    ),
+    (
+        "REPAIR_ITEM1",
+        [
+            ("en", "Driver check"),
+            ("ja", "ドライバーチェック"),
+            ("ko", "드라이버 확인"),
+            ("zh", "驱动状态检查"),
+            ("zh-Hant", "驅動狀態檢查"),
+        ],
+    ),
+    (
+        "REPAIR_ITEM1_DETAIL",
+        [
+            ("en", "Check if FUJIFILM driver is fully installed"),
+            ("ja", "FUJIFILMドライバーのインストール状態を確認"),
+            ("ko", "FUJIFILM 드라이버 설치 상태 확인"),
+            ("zh", "检查 FUJIFILM 驱动是否完整安装"),
+            ("zh-Hant", "檢查 FUJIFILM 驅動是否完整安裝"),
+        ],
+    ),
+    (
+        "REPAIR_ITEM2",
+        [
+            ("en", "Filter permissions"),
+            ("ja", "フィルター権限"),
+            ("ko", "필터 권한"),
+            ("zh", "过滤器权限"),
+            ("zh-Hant", "過濾器權限"),
+        ],
+    ),
+    (
+        "REPAIR_ITEM2_DETAIL",
+        [
+            ("en", "Check FFACMMCFilter owner and permissions"),
+            ("ja", "FFACMMCFilterのオーナーと権限を確認"),
+            ("ko", "FFACMMCFilter 소유자 및 권한 확인"),
+            ("zh", "检查 FFACMMCFilter owner 和权限"),
+            ("zh-Hant", "檢查 FFACMMCFilter 所有者和權限"),
+        ],
+    ),
+    (
+        "REPAIR_ITEM3",
+        [
+            ("en", "CUPS service"),
+            ("ja", "CUPSサービス"),
+            ("ko", "CUPS 서비스"),
+            ("zh", "CUPS 服务"),
+            ("zh-Hant", "CUPS 服務"),
+        ],
+    ),
+    (
+        "REPAIR_ITEM3_DETAIL",
+        [
+            ("en", "Check print service status and cache"),
+            ("ja", "印刷サービスの状態とキャッシュを確認"),
+            ("ko", "인쇄 서비스 상태 및 캐시 확인"),
+            ("zh", "检查打印服务运行状态和缓存"),
+            ("zh-Hant", "檢查列印服務運行狀態和快取"),
+        ],
+    ),
+    (
+        "REPAIR_STATUS",
+        [
+            ("en", "Pending"),
+            ("ja", "診断待ち"),
+            ("ko", "진단 대기"),
+            ("zh", "待诊断"),
+            ("zh-Hant", "待診斷"),
+        ],
+    ),
+    (
+        "REPAIR_FOOTER",
+        [
+            ("en", "Click below to start diagnosis"),
+            ("ja", "下記をクリックして診断開始"),
+            ("ko", "아래를 클릭하여 진단 시작"),
+            ("zh", "点击下方开始自动诊断"),
+            ("zh-Hant", "點擊下方開始自動診斷"),
+        ],
+    ),
+    (
+        "REPAIR_BTN",
+        [
+            ("en", "Start diagnosis"),
+            ("ja", "診断開始"),
+            ("ko", "진단 시작"),
+            ("zh", "开始诊断"),
+            ("zh-Hant", "開始診斷"),
+        ],
+    ),
+    (
+        "REPAIR_DEV",
+        [
+            ("en", "Diagnosis feature in development..."),
+            ("ja", "診断機能は開発中です..."),
+            ("ko", "진단 기능 개발 중..."),
+            ("zh", "诊断功能开发中..."),
+            ("zh-Hant", "診斷功能開發中..."),
+        ],
+    ),
     // --- app-new 新增：确保所有非配置文案随语言切换翻译 ---
     (
         "OFFICE",

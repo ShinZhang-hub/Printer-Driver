@@ -1,4 +1,4 @@
-import { getInitialState, getStrings, refreshConfig, confirm, quit, getInstalledPrinters, checkServerHealth } from "./api.js";
+import { getInitialState, getStrings, refreshConfig, confirm, quit, getInstalledPrinters, checkServerHealth, getUsername } from "./api.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { PhysicalSize } from "@tauri-apps/api/dpi";
 
@@ -9,6 +9,7 @@ const WIN_W = 440;
 let S = null;
 let lang = "zh";
 let officeKey = "auto";
+let anywhereSelected = new Set();
 let detectedOfficeKey = "auto";
 let defaultPrinterName = "";
 let pendingDefault = null;
@@ -126,6 +127,208 @@ function currentLocIPs() {
 function officeName(loc) {
   return loc || "--";
 }
+function esc(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// —— 异地打印 ——
+function getTodayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function isBannerDismissed(){try{const v=localStorage.getItem('anywhere_banner_dismissed');if(!v) return false;const ts=parseInt(v,10);if(isNaN(ts)) return localStorage.getItem('anywhere_banner_dismissed')===getTodayStr();return Date.now()-ts < 24*60*60*1000;}catch(e){return false;}}
+function isJumpDismissed(){try{const v=localStorage.getItem('anywhere_jump_dismissed');if(!v) return false;const ts=parseInt(v,10);if(isNaN(ts)) return localStorage.getItem('anywhere_jump_dismissed')===getTodayStr();return Date.now()-ts < 24*60*60*1000;}catch(e){return false;}}
+function isRemoteScenario(){
+  const localIp = S?.local_ip || "";
+  const defName = defaultPrinterName;
+  if(!localIp || !defName) return false;
+  // find default printer IP
+  let defIp = "";
+  for(const [loc, ips] of Object.entries(S?.loc_ips || {})){
+    const names = S?.loc_names?.[loc] || [];
+    const idx = names.indexOf(defName);
+    if(idx>=0) {defIp = ips[idx] || ""; break;}
+  }
+  if(!defIp) {
+    // fallback: find in installed cache
+    const found = installedPrintersCache.find(pr=>pr.name===defName);
+    defIp = found?.ip || "";
+  }
+  if(!defIp) return false;
+  return localIp.split('.').slice(0,3).join('.') !== defIp.split('.').slice(0,3).join('.');
+}
+function shouldShowBanner(){return isRemoteScenario() && !isBannerDismissed();}
+function shouldShowHighlight(){return isRemoteScenario() && !isBannerDismissed();}
+function shouldShowJump(){return isRemoteScenario() && !isJumpDismissed() && !isBannerDismissed();}
+function updateAnywhereHighlight(){
+  const tab=document.getElementById('tab-anywhere');
+  const banner=document.getElementById('anywhere-banner');
+  const showBanner=shouldShowBanner();
+  const showHighlight=shouldShowHighlight();
+  const showJump=shouldShowJump();
+  if(tab){tab.classList.toggle('highlight',showHighlight);tab.classList.toggle('jump',showJump);}
+  if(banner)banner.style.display=showBanner?'flex':'none';
+}
+function anywhereCurrentOffice(){
+  // 复用安装页办公室逻辑：共享 officeKey
+  return currentOffice();
+}
+function renderAnywhere(){
+  if(!S) return;
+  // 复用安装页办公室逻辑：办公室卡片（与安装页共享 officeKey）
+  const loc = currentOffice() ?? S?.detected_location ?? S?.locations?.[0] ?? "";
+  const isAuto = officeKey==="auto";
+  const cardNameEl=document.getElementById('anywhere-office-name');
+  const cardDetailEl=document.getElementById('anywhere-office-detail');
+  const cardStatusEl=document.getElementById('anywhere-office-status');
+  const cardLabelEl=document.getElementById('anywhere-office-label');
+  if(cardNameEl) cardNameEl.textContent=loc||"--";
+  if(cardDetailEl) cardDetailEl.textContent=t('LOCAL_IP')+(S?.local_ip||"--");
+  if(cardStatusEl){cardStatusEl.textContent=isAuto?t('AUTO_DETECT'):t('MANUAL_SELECT'); cardStatusEl.className='office-status '+(isAuto?'auto':'manual');}
+  if(cardLabelEl) cardLabelEl.textContent=t('OFFICE');
+  // 办公室菜单
+  const menu=document.getElementById('anywhere-office-menu');
+  if(menu){
+    menu.innerHTML="";
+    const autoBtn=document.createElement('button');
+    autoBtn.dataset.office="auto";
+    autoBtn.textContent=t('AUTO_DETECT_MENU');
+    menu.appendChild(autoBtn);
+    for(const l of (S.locations||[])){
+      const b=document.createElement('button');
+      b.dataset.office=l;
+      b.textContent=l;
+      menu.appendChild(b);
+    }
+  }
+  // 打印机列表：单台强制勾选，多台手动最多2台
+  const names = S.loc_names?.[loc] || [];
+  const ips = S.loc_ips?.[loc] || [];
+  const byIp = new Map((S.existing||[]).map(pr=>[pr.ip, pr.name]));
+  // 单台强制勾选
+  if(names.length===1 && !byIp.has(ips[0]||"")){
+    anywhereSelected.clear();
+    anywhereSelected.add(loc+"::"+(ips[0]||""));
+  }
+  const container=document.getElementById('anywhere-printer-list');
+  if(container){
+    let html="";
+    for(let i=0;i<names.length;i++){
+      const name=names[i];
+      const ip=ips[i]||"";
+      const id=loc+"::"+ip;
+      const installed=byIp.has(ip);
+      const isForced = names.length===1 && !installed;
+      html+=`<label class="printer" style="cursor:${(installed||isForced)?'default':'pointer'}"><input type="checkbox" data-id="${id}" ${anywhereSelected.has(id)?'checked':''} ${(installed||isForced)?'disabled':''}><span class="printer-icon">${printerIcon}</span><span><span class="printer-name">${name}</span><span class="printer-detail">IP ${ip}</span></span><span class="printer-action"><span class="tag ${installed?'installed':'available'}">${installed?t('INSTALLED_TAG'):t('AVAILABLE_TAG')}</span>${isForced?'<span style="font-size:10px;color:var(--sub)">'+ (t('REQUIRED')||'必选') +'</span>':''}</span></label>`;
+    }
+    if(names.length===0) html=`<div style="padding:12px;color:var(--sub);font-size:12px;text-align:center">${t('NONE')}</div>`;
+    container.innerHTML=html;
+    // 绑定（多台手动，最多2台；单台locked）
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const id=cb.dataset.id;
+        if(cb.checked){
+          if(anywhereSelected.size>=2){ cb.checked=false; toast(t('MAX_TWO')||'最多选择2台'); return; }
+          anywhereSelected.add(id);
+        } else {
+          const sole = names.length===1;
+          if(sole){ cb.checked=true; return; }
+          anywhereSelected.delete(id);
+        }
+        renderAnywhere();
+      });
+    });
+  }
+  updateAnywhereSelectAllText();
+  // email preview
+  const userEl=document.getElementById('anywhere-email-user');
+  const domainEl=document.getElementById('anywhere-email-domain');
+  const preview=document.getElementById('anywhere-email-preview');
+  if(userEl && domainEl && preview){
+    const u=(userEl.value||'zhxsdxin').trim()||'zhxsdxin';
+    const d=domainEl.value||'global.xx.com';
+    preview.textContent=u+'@'+d;
+  }
+}
+// —— 异地申请次数：每日最多2次；每次提交成功→隐藏表单显示成功详情（当前会话），
+//    重开软件后若当日未满2次→重新显示申请界面；满2次→重开也显示成功详情；次日重置 ——
+function getSubmitMeta(){
+  try{
+    const v=localStorage.getItem('anywhere_submit_meta');
+    return v?JSON.parse(v):null;
+  }catch(e){ return null; }
+}
+function isQuotaExhaustedToday(){
+  const m=getSubmitMeta();
+  return !!(m && m.date===getTodayStr() && m.count>=2);
+}
+// 成功详情渲染
+function renderSuccess(record, quota){
+  const succ=document.getElementById('anywhere-success');
+  if(!succ) return;
+  succ.innerHTML=`<b style="font-size:14px">🎉 ${t('ANYWHERE_STATUS')}</b><br>`+
+    (record.req_no?`<div style="margin-top:8px;color:var(--ink)">${t('ANYWHERE_REQ')||'申请单号'}：<b style="color:#1849a9">${esc(record.req_no)}</b></div>`:'')+
+    `<div style="margin-top:8px;color:var(--ink)">${t('ANYWHERE_FORM_OFFICE_LABEL')}: <b>${esc(record.office||'')}</b></div>`+
+    `<div style="color:var(--ink)">${t('ANYWHERE_DETAIL_PRINTERS')||'打印机'}: <b>${esc(record.printers||'')}</b></div>`+
+    `<div style="color:var(--ink)">邮箱: <b>${esc(record.email||'')}</b></div>`+
+    `<div style="color:var(--ink)">${t('ANYWHERE_FORM_REASON_LABEL')}: ${esc(record.reason||'')}</div>`+
+    `<div style="font-size:11px;color:#667085;margin-top:8px">${(t('ANYWHERE_SUCCESS_QUOTA')||'今日申请次数：%d/2').replace('%d', quota||1)}</div>`+
+    `<div style="font-size:11px;color:#667085">${t('ANYWHERE_SUCCESS_HINT')||'明天将重新开放申请'}</div>`;
+  succ.style.display='block';
+}
+// 提交成功后：总是隐藏表单、显示成功详情（当前会话）
+function forceAnywhereSuccess(record, meta){
+  const apply=document.getElementById('anywhere-apply');
+  const status=document.getElementById('anywhere-status');
+  if(apply) apply.style.display='none';
+  if(status) status.style.display='none';
+  renderSuccess(record, meta?meta.count:1);
+}
+// 载入/刷新时按当日剩余次数决定显示表单或成功详情
+function renderAnywhereState(){
+  const apply=document.getElementById('anywhere-apply');
+  const succ=document.getElementById('anywhere-success');
+  const status=document.getElementById('anywhere-status');
+  const m=getSubmitMeta();
+  if(m && m.date===getTodayStr() && m.count>=2){
+    // 今日已用满2次：显示成功详情，隐藏申请界面
+    if(apply) apply.style.display='none';
+    if(status) status.style.display='none';
+    renderSuccess(m.last||{}, m.count);
+  } else {
+    // 未满2次（或次日）：显示申请界面
+    if(apply) apply.style.display='';
+    if(succ) succ.style.display='none';
+  }
+}
+function bumpSubmitCount(record){
+  const today=getTodayStr();
+  const m=getSubmitMeta();
+  // 每日最多2次
+  const count=Math.min((m && m.date===today ? m.count : 0)+1, 2);
+  const meta={date:today, count, last:record};
+  try{ localStorage.setItem('anywhere_submit_meta', JSON.stringify(meta)); }catch(e){}
+  return meta;
+}
+function clearSubmitMeta(){
+  try{ localStorage.removeItem('anywhere_submit_meta'); }catch(e){}
+}
+function updateAnywhereSelectAllText(){
+  const selAll=document.getElementById('anywhere-select-all');
+  if(!selAll) return;
+  const loc = currentOffice() ?? S?.detected_location ?? S?.locations?.[0] ?? "";
+  const names = S.loc_names?.[loc] || [];
+  const ips = S.loc_ips?.[loc] || [];
+  const byIp = new Map((S.existing||[]).map(pr=>[pr.ip, pr.name]));
+  const available = names.filter((_,i)=>!byIp.has(ips[i]||""));
+  const selCount = Array.from(anywhereSelected).filter(id=>id.startsWith(loc+"::")).length;
+  // 单台强制勾选时隐藏全选
+  if(names.length===1){ selAll.style.display='none'; return; }
+  selAll.style.display='';
+  // 多台时已选=已选数
+  selAll.textContent = (available.length>0 && selCount>=available.length) ? t('CANCEL_SELECT_ALL') : t('SELECT_ALL');
+}
+
 
 // —— 渲染办公室卡片 ——
 function renderOffice() {
@@ -184,7 +387,7 @@ function renderInstallList() {
       <span class="printer-action">
         <span class="tag ${installed?'installed':'available'}">${installed?t('INSTALLED_TAG'):t('AVAILABLE_TAG')}</span>
         ${installed?(name===defName?`<span class="default-current">${t('CURRENT_DEFAULT_TAG')}</span>`:'')
-          :`<label class="default-choice"><input type="checkbox" data-default value="${name}" ${pendingDefault===name?'checked':''}> ${t('SET_DEFAULT')}</label>`}
+          :`<label class="default-choice"><input type="checkbox" data-default data-id="${id}" value="${name}" ${pendingDefault===name?'checked':''}> ${t('SET_DEFAULT')}</label>`}
       </span>
     </div>`;
   }
@@ -222,22 +425,35 @@ function updateInstallSummary() {
   }
 }
 function bindInstallEvents() {
-  // 安装勾选
+  // 安装勾选；取消安装时顺带取消该打印机的设为默认（避免默认指向未安装项）
   $$(".install-choice").forEach(cb => {
     cb.addEventListener("change", () => {
-      if (cb.checked) selectedInstall.add(cb.dataset.id);
-      else selectedInstall.delete(cb.dataset.id);
+      if (cb.checked) {
+        selectedInstall.add(cb.dataset.id);
+      } else {
+        selectedInstall.delete(cb.dataset.id);
+        const def = $$('input[data-default]').find(x => x.dataset.id === cb.dataset.id);
+        if (def && def.checked) def.checked = false;
+        if (def && pendingDefault === def.value) pendingDefault = null;
+      }
       updateInstallSummary();
     });
   });
-  // 设为默认：独立于安装，全局单选（最多 1 个）
+  // 设为默认：全局单选（最多 1 个），勾选时顺带勾选左侧安装框
   $$('input[data-default]').forEach(cb => {
     cb.addEventListener("change", () => {
       if (cb.checked) {
         $$('input[data-default]').forEach(c => { if (c !== cb) c.checked = false; });
         pendingDefault = cb.value;
+        const id = cb.dataset.id;
+        if (id && !selectedInstall.has(id)) {
+          selectedInstall.add(id);
+          const inst = $$(".install-choice").find(x => x.dataset.id === id);
+          if (inst && !inst.disabled) inst.checked = true;
+          updateInstallSummary();
+        }
       } else {
-        pendingDefault = null;
+        if (pendingDefault === cb.value) pendingDefault = null;
       }
     });
   });
@@ -306,12 +522,15 @@ async function refreshAll() {
   renderOffice();
   renderInstallList();
   renderRemoveList();
+  renderAnywhere();
+  renderAnywhereState();
+  updateAnywhereHighlight();
   updateHealthUI();
 }
 
 // —— 全局绑定 ——
 function bindGlobal() {
-  // office menu
+  // office menu (install)
   $("change-office").addEventListener("click", () => {
     $("office-menu").hidden = !$("office-menu").hidden;
   });
@@ -322,16 +541,64 @@ function bindGlobal() {
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".office")) $("office-menu").hidden = true;
   });
+  // office menu (anywhere) - 复用安装页逻辑
+  const awChangeBtn=document.getElementById('anywhere-change-office');
+  const awMenu=document.getElementById('anywhere-office-menu');
+  if(awChangeBtn && awMenu){
+    awChangeBtn.addEventListener('click', (e)=>{e.stopPropagation(); awMenu.hidden=!awMenu.hidden;});
+    awMenu.addEventListener('click', (e)=>{
+      const btn=e.target.closest('button[data-office]');
+      if(!btn) return;
+      const v=btn.dataset.office;
+      anywhereSelected.clear();
+      awMenu.hidden=true;
+      // 复用安装页办公室切换：共享 officeKey，安装页与异地页联动
+      selectOffice(v);
+      renderAnywhere();
+      updateAnywhereHighlight();
+    });
+    document.addEventListener('click', (e)=>{
+      if(!e.target.closest('#anywhere-office-card')) awMenu.hidden=true;
+    });
+  }
+  const awSelAll=document.getElementById('anywhere-select-all');
+  if(awSelAll){
+    awSelAll.addEventListener('click', ()=>{
+      const loc = currentOffice() ?? S?.detected_location ?? S?.locations?.[0] ?? "";
+      const names=S.loc_names?.[loc]||[];
+      const ips=S.loc_ips?.[loc]||[];
+      const byIp=new Map((S.existing||[]).map(pr=>[pr.ip,pr.name]));
+      // 单台强制勾选时全选无效
+      if(names.length===1) return;
+      const ids=[];
+      for(let i=0;i<names.length;i++){ if(!byIp.has(ips[i]||"")) ids.push(loc+"::"+(ips[i]||"")); }
+      const allSelected=ids.length>0 && ids.every(id=>anywhereSelected.has(id));
+      if(allSelected) ids.forEach(id=>anywhereSelected.delete(id));
+      else {
+        anywhereSelected.clear();
+        ids.slice(0,2).forEach(id=>anywhereSelected.add(id)); // 最多2台
+      }
+      renderAnywhere();
+    });
+  }
 
   // tab 切换
   $$(".tab").forEach(tab => {
     tab.addEventListener("click", () => {
       if (tab.disabled) return;
       const key = tab.dataset.tab;
+      if(key==='anywhere' && shouldShowJump()){
+        try{localStorage.setItem('anywhere_jump_dismissed',String(Date.now()));}catch(e){}
+        tab.classList.remove('jump');
+      }
       $$(".tab").forEach(t => t.classList.toggle("active", t === tab));
       $("install-panel").classList.toggle("active", key === "install");
       $("remove-panel").classList.toggle("active", key === "remove");
+      $("anywhere-panel").classList.toggle("active", key === "anywhere");
+      $("repair-panel").classList.toggle("active", key === "repair");
       if (key === "remove") renderRemoveList();
+      if (key === "anywhere") {renderAnywhere(); renderAnywhereState(); updateAnywhereHighlight();}
+      if (key === "repair") {/* 修复面板文案已在 renderAll 中润色 */}
       scheduleFit();
     });
   });
@@ -407,6 +674,124 @@ function bindGlobal() {
       renderInstallList();
     });
   }
+  // anywhere - email 通过账户名自动检测
+  const awUser=document.getElementById('anywhere-email-user');
+  const awDomain=document.getElementById('anywhere-email-domain');
+  const awPreview=document.getElementById('anywhere-email-preview');
+  // 优先使用系统账户名，其次 localStorage，最后默认 zhxsdxin
+  (async ()=>{
+    let account="zhxsdxin";
+    try{ const u=await getUsername(); if(u && u.trim() && u!=="root") account=u.trim().split(/[.\\\/]/).pop()||u; }catch(e){}
+    try{
+      const savedU=localStorage.getItem('anywhere_email_user');
+      const savedD=localStorage.getItem('anywhere_email_domain');
+      if(savedU && awUser) awUser.value=savedU;
+      else if(awUser) awUser.value=account;
+      if(savedD && awDomain) awDomain.value=savedD;
+      refreshEmailPreview();
+    }catch(e){ if(awUser) awUser.value=account; refreshEmailPreview();}
+  })();
+  function refreshEmailPreview(){if(awUser && awDomain && awPreview){const u=(awUser.value||'zhxsdxin').trim()||'zhxsdxin';const d=awDomain.value||'global.xx.com';awPreview.textContent=u+'@'+d;}}
+  if(awUser) awUser.addEventListener('input', ()=>{refreshEmailPreview();try{localStorage.setItem('anywhere_email_user',awUser.value.trim());}catch(e){} awUser.style.borderColor='var(--line)';});
+  if(awDomain) awDomain.addEventListener('change', ()=>{refreshEmailPreview();try{localStorage.setItem('anywhere_email_domain',awDomain.value);}catch(e){}});
+  refreshEmailPreview();
+  // anywhere - banner dismiss & submit
+  const awBannerDismiss=document.getElementById('anywhere-banner-dismiss');
+  if(awBannerDismiss) awBannerDismiss.addEventListener('click', ()=>{
+    try{const now=String(Date.now());localStorage.setItem('anywhere_banner_dismissed',now);localStorage.setItem('anywhere_jump_dismissed',now);}catch(e){}
+    updateAnywhereHighlight();
+    toast(t('TOAST_CANCEL'));
+  });
+  const awSubmit=document.getElementById('anywhere-submit');
+  const awCancel=document.getElementById('anywhere-cancel');
+  const awReason=document.getElementById('anywhere-reason');
+  const awStatus=document.getElementById('anywhere-status');
+  if(awReason) awReason.addEventListener('input', ()=>{awReason.style.borderColor='var(--line)';const er=document.getElementById('anywhere-reason-error');if(er)er.style.display='none';});
+  if(awSubmit) awSubmit.addEventListener('click', async ()=>{
+    const officeObj=currentOffice();
+    const office=officeObj || S?.detected_location || S?.locations?.[0] || "";
+    const reason=(awReason?.value||'').trim();
+    const errEl=document.getElementById('anywhere-reason-error');
+    const emailUser=(awUser?.value||'zhxsdxin').trim()||'zhxsdxin';
+    const emailDomain=awDomain?.value||'global.xx.com';
+    const email=emailUser+'@'+emailDomain;
+    if(anywhereSelected.size===0){
+      toast(t('SELECTION')+': '+t('NONE'));
+      return;
+    }
+    if(!reason){
+      if(awReason){awReason.style.borderColor='var(--red)';awReason.focus();}
+      if(errEl){errEl.textContent=t('ANYWHERE_REASON_REQUIRED');errEl.style.display='block';}
+      toast(t('ANYWHERE_REASON_REQUIRED'));
+      return;
+    }
+    if(awReason)awReason.style.borderColor='var(--line)';
+    if(errEl)errEl.style.display='none';
+    if(awUser)awUser.style.borderColor='var(--line)';
+    try{localStorage.setItem('anywhere_email_user',emailUser);localStorage.setItem('anywhere_email_domain',emailDomain);}catch(e){}
+    const selectedNames=Array.from(anywhereSelected).map(id=>{
+      const sep=id.indexOf('::');
+      if(sep===-1) return id;
+      const loc=id.slice(0,sep);
+      const ip=id.slice(sep+2);
+      const ips=S.loc_ips?.[loc]||[];
+      const names=S.loc_names?.[loc]||[];
+      const idx=ips.indexOf(ip);
+      return idx>=0?names[idx]:id;
+    }).join(', ');
+    const selectedArr=Array.from(anywhereSelected).map(id=>{
+      const sep=id.indexOf('::');
+      if(sep===-1) return id;
+      const loc=id.slice(0,sep);
+      const ip=id.slice(sep+2);
+      const ips=S.loc_ips?.[loc]||[];
+      const names=S.loc_names?.[loc]||[];
+      const idx=ips.indexOf(ip);
+      return idx>=0?names[idx]:id;
+    });
+    // 直接发给后台 8000
+    const BACKEND="http://127.0.0.1:8000";
+    const payload={
+      user_id: emailUser,
+      ip: S?.local_ip||"",
+      email: email,
+      default_printer: defaultPrinterName||"",
+      target_location: office,
+      target_printer: selectedArr[0]||"",
+      target_printers: selectedArr,
+      reason: reason
+    };
+    try{
+      const r=await fetch(`${BACKEND}/api/apply`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const j=await r.json();
+      console.log('apply',j);
+      const req_no=j.req_no||j.reqNo||'';
+      // 提交成功：累计当日次数（上限2），隐藏表单显示成功详情；重开软件未满2次则重新显示申请界面
+      const meta=bumpSubmitCount({ req_no, office, printers:selectedNames, email, reason });
+      forceAnywhereSuccess(meta.last, meta);
+      toast(office+' — '+selectedNames+' — '+t('ANYWHERE_STATUS')+' — '+email);
+    }catch(e){
+      console.error(e);
+      if(awStatus){
+        awStatus.innerHTML=`<b>🛠</b><br><span style="color:var(--red)">`+e+`</span>`;
+        awStatus.style.display='block';
+        awStatus.classList.add('show');
+      }
+      toast('❌ '+e);
+    }
+    if(awReason) awReason.value='';
+  });
+  if(awCancel) awCancel.addEventListener('click', ()=>{
+    if(awReason){awReason.value='';awReason.style.borderColor='var(--line)';}
+    const st=document.getElementById('anywhere-status');
+    if(st){st.style.display='none';st.classList.remove('show');}
+    const er=document.getElementById('anywhere-reason-error');
+    if(er)er.style.display='none';
+    renderAnywhereState();
+    toast(t('TOAST_CANCEL'));
+  });
+  const repairBtn=document.getElementById('repair-btn');
+  if(repairBtn) repairBtn.addEventListener('click', ()=>{toast(t('REPAIR_DEV')||'诊断功能开发中...');});
   // select all (remove)
   $("select-all").addEventListener("click", () => {
     const ps = installedPrintersCache;
@@ -476,6 +861,7 @@ function renderAll() {
     const key = tab.dataset.tab;
     if (key === "install") tab.childNodes[0].textContent = t("TAB_INSTALL");
     else if (key === "remove") tab.childNodes[0].textContent = t("TAB_REMOVE");
+    else if (key === "anywhere") tab.textContent = t("TAB_ANYWHERE");
     else if (key === "repair") tab.textContent = t("TAB_REPAIR");
   });
   $("office-label").textContent = t("OFFICE");
@@ -487,10 +873,53 @@ function renderAll() {
   $("exit-button").textContent = t("CANCEL");
   $("install-button").textContent = t("INSTALL_BTN");
   $("remove-button").textContent = t("REMOVE_BTN");
+  // anywhere & repair i18n (文案润色)
+  const awMap = {
+    "anywhere-banner-title":"ANYWHERE_BANNER_TITLE",
+    "anywhere-banner-desc":"ANYWHERE_BANNER_DESC",
+    "anywhere-desc-title":"ANYWHERE_DESC_TITLE",
+    "anywhere-desc":"ANYWHERE_DESC",
+    "anywhere-tip-title":"ANYWHERE_TIP_TITLE",
+    "anywhere-tip-body":"ANYWHERE_TIP_BODY",
+    "anywhere-form-office-label":"ANYWHERE_FORM_OFFICE_LABEL",
+    "anywhere-form-email-label":"ANYWHERE_FORM_EMAIL_LABEL",
+    "anywhere-form-reason-label":"ANYWHERE_FORM_REASON_LABEL",
+    "anywhere-submit":"ANYWHERE_SUBMIT",
+    "anywhere-cancel":"ANYWHERE_CANCEL",
+    "anywhere-footer":"ANYWHERE_FOOTER",
+    "anywhere-banner-dismiss":"ANYWHERE_BANNER_DISMISS",
+    "repair-title":"REPAIR_TITLE",
+    "repair-hint":"REPAIR_HINT",
+    "repair-item1":"REPAIR_ITEM1",
+    "repair-item1-detail":"REPAIR_ITEM1_DETAIL",
+    "repair-item2":"REPAIR_ITEM2",
+    "repair-item2-detail":"REPAIR_ITEM2_DETAIL",
+    "repair-item3":"REPAIR_ITEM3",
+    "repair-item3-detail":"REPAIR_ITEM3_DETAIL",
+    "repair-status":"REPAIR_STATUS",
+    "repair-footer":"REPAIR_FOOTER",
+    "repair-btn":"REPAIR_BTN"
+  };
+  for(const [id,key] of Object.entries(awMap)){
+    const el=document.getElementById(id);
+    if(el){
+      if(id==="anywhere-form-reason-label") el.innerHTML=t(key)+' <span style="color:var(--red)">*</span>';
+      else el.textContent=t(key);
+    }
+  }
+  const reasonEl=document.getElementById('anywhere-reason');
+  if(reasonEl) reasonEl.placeholder=t('ANYWHERE_FORM_REASON_PLACEHOLDER');
+  const errEl=document.getElementById('anywhere-reason-error');
+  if(errEl) errEl.textContent=t('ANYWHERE_REASON_REQUIRED');
   renderOffice();
   renderInstallList();
   renderRemoveList();
+  renderAnywhere();
+  renderAnywhereState();
+  updateAnywhereHighlight();
   updateHealthUI();
+  // repair tag
+  document.querySelectorAll('#repair-panel .tag.available').forEach(el=>el.textContent=t('REPAIR_STATUS'));
 }
 
 // —— 初始化 ——

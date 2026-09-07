@@ -207,6 +207,48 @@ fn check_server_health() -> Result<HealthResult, String> {
     })
 }
 
+/// Get current OS account name for email prefix (e.g. zhxsdxin)
+#[tauri::command]
+fn get_username() -> Result<String, String> {
+    if let Ok(u) = std::env::var("USER").or_else(|_| std::env::var("USERNAME")) {
+        if !u.is_empty() && u != "root" {
+            return Ok(u);
+        }
+    }
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(out) = std::process::Command::new("whoami").output() {
+            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if !s.is_empty() {
+                return Ok(s.split(['\\', '/']).last().unwrap_or(&s).to_string());
+            }
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        if let Ok(out) = std::process::Command::new("whoami").output() {
+            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if !s.is_empty() && s != "root" {
+                return Ok(s);
+            }
+        }
+        if let Ok(out) = std::process::Command::new("id").args(["-un"]).output() {
+            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if !s.is_empty() && s != "root" {
+                return Ok(s);
+            }
+        }
+        // macOS console user
+        if let Ok(out) = std::process::Command::new("stat").args(["-f", "%Su", "/dev/console"]).output() {
+            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if !s.is_empty() && s != "root" {
+                return Ok(s);
+            }
+        }
+    }
+    Ok("zhxsdxin".to_string())
+}
+
 /// Terminate the process immediately (same as the window close button).
 #[tauri::command]
 fn quit(app: tauri::AppHandle) {
@@ -223,6 +265,7 @@ pub fn run() {
             refresh_config,
             get_installed_printers,
             check_server_health,
+            get_username,
             quit
         ])
         .run(tauri::generate_context!())
