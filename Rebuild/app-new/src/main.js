@@ -18,7 +18,6 @@ let removeSelected = new Set();
 let addedLocations = [];
 let serverHealthy = false;
 let installedPrintersCache = [];
-let needsCenter = false;
 
 const printerIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5M6 18H4v-8h16v8h-2M6 14h12v6H6z"/></svg>';
 
@@ -65,7 +64,7 @@ async function toastAfterRefresh(text) {
 }
 
 // —— 窗口适配 ——
-async function fitWindow() {
+async function fitWindow(center = false) {
   try {
     await document.fonts.ready;
     const win = getCurrentWindow();
@@ -81,14 +80,15 @@ async function fitWindow() {
     const targetH = wantH + decoH;
     const sameSize = Math.abs(outer.height - targetH) < 4 && Math.abs(outer.width - targetW) < 4;
     if (!sameSize) await win.setSize(new PhysicalSize(targetW, targetH));
-    // 高度变化后把窗口重新居中，避免向下延展被底部遮挡
-    if (needsCenter) { needsCenter = false; try { await win.center(); } catch (_) {} }
+    // 高度稳定后把窗口重新居中，避免向下延展被底部遮挡
+    if (center) { try { await win.center(); } catch (_) {} }
   } catch (_) {}
 }
-function scheduleFit() {
-  for (const ms of [0, 120, 350, 700]) setTimeout(fitWindow, ms);
+function scheduleFit(center = false) {
+  const times = [0, 120, 350, 700];
+  times.forEach((ms, i) => setTimeout(() => fitWindow(center && i === times.length - 1), ms));
 }
-new ResizeObserver(() => requestAnimationFrame(fitWindow)).observe($("app"));
+new ResizeObserver(() => requestAnimationFrame(() => fitWindow())).observe($("app"));
 
 // —— 健康检测 ——
 async function checkHealth() {
@@ -617,8 +617,7 @@ function bindGlobal() {
       if (key === "remove") renderRemoveList();
       if (key === "anywhere") {renderAnywhere(); renderAnywhereState(); updateAnywhereHighlight();}
       if (key === "repair") {/* 修复面板文案已在 renderAll 中润色 */}
-      needsCenter = true;
-      scheduleFit();
+      scheduleFit(true);
     });
   });
 
