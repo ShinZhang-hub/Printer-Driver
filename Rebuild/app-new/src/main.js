@@ -18,6 +18,8 @@ let removeSelected = new Set();
 let addedLocations = [];
 let serverHealthy = false;
 let installedPrintersCache = [];
+let centerUntil = 0;
+let pendingApply = null;
 
 const printerIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5M6 18H4v-8h16v8h-2M6 14h12v6H6z"/></svg>';
 
@@ -34,7 +36,7 @@ const STRINGSFallback = {
   INSTALLED_TAG:"已安装",AVAILABLE_TAG:"可安装",SET_DEFAULT:"设为默认",CURRENT_DEFAULT_TAG:"当前默认",
   SELECTION:"已选择",UNIT:"台",CANCEL:"取消",INSTALL_BTN:"安装",
   INSTALLED_PRINTERS:"已安装的打印机",SELECT_ALL:"全选",CANCEL_SELECT_ALL:"取消全选",
-  REMOVE_NOTE:"移除当前默认设备后，系统将自动选择其他可用打印机。",REMOVE_BTN:"移除",
+  REMOVE_NOTE:"移除当前默认设备后，系统将自动选择其他可用打印机。",REMOVE_BTN:"移除",ANYWHERE_CONFIRM:"确认",
   REVIEW_TITLE:"确认操作",REVIEW_INSTALL:"安装：",REVIEW_ADD_INSTALL:"追加安装：",
   REVIEW_CONFLICT:"冲突处理：",REVIEW_DEFAULT_PRINTER:"默认打印机：",
   REVIEW_REMOVE:"移除：",REVIEW_NONE:"无",REVIEW_SKIPPED_ADDED:"跳过（重复）：",REVIEW_FILTERED_REMOVE:"过滤：",
@@ -64,7 +66,7 @@ async function toastAfterRefresh(text) {
 }
 
 // —— 窗口适配 ——
-async function fitWindow(center = false) {
+async function fitWindow() {
   try {
     await document.fonts.ready;
     const win = getCurrentWindow();
@@ -80,15 +82,14 @@ async function fitWindow(center = false) {
     const targetH = wantH + decoH;
     const sameSize = Math.abs(outer.height - targetH) < 4 && Math.abs(outer.width - targetW) < 4;
     if (!sameSize) await win.setSize(new PhysicalSize(targetW, targetH));
-    // 高度稳定后把窗口重新居中，避免向下延展被底部遮挡
-    if (center) { try { await win.center(); } catch (_) {} }
+    // 切换标签后 1.5s 内每次自适应都重新居中（含延迟布局），避免向下延展被底部遮挡
+    if (Date.now() < centerUntil) { try { await win.center(); } catch (_) {} }
   } catch (_) {}
 }
-function scheduleFit(center = false) {
-  const times = [0, 120, 350, 700];
-  times.forEach((ms, i) => setTimeout(() => fitWindow(center && i === times.length - 1), ms));
+function scheduleFit() {
+  for (const ms of [0, 120, 350, 700]) setTimeout(fitWindow, ms);
 }
-new ResizeObserver(() => requestAnimationFrame(() => fitWindow())).observe($("app"));
+new ResizeObserver(() => requestAnimationFrame(fitWindow)).observe($("app"));
 
 // —— 健康检测 ——
 async function checkHealth() {
@@ -617,7 +618,8 @@ function bindGlobal() {
       if (key === "remove") renderRemoveList();
       if (key === "anywhere") {renderAnywhere(); renderAnywhereState(); updateAnywhereHighlight();}
       if (key === "repair") {/* 修复面板文案已在 renderAll 中润色 */}
-      scheduleFit(true);
+      centerUntil = Date.now() + 1500;
+      scheduleFit();
     });
   });
 
@@ -721,11 +723,10 @@ function bindGlobal() {
     toast(t('TOAST_CANCEL'));
   });
   const awSubmit=document.getElementById('anywhere-submit');
-  const awCancel=document.getElementById('anywhere-cancel');
   const awReason=document.getElementById('anywhere-reason');
   const awStatus=document.getElementById('anywhere-status');
   if(awReason) awReason.addEventListener('input', ()=>{awReason.style.borderColor='var(--line)';const er=document.getElementById('anywhere-reason-error');if(er)er.style.display='none';});
-  if(awSubmit) awSubmit.addEventListener('click', async ()=>{
+  if(awSubmit) awSubmit.addEventListener('click', ()=>{
     const officeObj=currentOffice();
     const office=officeObj || S?.detected_location || S?.locations?.[0] || "";
     const reason=(awReason?.value||'').trim();
@@ -779,6 +780,30 @@ function bindGlobal() {
       target_printers: selectedArr,
       reason: reason
     };
+    pendingApply={office,reason,email,selectedNames,selectedArr,payload};
+    const body=document.getElementById('anywhere-confirm-body');
+    if(body) body.innerHTML=
+      `<div>${t('ANYWHERE_FORM_OFFICE_LABEL')}: <b style="color:var(--ink)">${esc(office)}</b></div>`+
+      `<div>${t('ANYWHERE_DETAIL_PRINTERS')||'打印机'}: <b style="color:var(--ink)">${esc(selectedNames)}</b></div>`+
+      `<div>${t('ANYWHERE_FORM_EMAIL_LABEL')}: <b style="color:var(--ink)">${esc(email)}</b></div>`+
+      `<div>${t('ANYWHERE_FORM_REASON_LABEL')}: ${esc(reason)}</div>`;
+    const mask=document.getElementById('anywhere-confirm-mask');
+    if(mask) mask.style.display='flex';
+  });
+  const awConfirmMask=document.getElementById('anywhere-confirm-mask');
+  if(awConfirmMask) awConfirmMask.addEventListener('click',(e)=>{ if(e.target===awConfirmMask){awConfirmMask.style.display='none';pendingApply=null;} });
+  const awConfirmCancel=document.getElementById('anywhere-confirm-cancel');
+  if(awConfirmCancel) awConfirmCancel.addEventListener('click', ()=>{
+    if(awConfirmMask) awConfirmMask.style.display='none';
+    pendingApply=null;
+  });
+  const awConfirmOk=document.getElementById('anywhere-confirm-ok');
+  if(awConfirmOk) awConfirmOk.addEventListener('click', async ()=>{
+    if(awConfirmMask) awConfirmMask.style.display='none';
+    const p=pendingApply; pendingApply=null;
+    if(!p) return;
+    const {office,reason,email,selectedNames,selectedArr,payload}=p;
+    const BACKEND="http://127.0.0.1:8000";
     try{
       const r=await fetch(`${BACKEND}/api/apply`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       const j=await r.json();
@@ -798,15 +823,6 @@ function bindGlobal() {
       toast('❌ '+e);
     }
     if(awReason) awReason.value='';
-  });
-  if(awCancel) awCancel.addEventListener('click', ()=>{
-    if(awReason){awReason.value='';awReason.style.borderColor='var(--line)';}
-    const st=document.getElementById('anywhere-status');
-    if(st){st.style.display='none';st.classList.remove('show');}
-    const er=document.getElementById('anywhere-reason-error');
-    if(er)er.style.display='none';
-    renderAnywhereState();
-    toast(t('TOAST_CANCEL'));
   });
   const repairBtn=document.getElementById('repair-btn');
   if(repairBtn) repairBtn.addEventListener('click', ()=>{toast(t('REPAIR_DEV')||'诊断功能开发中...');});
@@ -903,7 +919,9 @@ function renderAll() {
     "anywhere-form-email-label":"ANYWHERE_FORM_EMAIL_LABEL",
     "anywhere-form-reason-label":"ANYWHERE_FORM_REASON_LABEL",
     "anywhere-submit":"ANYWHERE_SUBMIT",
-    "anywhere-cancel":"ANYWHERE_CANCEL",
+    "anywhere-confirm-title":"ANYWHERE_SUBMIT",
+    "anywhere-confirm-cancel":"ANYWHERE_CANCEL",
+    "anywhere-confirm-ok":"ANYWHERE_CONFIRM",
     "anywhere-footer":"ANYWHERE_FOOTER",
     "anywhere-banner-dismiss":"ANYWHERE_BANNER_DISMISS",
     "repair-title":"REPAIR_TITLE",

@@ -782,6 +782,16 @@ const STRINGS: &[(&str, Table)] = &[
         ],
     ),
     (
+        "ANYWHERE_CONFIRM",
+        [
+            ("en", "Confirm"),
+            ("ja", "確認"),
+            ("ko", "확인"),
+            ("zh", "确认"),
+            ("zh-Hant", "確認"),
+        ],
+    ),
+    (
         "ANYWHERE_SUCCESS_QUOTA",
         [
             ("en", "Today requests: %d/2"),
