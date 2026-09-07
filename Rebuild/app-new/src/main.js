@@ -18,6 +18,7 @@ let removeSelected = new Set();
 let addedLocations = [];
 let serverHealthy = false;
 let installedPrintersCache = [];
+let needsCenter = false;
 
 const printerIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5M6 18H4v-8h16v8h-2M6 14h12v6H6z"/></svg>';
 
@@ -78,8 +79,10 @@ async function fitWindow() {
     const decoH = outer.height - inner.height;
     const targetW = wantW + decoW;
     const targetH = wantH + decoH;
-    if (Math.abs(outer.height - targetH) < 4 && Math.abs(outer.width - targetW) < 4) return;
-    await win.setSize(new PhysicalSize(targetW, targetH));
+    const sameSize = Math.abs(outer.height - targetH) < 4 && Math.abs(outer.width - targetW) < 4;
+    if (!sameSize) await win.setSize(new PhysicalSize(targetW, targetH));
+    // 高度变化后把窗口重新居中，避免向下延展被底部遮挡
+    if (needsCenter) { needsCenter = false; try { await win.center(); } catch (_) {} }
   } catch (_) {}
 }
 function scheduleFit() {
@@ -614,6 +617,7 @@ function bindGlobal() {
       if (key === "remove") renderRemoveList();
       if (key === "anywhere") {renderAnywhere(); renderAnywhereState(); updateAnywhereHighlight();}
       if (key === "repair") {/* 修复面板文案已在 renderAll 中润色 */}
+      needsCenter = true;
       scheduleFit();
     });
   });
