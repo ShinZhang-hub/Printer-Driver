@@ -20,6 +20,7 @@ let serverHealthy = false;
 let installedPrintersCache = [];
 let centerUntil = 0;
 let pendingApply = null;
+let activeTab = "install";
 
 const printerIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5M6 18H4v-8h16v8h-2M6 14h12v6H6z"/></svg>';
 
@@ -543,6 +544,20 @@ async function refreshAll() {
   renderAnywhereState();
   updateAnywhereHighlight();
   updateHealthUI();
+  restoreTab();
+}
+
+// —— 标签页保持：全局刷新后停留在当前标签页 ——
+function restoreTab(){
+  let key = activeTab || "install";
+  const btn = document.querySelector(`.tab[data-tab="${key}"]`);
+  if (!btn || btn.disabled || btn.style.display === "none") key = "install";
+  activeTab = key;
+  $$(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === key));
+  $("install-panel").classList.toggle("active", key === "install");
+  $("remove-panel").classList.toggle("active", key === "remove");
+  $("anywhere-panel").classList.toggle("active", key === "anywhere");
+  $("repair-panel").classList.toggle("active", key === "repair");
 }
 
 // —— 全局绑定 ——
@@ -606,6 +621,7 @@ function bindGlobal() {
     tab.addEventListener("click", () => {
       if (tab.disabled) return;
       const key = tab.dataset.tab;
+      activeTab = key;
       if(key==='anywhere' && shouldShowJump()){
         try{localStorage.setItem('anywhere_jump_dismissed',String(Date.now()));}catch(e){}
         tab.classList.remove('jump');
@@ -956,6 +972,7 @@ function renderAll() {
   updateHealthUI();
   // repair tag
   document.querySelectorAll('#repair-panel .tag.available').forEach(el=>el.textContent=t('REPAIR_STATUS'));
+  restoreTab();
 }
 
 // —— 初始化 ——
