@@ -434,12 +434,12 @@ function updateInstallSummary() {
   const unit = t("UNIT");
   $("install-summary").innerHTML = `${t("SELECTION")} <b>${n}</b>${unit ? " " + unit : ""}`;
   $("install-button").disabled = n === 0;
-  // 同移除界面一致的全选/取消全选（便于同位置3台以上场景）
+  // 同移除界面一致：当前位置全选后按钮变为“取消全选”（按当前视图判断，与点击切换同口径）
   const selBtn = $("install-select-all");
   if (selBtn) {
     const available = $$(".install-choice:not(:disabled)");
-    const total = available.length;
-    selBtn.textContent = (total > 0 && n === total) ? t("CANCEL_SELECT_ALL") : t("SELECT_ALL");
+    const selInView = available.filter(cb => selectedInstall.has(cb.dataset.id)).length;
+    selBtn.textContent = (available.length > 0 && selInView === available.length) ? t("CANCEL_SELECT_ALL") : t("SELECT_ALL");
   }
 }
 function bindInstallEvents() {
