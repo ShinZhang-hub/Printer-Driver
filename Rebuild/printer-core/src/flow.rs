@@ -41,16 +41,26 @@ pub fn load_config() -> Config {
 
 pub fn initial_state() -> InitialState {
     let cfg = load_config();
+    // Windows: the single combined init pass (language + IPs + printers +
+    // default) fills the cache once so all subsequent reads reuse it.
+    #[cfg(target_os = "windows")]
+    let lang = crate::win_installer::init_cache();
+    #[cfg(not(target_os = "windows"))]
     let lang = i18n::detect();
     let strings = i18n::strings(&lang);
 
-    let local_ip_str = location::local_ip()
+    // The displayed local IP must be the SAME interface used for location
+    // detection. `local_ip()` returns the first non-link-local NIC (often a
+    // VPN/virtual adapter like 192.168.x.x), which disagrees with the
+    // subnet-matched detection IP. Prefer the detection IP, fall back to
+    // plain local_ip() only when detection finds nothing.
+    let detected_addr = location::detected_local_ip(&cfg);
+    let local_ip_str = detected_addr
+        .or_else(location::local_ip)
         .map(|ip| ip.to_string())
         .unwrap_or_default();
 
-    let detected_ip = location::detected_local_ip(&cfg)
-        .map(|ip| ip.to_string())
-        .unwrap_or_default();
+    let detected_ip = detected_addr.map(|ip| ip.to_string()).unwrap_or_default();
     let detected_location = if detected_ip.is_empty() {
         None
     } else {

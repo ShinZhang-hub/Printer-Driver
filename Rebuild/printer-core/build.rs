@@ -46,6 +46,16 @@ fn collect(
     // Walk recursively so plugin bundles (Contents/...) keep their layout.
     let mut entries: Vec<(String, Vec<u8>)> = Vec::new();
     walk(root, root, &mut entries)?;
+    // Windows driver package: pre-expand makecab-compressed (_. / MSCF)
+    // files at build time so installs don't pay extrac32 cost on every run.
+    // Only on a Windows build host (extrac32 available); otherwise the
+    // compressed files are embedded as-is and expanded at runtime.
+    #[cfg(windows)]
+    let mut entries = if manifest_name == "MANIFEST" {
+        pre_expand_windows_drivers(entries)
+    } else {
+        entries
+    };
     entries.sort_by(|a, b| a.0.cmp(&b.0));
 
     for (i, (_rel, content)) in entries.iter().enumerate() {
@@ -64,6 +74,65 @@ fn collect(
     }
     writeln!(f, "];").unwrap();
     Ok(())
+}
+
+/// Pre-expand makecab-compressed Windows driver files (_. suffix, MSCF
+/// magic) via the system Cabinet Extraction Tool, so the embedded package
+/// already contains the expanded names the INF references. Entries that fail
+/// to expand are kept as-is (runtime expand_compressed handles them).
+#[cfg(windows)]
+fn pre_expand_windows_drivers(entries: Vec<(String, Vec<u8>)>) -> Vec<(String, Vec<u8>)> {
+    use std::process::Command;
+    let staging = std::env::temp_dir().join(format!("drv-pre-expand-{}", std::process::id()));
+    let _ = fs::create_dir_all(&staging);
+    let mut out: Vec<(String, Vec<u8>)> = Vec::with_capacity(entries.len());
+    for (rel, data) in entries {
+        let compressed = rel
+            .rsplit('.')
+            .next()
+            .map(|e| e.ends_with('_'))
+            .unwrap_or(false)
+            && data.len() >= 4
+            && &data[..4] == b"MSCF";
+        if !compressed {
+            out.push((rel, data));
+            continue;
+        }
+        let tag = out.len();
+        let src = staging.join(format!("src_{tag}"));
+        let dest_dir = staging.join(format!("out_{tag}"));
+        let expanded: Option<(String, Vec<u8>)> = (|| {
+            fs::create_dir_all(&dest_dir).ok()?;
+            fs::write(&src, &data).ok()?;
+            let st = Command::new("extrac32.exe")
+                .args(["/Y", "/E"])
+                .arg(&src)
+                .args(["/L"])
+                .arg(&dest_dir)
+                .output()
+                .ok()?;
+            if !st.status.success() {
+                return None;
+            }
+            let mut rd = fs::read_dir(&dest_dir).ok()?;
+            let ent = rd.next()?.ok()?;
+            let bytes = fs::read(ent.path()).ok()?;
+            let fname = ent.file_name().to_string_lossy().to_string();
+            let parent = rel.rsplit_once('/').map(|(p, _)| p).unwrap_or("");
+            let new_rel = if parent.is_empty() {
+                fname
+            } else {
+                format!("{parent}/{fname}")
+            };
+            Some((new_rel, bytes))
+        })();
+        match expanded {
+            Some((nr, nb)) => out.push((nr, nb)),
+            None => out.push((rel, data)),
+        }
+    }
+    let _ = fs::remove_dir_all(&staging);
+    out
 }
 
 fn walk(base: &Path, dir: &Path, out: &mut Vec<(String, Vec<u8>)>) -> std::io::Result<()> {

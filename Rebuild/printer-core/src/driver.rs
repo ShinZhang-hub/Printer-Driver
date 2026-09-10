@@ -35,7 +35,59 @@ pub fn unpack_embedded_drivers() -> Result<PathBuf, String> {
         }
         std::fs::write(&p, data).map_err(|e| e.to_string())?;
     }
+
+    // Driver packages ship makecab-compressed files (_. suffix, MSCF magic).
+    // pnputil/printui need the EXPANDED files the INF references (e.g. the
+    // INF says DataFile=X.GPD but only X.gp_ exists until expanded).
+    #[cfg(target_os = "windows")]
+    expand_compressed(&dir)?;
+
     Ok(dir)
+}
+
+/// Expand CAB-compressed (_. suffix, MSCF magic) files in `dir` via the
+/// system Cabinet Extraction Tool. Uses internal filenames, silent.
+#[cfg(target_os = "windows")]
+fn expand_compressed(dir: &Path) -> Result<(), String> {
+    let entries = std::fs::read_dir(dir).map_err(|e| e.to_string())?;
+    for e in entries.flatten() {
+        let p = e.path();
+        if !p.is_file() {
+            continue;
+        }
+        let underscore_ext = p
+            .extension()
+            .map(|x| x.to_string_lossy().to_lowercase().ends_with('_'))
+            .unwrap_or(false);
+        if !underscore_ext || !is_cab(&p) {
+            continue;
+        }
+        let mut c = std::process::Command::new("extrac32.exe");
+        c.args(["/Y", "/E"]).arg(&p).args(["/L"]).arg(dir);
+        {
+            use std::os::windows::process::CommandExt;
+            const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+            c.creation_flags(CREATE_NO_WINDOW);
+        }
+        let out = c.output().map_err(|e| e.to_string())?;
+        if !out.status.success() {
+            return Err(format!("failed to expand {}", p.display()));
+        }
+    }
+    Ok(())
+}
+
+/// True iff the file starts with the CAB magic "MSCF".
+#[cfg(target_os = "windows")]
+fn is_cab(p: &Path) -> bool {
+    use std::io::Read;
+    if let Ok(mut f) = std::fs::File::open(p) {
+        let mut magic = [0u8; 4];
+        if f.read_exact(&mut magic).is_ok() {
+            return &magic == b"MSCF";
+        }
+    }
+    false
 }
 
 /// Parse every .inf under `dir` (non-recursive) and return all model entries.

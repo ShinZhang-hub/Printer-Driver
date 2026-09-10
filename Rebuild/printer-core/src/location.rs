@@ -34,24 +34,12 @@ fn local_v4_via_ifconfig() -> Vec<Ipv4Addr> {
 fn local_v4_via_ifconfig() -> Vec<Ipv4Addr> {
     // Software NICs (VPN/VM adapters) report 169.254.* or unusual addresses;
     // Get-NetIPAddress gives the real addresses without locale-dependent
-    // `ipconfig` prefixes ("IPv4 地址" on zh-CN).
-    let script = r#"
-$ErrorActionPreference = 'SilentlyContinue'
-(Get-NetIPAddress -AddressFamily IPv4).IPAddress
-"#;
-    let mut v4 = Vec::new();
-    if let Ok(out) = std::process::Command::new("powershell")
-        .args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script])
-        .output()
-    {
-        let text = String::from_utf8_lossy(&out.stdout);
-        for line in text.lines() {
-            if let Ok(ip) = line.trim().parse::<Ipv4Addr>() {
-                v4.push(ip);
-            }
-        }
-    }
-    v4
+    // `ipconfig` prefixes ("IPv4 地址" on zh-CN). The addresses come from the
+    // single cached init pass to avoid an extra PowerShell spawn.
+    crate::win_installer::cached_local_ips()
+        .iter()
+        .filter_map(|ip| ip.trim().parse::<Ipv4Addr>().ok())
+        .collect()
 }
 
 /// Pick the local IPv4 that falls inside one of the configured subnets,

@@ -6,7 +6,7 @@ button,input,select{font:inherit}
 button{cursor:pointer}
 
 /* titlebar - Overlay 模式下，macOS 红黄绿按钮悬浮在顶部(约28px高/70px宽)，标题整体下移至按钮下方，左侧18px与下方内容左对齐 */
-.titlebar{height:auto;min-height:32px;padding:36px 18px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);-webkit-app-region:drag;justify-content:flex-start}
+.titlebar{height:auto;min-height:32px;padding:14px 18px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);-webkit-app-region:drag;justify-content:flex-start}
 .app-icon{width:28px;height:28px;display:grid;place-items:center;background:var(--blue);border-radius:8px;color:#fff;flex:none}
 .title{font-size:15px;font-weight:720;-webkit-app-region:no-drag}
 .health{display:block;width:8px;height:8px;min-width:8px;min-height:8px;border-radius:50%;background:#a7f3d0;box-shadow:0 0 0 3px var(--green-bg);flex:none;animation:breathe 1.6s ease-in-out infinite}

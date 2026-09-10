@@ -1,0 +1,15 @@
+{
+  "host": "0.0.0.0",
+  "port": 443,
+  "publicHost": "30.61.39.54",
+  "publicUrl": "https://30.61.39.54:443",
+  "configFile": "config.json",
+  "tokenFile": "admin.token",
+  "keepBackups": 20,
+  "adminIps": ["127.0.0.1", "30.61.39.54", "30.61.39.0/24"],
+  "https": {
+    "enabled": true,
+    "pfxFile": "server.pfx",
+    "passphrase": "printer443"
+  }
+}

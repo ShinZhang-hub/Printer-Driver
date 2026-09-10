@@ -109,6 +109,7 @@ pub fn refresh_config() -> bool {
 pub fn fetch(url: &str, timeout_ms: u64) -> Result<String, String> {
     let agent = ureq::AgentBuilder::new()
         .timeout(std::time::Duration::from_millis(timeout_ms))
+        .tls_config(std::sync::Arc::new(insecure_tls_config()))
         .build();
     agent
         .get(url)
@@ -116,6 +117,70 @@ pub fn fetch(url: &str, timeout_ms: u64) -> Result<String, String> {
         .map_err(|e| e.to_string())?
         .into_string()
         .map_err(|e| e.to_string())
+}
+
+/// TLS config that skips server certificate verification.
+/// The config server lives on the corporate LAN with a self-signed cert
+/// (Subject == Issuer, no CA will ever validate it), and `fetch` is ONLY
+/// used for that internal server — never for public internet hosts.
+fn insecure_tls_config() -> rustls::ClientConfig {
+    #[derive(Debug)]
+    struct NoVerifier;
+    impl rustls::client::danger::ServerCertVerifier for NoVerifier {
+        fn verify_server_cert(
+            &self,
+            _end_entity: &rustls::pki_types::CertificateDer<'_>,
+            _intermediates: &[rustls::pki_types::CertificateDer<'_>],
+            _server_name: &rustls::pki_types::ServerName<'_>,
+            _ocsp_response: &[u8],
+            _now: rustls::pki_types::UnixTime,
+        ) -> Result<rustls::client::danger::ServerCertVerified, rustls::Error> {
+            Ok(rustls::client::danger::ServerCertVerified::assertion())
+        }
+        fn verify_tls12_signature(
+            &self,
+            _message: &[u8],
+            _cert: &rustls::pki_types::CertificateDer<'_>,
+            _dss: &rustls::DigitallySignedStruct,
+        ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+            Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
+        }
+        fn verify_tls13_signature(
+            &self,
+            _message: &[u8],
+            _cert: &rustls::pki_types::CertificateDer<'_>,
+            _dss: &rustls::DigitallySignedStruct,
+        ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+            Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
+        }
+        fn supported_verify_schemes(&self) -> Vec<rustls::SignatureScheme> {
+            use rustls::SignatureScheme;
+            vec![
+                SignatureScheme::RSA_PKCS1_SHA256,
+                SignatureScheme::RSA_PKCS1_SHA384,
+                SignatureScheme::RSA_PKCS1_SHA512,
+                SignatureScheme::ECDSA_NISTP256_SHA256,
+                SignatureScheme::ECDSA_NISTP384_SHA384,
+                SignatureScheme::ECDSA_NISTP521_SHA512,
+                SignatureScheme::RSA_PSS_SHA256,
+                SignatureScheme::RSA_PSS_SHA384,
+                SignatureScheme::RSA_PSS_SHA512,
+                SignatureScheme::ED25519,
+            ]
+        }
+    }
+
+    // Explicit ring provider: avoids process-default CryptoProvider
+    // ambiguity when multiple providers are compiled in.
+    let provider = std::sync::Arc::new(rustls::crypto::ring::default_provider());
+    let mut cfg = rustls::ClientConfig::builder_with_provider(provider)
+        .with_protocol_versions(rustls::DEFAULT_VERSIONS)
+        .expect("ring supports default versions")
+        .with_root_certificates(rustls::RootCertStore::empty())
+        .with_no_client_auth();
+    cfg.dangerous()
+        .set_certificate_verifier(std::sync::Arc::new(NoVerifier));
+    cfg
 }
 
 impl Default for Config {

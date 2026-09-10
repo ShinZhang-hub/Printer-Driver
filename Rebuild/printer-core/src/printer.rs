@@ -235,6 +235,9 @@ pub fn run_install(
             let should_try = (skipped.contains(&def) || r.installed.contains(&def) || actual != def) && needs_extra;
             if should_try {
                 let ok = set_default_printer(&def).is_ok() && default_printer() == def;
+                // `mut` is only reassigned by the macOS retry below; Windows
+                // would warn unused_mut without this.
+                #[allow(unused_mut)]
                 let mut final_ok = ok;
                 if !ok {
                     #[cfg(target_os = "macos")]
@@ -749,6 +752,7 @@ mod imp {
 #[cfg(target_os = "windows")]
 mod imp {
     use super::*;
+    use std::process::Command;
 
     pub fn install_batch(
         _cfg: &Config,
@@ -760,19 +764,11 @@ mod imp {
     }
 
     pub fn printers() -> Vec<(String, String)> {
-        crate::win_installer::printers()
+        crate::win_installer::cached_printers()
     }
 
     pub fn default_printer() -> String {
-        // Windows: use PowerShell to get default printer
-        let script = "(Get-CimInstance -ClassName Win32_Printer | Where-Object {$_.Default}).Name";
-        let out = std::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", script])
-            .output();
-        match out {
-            Ok(o) => String::from_utf8_lossy(&o.stdout).trim().to_string(),
-            Err(_) => String::new(),
-        }
+        crate::win_installer::cached_default_printer()
     }
 
     pub fn set_default_printer(name: &str) -> Result<(), String> {
@@ -780,9 +776,15 @@ mod imp {
             "(Get-CimInstance -ClassName Win32_Printer | Where-Object {{$_.Name -eq '{}}}).InvokeMethod('SetDefaultPrinter', $null)",
             name.replace('\'', "''")
         );
-        let out = std::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", &script])
-            .output()
+        let mut c = Command::new("powershell");
+        c.args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden"]);
+        #[cfg(target_os = "windows")]
+        {
+            use std::os::windows::process::CommandExt;
+            const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+            c.creation_flags(CREATE_NO_WINDOW);
+        }
+        let out = c.arg("-Command").arg(&script).output()
             .map_err(|e| e.to_string())?;
         if out.status.success() {
             Ok(())

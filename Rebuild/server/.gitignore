@@ -1,0 +1,5 @@
+admin.token
+server.pfx
+logs/
+backups/
+node_modules/

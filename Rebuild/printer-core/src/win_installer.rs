@@ -6,10 +6,162 @@
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::{Mutex, OnceLock};
 
 use crate::driver;
 use crate::i18n;
 use crate::printer::{BatchResult, InstallTarget};
+
+// ── Cached Windows init data ──────────────────────────────────────────────
+// A single PowerShell process gathers language + IPs + printers + default
+// at startup. Subsequent calls read from cache, avoiding repeated cold-start
+// overhead and preventing multiple console windows from flashing.
+
+pub struct WinInit {
+    pub lang: String,
+    pub local_ips: Vec<String>,
+    pub printers: Vec<(String, String)>,
+    pub default_printer: String,
+}
+
+static WIN_INIT: OnceLock<Mutex<Option<WinInit>>> = OnceLock::new();
+
+fn cache() -> std::sync::MutexGuard<'static, Option<WinInit>> {
+    WIN_INIT.get_or_init(|| Mutex::new(None)).lock().unwrap()
+}
+
+/// Run the single combined PowerShell query and cache the result.
+/// Called once by `initial_state()`.
+pub fn run_init() -> WinInit {
+    let mut c = Command::new("powershell");
+    c.args(["-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden"]);
+    hide_console(&mut c);
+    let script = r#"
+$lang = (Get-WinUserLanguageList)[0].LanguageTag
+Write-Output "LANG=$lang"
+$ips = @()
+try { $ips = (Get-NetIPAddress -AddressFamily IPv4).IPAddress } catch {}
+foreach ($ip in $ips) { Write-Output "IP=$ip" }
+Write-Output "---"
+Get-Printer -ErrorAction SilentlyContinue | ForEach-Object {
+  $name = $_.Name
+  $port = Get-PrinterPort -Name $_.PortName -ErrorAction SilentlyContinue
+  if ($port) {
+    $ip = if ($port.Name -match '^IP_(\d+\.\d+\.\d+\.\d+)$') { $matches[1] }
+          elseif ($port.HostAddress) { $port.HostAddress } else { $null }
+    if ($ip) { Write-Output "PRINTER=$name=$ip" }
+  }
+}
+Write-Output "---"
+$def = Get-CimInstance -ClassName Win32_Printer -ErrorAction SilentlyContinue |
+       Where-Object { $_.Default } | Select-Object -First 1
+if ($def) { Write-Output "DEFAULT=$($def.Name)" }
+"#;
+    let out = match c.arg("-Command").arg(script).output() {
+        Ok(o) if o.status.success() => String::from_utf8_lossy(&o.stdout).to_string(),
+        _ => String::new(),
+    };
+
+    let mut lang = String::new();
+    let mut local_ips = Vec::new();
+    let mut printers = Vec::new();
+    let mut default_printer = String::new();
+    let mut section = 0u8;
+
+    for line in out.lines() {
+        let line = line.trim();
+        if line == "---" {
+            section += 1;
+            continue;
+        }
+        match section {
+            0 => {
+                if let Some(v) = line.strip_prefix("LANG=") {
+                    lang = v.to_string();
+                } else if let Some(v) = line.strip_prefix("IP=") {
+                    local_ips.push(v.to_string());
+                }
+            }
+            1 => {
+                if let Some(v) = line.strip_prefix("PRINTER=") {
+                    if let Some((name, ip)) = v.split_once('=') {
+                        printers.push((name.to_string(), ip.to_string()));
+                    }
+                }
+            }
+            2 => {
+                if let Some(v) = line.strip_prefix("DEFAULT=") {
+                    default_printer = v.to_string();
+                }
+            }
+            _ => {}
+        }
+    }
+
+    WinInit { lang, local_ips, printers, default_printer }
+}
+
+/// Initialize the cache. Returns the detected language.
+pub fn init_cache() -> String {
+    let wi = run_init();
+    let lang = wi.lang.clone();
+    *cache() = Some(wi);
+    lang
+}
+
+pub fn cached_printers() -> Vec<(String, String)> {
+    cache()
+        .as_ref()
+        .map(|w| w.printers.clone())
+        .unwrap_or_default()
+}
+
+pub fn cached_lang() -> String {
+    cache()
+        .as_ref()
+        .map(|w| w.lang.clone())
+        .unwrap_or_default()
+}
+
+pub fn cached_default_printer() -> String {
+    cache()
+        .as_ref()
+        .map(|w| w.default_printer.clone())
+        .unwrap_or_default()
+}
+
+pub fn cached_local_ips() -> Vec<String> {
+    cache()
+        .as_ref()
+        .map(|w| w.local_ips.clone())
+        .unwrap_or_default()
+}
+
+/// Append a timestamped line to a persistent debug log in %TEMP%.
+/// The per-run work dir is cleaned up, so without this there is no trace of
+/// what the elevated script actually did when an install fails.
+pub fn debug_log(msg: &str) {
+    let path = std::env::temp_dir().join("printer-installer-debug.log");
+    let ts = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let mut line = format!("[{}] {}", ts, msg);
+    if !line.ends_with('\n') {
+        line.push('\n');
+    }
+    // Best-effort; never fail the install because logging failed.
+    // Cap the log at ~512KB by rotating.
+    if let Ok(md) = std::fs::metadata(&path) {
+        if md.len() > 512 * 1024 {
+            let _ = std::fs::remove_file(&path);
+        }
+    }
+    use std::io::Write as _;
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
+        let _ = f.write_all(line.as_bytes());
+    }
+}
 
 /// Base powershell invocation with hidden console friendly flags.
 fn powershell() -> Command {
@@ -31,39 +183,6 @@ fn hide_console(c: &mut Command) {
 
 #[cfg(not(target_os = "windows"))]
 fn hide_console(_c: &mut Command) {}
-
-/// Enumerate installed printers as (name, ip) via Get-Printer +
-/// Get-PrinterPort. IP_### ports map straight back to their address.
-pub fn printers() -> Vec<(String, String)> {
-    let script = r#"
-$ErrorActionPreference = 'SilentlyContinue'
-Get-Printer | ForEach-Object {
-  $name = $_.Name
-  $port = Get-PrinterPort -Name $_.PortName -ErrorAction SilentlyContinue
-  if ($port) {
-    $ip = if ($port.Name -match '^IP_(\d+\.\d+\.\d+\.\d+)$') { $matches[1] }
-          elseif ($port.HostAddress) { $port.HostAddress } else { $null }
-    if ($ip) { $name + "=" + $ip }
-  }
-}
-"#;
-    let out = match powershell().arg("-Command").arg(script).output() {
-        Ok(o) if o.status.success() => String::from_utf8_lossy(&o.stdout).to_string(),
-        _ => String::new(),
-    };
-    let mut result = Vec::new();
-    for line in out.lines() {
-        let line = line.trim();
-        if let Some(eq) = line.find('=') {
-            let name = line[..eq].trim();
-            let ip = line[eq + 1..].trim();
-            if !name.is_empty() {
-                result.push((name.to_string(), ip.to_string()));
-            }
-        }
-    }
-    result
-}
 
 /// Whether the current process already runs with admin privileges.
 pub fn is_elevated() -> bool {
@@ -93,11 +212,11 @@ pub fn install_batch(
     let drv_dir = driver::unpack_embedded_drivers()?;
     let drv_entries = driver::parse_inf_dir(&drv_dir);
 
-    // 2. Resolve every target to its INF + model name.
+    // 2. Resolve every target to its INF + model name. No fuzzy fallback:
+    // installing with the WRONG driver is worse than a clear error.
     let mut rows: Vec<String> = Vec::new();
     for t in targets {
         let entry = driver::find_model(&drv_entries, &t.model)
-            .or_else(|| drv_entries.first())
             .ok_or_else(|| format!("no driver for model '{}'", t.model))?;
         rows.push(format!(
             "{}\t{}\t{}\t{}\t{}\t{}\t{}",
@@ -137,14 +256,56 @@ pub fn install_batch(
     )
     .map_err(|e| e.to_string())?;
 
+    // Debug: confirm all work files exist and show plan content.
+    for (label, p) in [
+        ("plan", &plan_file),
+        ("delete", &delete_file),
+        ("script", &script_file),
+    ] {
+        match std::fs::metadata(p) {
+            Ok(md) => debug_log(&format!("work {} exists bytes={}", label, md.len())),
+            Err(e) => debug_log(&format!("work {} MISSING: {}", label, e)),
+        }
+    }
+    if let Ok(plan_text) = std::fs::read_to_string(&plan_file) {
+        for line in plan_text.lines() {
+            debug_log(&format!("  plan-row: {}", line.trim()));
+        }
+    }
+    // Debug: dump full script (so a silent-exit can be matched to exact content).
+    if let Ok(script_text) = std::fs::read_to_string(&script_file) {
+        debug_log(&format!("--- script begin ({}) ---", script_file.display()));
+        for line in script_text.lines() {
+            debug_log(&format!("  PS: {}", line));
+        }
+        debug_log("--- script end ---");
+    }
+    debug_log(&format!("workdir: {}", work.dir.display()));
+
     // 5. One elevated run — direct if already admin.
+    debug_log(&format!(
+        "install_batch start: {} targets, {} deletes, elevated={}",
+        targets.len(),
+        delete.len(),
+        is_elevated()
+    ));
+    for t in targets {
+        debug_log(&format!(
+            "  target name={} ip={} model={}",
+            t.name, t.ip, t.model
+        ));
+    }
     match run_elevated(&script_file) {
-        Ok(true) => {}
+        Ok(true) => {
+            debug_log("run_elevated: OK");
+        }
         Ok(false) => {
+            debug_log("run_elevated: CANCELLED by user");
             let _ = work.cleanup();
             return Err("cancelled".into());
         }
         Err(e) => {
+            debug_log(&format!("run_elevated: ERR {}", e));
             let _ = work.cleanup();
             return Err(e);
         }
@@ -152,8 +313,28 @@ pub fn install_batch(
 
     // 6. Parse tagged output through the shared parser.
     let out = std::fs::read_to_string(&result_file).unwrap_or_default();
+    debug_log(&format!("result.out bytes={}", out.len()));
+    for line in out.lines() {
+        debug_log(&format!("  result: {}", line.trim()));
+    }
     let r = crate::printer::parse_batch_output(&out);
-    let _ = work.cleanup();
+    // On empty result (silent script exit), KEEP the work dir for manual
+    // inspection instead of cleaning up. Log its location.
+    if out.trim().is_empty() {
+        debug_log(&format!(
+            "EMPTY RESULT — workdir KEPT for inspection: {}",
+            work.dir.display()
+        ));
+    } else {
+        let _ = work.cleanup();
+    }
+
+    // Refresh the cached printer/default snapshot so any post-install
+    // verification (default-printer self-check in printer::run_install, the
+    // confirm command) sees the ACTUAL new state instead of the stale
+    // pre-install snapshot.
+    let _ = init_cache();
+
     Ok(r)
 }
 
@@ -161,12 +342,33 @@ pub fn install_batch(
 /// `Ok(false)` = user cancelled the prompt, `Err` = failure.
 fn run_elevated(script_file: &Path) -> Result<bool, String> {
     if is_elevated() {
-        let st = powershell()
+        // Capture stdout/stderr (not just status) so script errors are visible
+        // in debug_log instead of vanishing — a script can exit 0 while
+        // failing every Add-Content under 'Continue'.
+        let out = powershell()
             .arg("-File")
             .arg(script_file)
-            .status()
+            .output()
             .map_err(|e| e.to_string())?;
-        return Ok(st.success());
+        let code = out.status.code().unwrap_or(-1);
+        let stdout = String::from_utf8_lossy(&out.stdout).trim().to_string();
+        let stderr = String::from_utf8_lossy(&out.stderr).trim().to_string();
+        // Cap to keep the log readable.
+        let cut = |s: &str| {
+            if s.len() > 2000 {
+                format!("{}...[truncated]", &s[..2000])
+            } else {
+                s.to_string()
+            }
+        };
+        debug_log(&format!("direct-run exit={}", code));
+        if !stdout.is_empty() {
+            debug_log(&format!("direct-run stdout: {}", cut(&stdout)));
+        }
+        if !stderr.is_empty() {
+            debug_log(&format!("direct-run stderr: {}", cut(&stderr)));
+        }
+        return Ok(out.status.success());
     }
 
     // Launch a tiny wrapper that elevates the real script via
@@ -250,21 +452,21 @@ function InstallOne([string]$d) {{
     ForEach-Object {{ Remove-Printer -Name $_.Name -Confirm:$false -ErrorAction SilentlyContinue }}
 
   # 2. driver package
-  if (-not (Test-Path $inf)) {{ $script:LAST = 'lpadmin'; return 1 }}
-  $null = (& pnputil /add-driver $inf 2>&1 | Out-String)
-  if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 5) {{ $script:LAST = 'lpadmin'; return 1 }}
+  if (-not (Test-Path $inf)) {{ $script:LAST = 'lpadmin'; Add-Content $Result ("DBG`t" + $name + "`tmissing-inf`t" + $inf); return 1 }}
+  $pnputilOut = (& pnputil /add-driver $inf 2>&1 | Out-String)
+  if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 5) {{ $script:LAST = 'lpadmin'; Add-Content $Result ("DBG`t" + $name + "`tpnputil-exit=$LASTEXITCODE`t" + $pnputilOut.Trim().Substring(0, [Math]::Min(500, $pnputilOut.Trim().Length))); return 1 }}
 
   # 3. TCP/IP port
   Remove-PrinterPort -Name $portName -ErrorAction SilentlyContinue
   if (-not (Get-PrinterPort -Name $portName -ErrorAction SilentlyContinue)) {{
     try {{ $null = Add-PrinterPort -Name $portName -PrinterHostAddress $ip -PortNumber $port -ErrorAction Stop }}
-    catch {{ $script:LAST = 'lpadmin'; return 1 }}
+    catch {{ $script:LAST = 'lpadmin'; Add-Content $Result ("DBG`t" + $name + "`tadd-port-fail`t" + $_.Exception.Message); return 1 }}
   }}
 
   # 4. printer queue
-  $null = (& rundll32 printui.dll,PrintUIEntry /if /b $name /f $inf /r $portName /m $model 2>&1 | Out-String)
+  $printuiOut = (& rundll32 printui.dll,PrintUIEntry /if /b $name /f $inf /r $portName /m $model 2>&1 | Out-String)
   if (-not (Get-Printer -Name $name -ErrorAction SilentlyContinue)) {{
-    $script:LAST = 'verify'; return 1
+    $script:LAST = 'verify'; Add-Content $Result ("DBG`t" + $name + "`tprintui-verify-fail`t" + $printuiOut.Trim().Substring(0, [Math]::Min(500, $printuiOut.Trim().Length))); return 1
   }}
 
   # 5. default

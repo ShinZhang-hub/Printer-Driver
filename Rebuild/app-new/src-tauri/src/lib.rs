@@ -111,6 +111,8 @@ fn confirm(req: ConfirmRequest) -> Result<ConfirmResult, String> {
                 let actual = printer_core::printer::default_printer();
                 if actual != requested_default {
                     let _ = printer_core::printer::set_default_printer(&requested_default);
+                    // `mut` is only reassigned by the macOS retry below.
+                    #[allow(unused_mut)]
                     let mut actual2 = printer_core::printer::default_printer();
                     if actual2 != requested_default {
                         #[cfg(target_os = "macos")]

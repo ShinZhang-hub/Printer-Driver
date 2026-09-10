@@ -35,9 +35,10 @@ pub fn t(lang: &str, key: &str, args: &[&str]) -> String {
 
 /// Map a system locale identifier (e.g. "zh-Hant_TW", "zh_CN", "ja_JP")
 /// to one of LANGS. Chinese is split into simplified ("zh") and
-/// traditional ("zh-Hant").
+/// traditional ("zh-Hant"). Tolerates space-separated multi-tag output and
+/// surrounding whitespace.
 fn map_system_locale(s: &str) -> Option<String> {
-    let lower = s.to_lowercase();
+    let lower = s.trim().to_lowercase();
     if lower.starts_with("zh") {
         let is_hant = lower.contains("hant")
             || lower.contains("_tw")
@@ -45,7 +46,7 @@ fn map_system_locale(s: &str) -> Option<String> {
             || lower.contains("_mo");
         return Some(if is_hant { "zh-Hant" } else { "zh" }.to_string());
     }
-    let lang = s.split(['_', '.', '-']).next().unwrap_or("").to_string();
+    let lang = s.split(['_', '.', '-', ' ']).next().unwrap_or("").to_string();
     if LANGS.contains(&lang.as_str()) {
         Some(lang)
     } else {
@@ -57,6 +58,16 @@ pub fn detect() -> String {
     if let Ok(l) = std::env::var("PRINTER_INSTALLER_LANG") {
         if LANGS.contains(&l.as_str()) {
             return l;
+        }
+    }
+    // Windows: read the cached language captured by the single combined
+    // init pass (see win_installer::run_init), so we don't spawn another
+    // PowerShell just for locale detection.
+    #[cfg(target_os = "windows")]
+    {
+        let lang = crate::win_installer::cached_lang();
+        if let Some(lang) = map_system_locale(&lang) {
+            return lang;
         }
     }
     // macOS: query the system locale.
@@ -72,14 +83,14 @@ pub fn detect() -> String {
             }
         }
     }
-    // Windows: query the first system UI language tag.
+    // Windows fallback: query the first system UI language tag.
     #[cfg(target_os = "windows")]
     {
         if let Ok(out) = Command::new("powershell")
             .args([
                 "-NoProfile",
                 "-Command",
-                "(Get-WinUserLanguageList | Select-Object -First 1).LanguageTag",
+                "(Get-WinUserLanguageList)[0].LanguageTag",
             ])
             .output()
         {
